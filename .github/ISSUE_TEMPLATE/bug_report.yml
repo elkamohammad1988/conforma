@@ -1,0 +1,55 @@
+name: 🐛 Bug report
+description: Report something that isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug! Please search existing issues
+        first to avoid duplicates.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, including what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+  - type: input
+    id: route
+    attributes:
+      label: Affected route / file
+      placeholder: "/classify, src/lib/classifier.ts, …"
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Where did this happen?
+      options:
+        - Local dev (npm run dev)
+        - Production build (npm run build/start)
+        - Deployed instance
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Environment details
+      description: Browser, OS, Node version, and any console output.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: This is not a security vulnerability (those go to SECURITY.md).
+          required: true

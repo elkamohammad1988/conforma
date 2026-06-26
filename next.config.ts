@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Don't advertise the framework/version in response headers.
+  poweredByHeader: false,
+  reactStrictMode: true,
 };
 
 export default nextConfig;
