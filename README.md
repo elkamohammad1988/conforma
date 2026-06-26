@@ -192,6 +192,8 @@ realistic pre-generated AI drafts, clearly labelled in the UI.
 | `npm run start` | Serve the production build |
 | `npm run lint` | Lint with ESLint |
 | `npm run typecheck` | Type-check with `tsc --noEmit` |
+| `npm test` | Run the Vitest unit suite |
+| `npm run test:watch` | Run Vitest in watch mode |
 
 ---
 

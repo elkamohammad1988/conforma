@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Premium design system** — shared entrance/skeleton/hover-lift animations,
+  custom scrollbars and rendered-markdown styling in `globals.css`, plus reusable
+  primitives (`Skeleton`, `Spinner`, `EmptyState`, `Reveal`) and a dependency-free,
+  XSS-safe `Markdown` renderer.
+- **World-class landing page** — interactive live classifier demo, an Art. 113
+  compliance timeline with live status, an in-browser product showcase, scroll
+  reveals and hover-lift cards.
+- **Dashboard upgrades** — search (`/` to focus), tier filter, sort, client-side
+  pagination, skeleton loading and a polished empty state.
+- **Document export** — preview ⇄ raw toggle with one-click export to Markdown,
+  Word (`.doc`) and PDF (print), with no new runtime dependencies.
+- **Test suite** — Vitest unit tests for the deterministic classifier, the encoded
+  regulation helpers, Demo Mode output and the Markdown renderer (incl. XSS
+  escaping); wired into CI.
+- **Security headers** — Content-Security-Policy, HSTS, `X-Frame-Options`,
+  `X-Content-Type-Options`, `Referrer-Policy` and `Permissions-Policy` via
+  `next.config.ts`; a skip-to-content link for keyboard users.
+
 ### Changed
 
 - **Demo Mode** — when no `ANTHROPIC_API_KEY` is configured (or a request fails),
