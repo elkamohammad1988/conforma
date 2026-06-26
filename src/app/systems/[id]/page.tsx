@@ -1,10 +1,15 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { DemoModeBadge, AiSourceTag } from "@/components/DemoModeBadge";
+import { Markdown } from "@/components/ui/Markdown";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { Spinner } from "@/components/ui/Spinner";
+import { EmptyState } from "@/components/ui/EmptyState";
 import {
   compliancePct,
   deleteSystem,
@@ -37,22 +42,26 @@ export default function SystemDetailPage({
   const system = useSystem(id);
 
   if (system === undefined) {
-    return <div className="mx-auto max-w-4xl px-5 py-16 text-slate-400">Loading…</div>;
+    return (
+      <div className="mx-auto max-w-4xl px-5 py-10">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="mt-4 h-44 rounded-2xl" />
+        <Skeleton className="mt-8 h-5 w-48" />
+        <Skeleton className="mt-3 h-28 rounded-xl" />
+        <Skeleton className="mt-8 h-5 w-48" />
+        <Skeleton className="mt-3 h-40 rounded-xl" />
+      </div>
+    );
   }
 
   if (system === null) {
     return (
-      <div className="mx-auto max-w-4xl px-5 py-20 text-center">
-        <h1 className="text-2xl font-bold">System not found</h1>
-        <p className="mt-2 text-slate-500">
-          It may have been deleted or saved in another browser.
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-6 inline-flex rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white"
-        >
-          Back to dashboard
-        </Link>
+      <div className="mx-auto max-w-4xl px-5 py-20">
+        <EmptyState
+          title="System not found"
+          description="It may have been deleted, or it was saved in another browser. Your registry is stored locally on this device."
+          action={{ href: "/dashboard", label: "Back to dashboard" }}
+        />
       </div>
     );
   }
@@ -236,6 +245,18 @@ function Meta({ label, value }: { label: string; value: React.ReactNode }) {
 
 /* --------------------------------------------------------- Document section */
 
+/** Print/Word stylesheet — kept compact and self-contained for portability. */
+const EXPORT_CSS = `
+  body { font-family: Georgia, 'Times New Roman', serif; color: #1e293b; line-height: 1.6; max-width: 46rem; margin: 2.5rem auto; padding: 0 1.5rem; }
+  h1 { font-size: 1.6rem; } h2 { font-size: 1.2rem; margin-top: 1.6rem; } h3 { font-size: 1.02rem; }
+  table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.85rem; }
+  th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+  th { background: #f1f5f9; }
+  blockquote { border-left: 3px solid #a5b4fc; background: #eef2ff; padding: 0.6rem 0.9rem; margin: 0.8rem 0; }
+  code { font-family: monospace; background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; }
+  hr { border: 0; border-top: 1px solid #e2e8f0; margin: 1.2rem 0; }
+`;
+
 function DocSection({ system }: { system: RegisteredSystem }) {
   const [active, setActive] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -243,9 +264,12 @@ function DocSection({ system }: { system: RegisteredSystem }) {
     Record<string, { markdown: string; source: string }>
   >({});
   const [copied, setCopied] = useState(false);
+  const [view, setView] = useState<"preview" | "raw">("preview");
+  const previewRef = useRef<HTMLDivElement>(null);
 
   const generate = async (docType: string) => {
     setActive(docType);
+    setView("preview");
     if (docs[docType]) return;
     setLoading(docType);
     try {
@@ -279,86 +303,159 @@ function DocSection({ system }: { system: RegisteredSystem }) {
   };
 
   const activeDoc = active ? docs[active] : null;
+  const activeLabel = DOC_TYPES.find((d) => d.id === active)?.label ?? "document";
+  const fileBase = `${system.name}-${active}`.replace(/[^A-Za-z0-9-]+/g, "-");
+
+  const download = (content: string, type: string, ext: string) => {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${fileBase}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportWord = () => {
+    const inner = previewRef.current?.innerHTML ?? "";
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${activeLabel}</title><style>${EXPORT_CSS}</style></head><body>${inner}</body></html>`;
+    download(html, "application/msword", "doc");
+  };
+
+  const exportPdf = () => {
+    const inner = previewRef.current?.innerHTML ?? "";
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${fileBase}</title><style>${EXPORT_CSS}</style></head><body>${inner}<script>window.onload=function(){window.print()}<\/script></body></html>`,
+    );
+    win.document.close();
+  };
 
   return (
     <section className="mt-8">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-        Compliance documents
-      </h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Compliance documents
+        </h2>
+        <DemoModeBadge />
+      </div>
       <p className="mt-1 text-xs text-slate-400">
-        Generate first-draft regulatory documents tailored to this system.
+        Generate first-draft regulatory documents tailored to this system, then
+        preview and export to Markdown, Word or PDF.
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {DOC_TYPES.map((d) => (
-          <button
-            key={d.id}
-            onClick={() => generate(d.id)}
-            className={`rounded-lg border px-3.5 py-2 text-left text-sm transition ${
-              active === d.id
-                ? "border-brand-400 bg-brand-50 ring-1 ring-brand-300"
-                : "border-slate-200 bg-white hover:border-slate-300"
-            }`}
-          >
-            <span className="block font-medium text-slate-800">{d.label}</span>
-            <span className="font-mono text-[11px] text-slate-400">{d.cite}</span>
-          </button>
-        ))}
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        {DOC_TYPES.map((d) => {
+          const isLoading = loading === d.id;
+          return (
+            <button
+              key={d.id}
+              onClick={() => generate(d.id)}
+              aria-pressed={active === d.id}
+              className={`flex items-center justify-between gap-2 rounded-lg border px-3.5 py-2.5 text-left text-sm transition ${
+                active === d.id
+                  ? "border-brand-400 bg-brand-50 ring-1 ring-brand-300"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+              }`}
+            >
+              <span>
+                <span className="block font-medium text-slate-800">{d.label}</span>
+                <span className="font-mono text-[11px] text-slate-400">{d.cite}</span>
+              </span>
+              {isLoading && <Spinner className="h-4 w-4 shrink-0 text-brand-500" />}
+            </button>
+          );
+        })}
       </div>
 
       {loading && (
-        <div className="mt-4 animate-pulse rounded-xl border border-slate-200 bg-slate-50 p-6 text-sm text-slate-400">
-          Drafting {DOC_TYPES.find((d) => d.id === loading)?.label}…
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-400">
+            <Spinner className="h-3.5 w-3.5 text-brand-500" />
+            Drafting {DOC_TYPES.find((d) => d.id === loading)?.label}…
+          </div>
+          <div className="space-y-3 p-5">
+            <Skeleton className="h-6 w-2/3" />
+            <Skeleton className="h-3.5 w-full" />
+            <Skeleton className="h-3.5 w-full" />
+            <Skeleton className="h-3.5 w-5/6" />
+            <Skeleton className="mt-4 h-3.5 w-1/2" />
+            <Skeleton className="h-24 w-full" />
+          </div>
         </div>
       )}
 
       {activeDoc && !loading && (
-        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
             <div className="flex items-center gap-2 text-xs">
-              {activeDoc.source === "claude" ? (
-                <span className="rounded bg-brand-100 px-1.5 py-0.5 font-medium text-brand-700">
-                  ✨ Drafted by Claude
-                </span>
-              ) : activeDoc.source === "template" ? (
-                <span className="rounded bg-slate-200 px-1.5 py-0.5 font-medium text-slate-500">
-                  offline template — add ANTHROPIC_API_KEY for live drafting
-                </span>
-              ) : (
-                <span className="text-red-500">error</span>
-              )}
+              <AiSourceTag source={activeDoc.source} />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* View toggle */}
+              <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
+                {(["preview", "raw"] as const).map((v) => (
+                  <button
+                    key={v}
+                    onClick={() => setView(v)}
+                    aria-pressed={view === v}
+                    className={`rounded-md px-2.5 py-1 font-medium capitalize transition ${
+                      view === v
+                        ? "bg-brand-600 text-white"
+                        : "text-slate-500 hover:bg-slate-100"
+                    }`}
+                  >
+                    {v === "raw" ? "Markdown" : "Preview"}
+                  </button>
+                ))}
+              </div>
+              <span className="h-4 w-px bg-slate-200" aria-hidden />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(activeDoc.markdown);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 1500);
                 }}
-                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
               >
                 {copied ? "Copied!" : "Copy"}
               </button>
               <button
-                onClick={() => {
-                  const blob = new Blob([activeDoc.markdown], {
-                    type: "text/markdown",
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = `${system.name}-${active}.md`;
-                  a.click();
-                  URL.revokeObjectURL(url);
-                }}
-                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 hover:bg-slate-100"
+                onClick={() => download(activeDoc.markdown, "text/markdown", "md")}
+                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
               >
-                Download
+                .md
+              </button>
+              <button
+                onClick={exportWord}
+                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+              >
+                Word
+              </button>
+              <button
+                onClick={exportPdf}
+                className="rounded bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
+              >
+                PDF
               </button>
             </div>
           </div>
-          <div className="prose-doc max-h-[28rem] overflow-y-auto px-5 py-4 font-mono text-[13px] text-slate-700">
-            {activeDoc.markdown}
+
+          {/* Rendered preview (always mounted so exports can read its HTML). */}
+          <div
+            ref={previewRef}
+            className={`scrollbar-thin max-h-[32rem] overflow-y-auto px-6 py-5 ${
+              view === "preview" ? "" : "hidden"
+            }`}
+          >
+            <Markdown source={activeDoc.markdown} />
           </div>
+          {/* Raw markdown */}
+          {view === "raw" && (
+            <div className="prose-doc scrollbar-thin max-h-[32rem] overflow-y-auto px-5 py-4 font-mono text-[13px] text-slate-700">
+              {activeDoc.markdown}
+            </div>
+          )}
         </div>
       )}
     </section>

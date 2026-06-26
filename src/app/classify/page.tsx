@@ -16,6 +16,7 @@ import {
 } from "@/lib/eu-ai-act";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { DemoModeBadge } from "@/components/DemoModeBadge";
 import { saveSystem, newId, type RegisteredSystem } from "@/lib/store";
 
 const STEPS = ["Basics", "Definition", "Prohibited", "High-risk", "Transparency"];
@@ -416,21 +417,27 @@ function ResultView({
           {/* AI explanation */}
           <div className="mt-6">
             {!narrative && (
-              <button
-                onClick={explain}
-                disabled={loadingAI}
-                className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:opacity-60"
-              >
-                {loadingAI ? "Thinking…" : "✨ Explain in plain English"}
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={explain}
+                  disabled={loadingAI}
+                  className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:opacity-60"
+                >
+                  {loadingAI ? "Thinking…" : "✨ Explain in plain English"}
+                </button>
+                <DemoModeBadge />
+              </div>
             )}
             {narrative && (
               <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-brand-700">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-brand-700">
                   ✨ AI explanation
-                  {aiSource === "template" && (
-                    <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
-                      offline template — add ANTHROPIC_API_KEY for live drafting
+                  {aiSource === "demo" && (
+                    <span
+                      title="Realistic, pre-generated sample. Add an ANTHROPIC_API_KEY to switch to live, system-specific drafting."
+                      className="inline-flex items-center gap-1 rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-medium text-brand-700 ring-1 ring-brand-200"
+                    >
+                      Demo Mode
                     </span>
                   )}
                 </div>

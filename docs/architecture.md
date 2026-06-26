@@ -15,8 +15,8 @@ flowchart TD
     R --> STORE["store.ts<br/>registry (useSyncExternalStore + localStorage)"]
     R --> API["/api/explain · /api/generate-doc<br/>(route handlers, server-only)"]
     API --> AI["claude.ts"]
-    AI -->|ANTHROPIC_API_KEY set| C["Claude documents & narrative"]
-    AI -->|no key / error| T["Offline templates"]
+    AI -->|ANTHROPIC_API_KEY set| C["Claude documents & narrative (live)"]
+    AI -->|no key / error| T["Demo Mode<br/>realistic pre-generated drafts"]
     STORE --> UI["App Router pages"]
     R --> UI
 ```
@@ -58,13 +58,16 @@ A **server-only** module (imported exclusively from route handlers) that drafts
 documents and plain-language narratives with Claude (`claude-opus-4-8`). It is a
 pure enhancement:
 
-- When `ANTHROPIC_API_KEY` is set, it calls the Anthropic SDK.
-- When the key is absent **or** a request fails, it returns high-quality structured
-  templates.
+- When `ANTHROPIC_API_KEY` is set, it calls the Anthropic SDK (live drafting).
+- When the key is absent **or** a request fails, it switches to **Demo Mode** and
+  returns realistic, system-specific pre-generated AI documents.
 
-Either way the workflow completes, so the product is demo-able with zero
-credentials and never breaks on a transient API error. The AI never recomputes the
-risk tier — it only explains or documents the tier the engine already produced.
+Each response is tagged with a `source` (`"claude"` or `"demo"`), and a
+`GET /api/ai-status` endpoint exposes the current mode so the UI can show a Demo
+Mode indicator proactively. Either way the workflow completes, so the product is
+demo-able with zero credentials and never breaks on a transient API error. The AI
+never recomputes the risk tier — it only explains or documents the tier the engine
+already produced.
 
 ### 4. Persistence — `src/lib/store.ts`
 
@@ -95,13 +98,13 @@ Open Graph image, JSON-LD, `robots.ts` and `sitemap.ts`.
 | Deterministic engine, AI on top | Reproducible, traceable results; AI augments but never decides. |
 | Server-only AI module | The API key stays out of the client bundle entirely. |
 | External-store persistence | SSR-safe client state today; a clean seam for a real database tomorrow. |
-| Graceful template fallback | The product works — and demos — with no credentials and survives API errors. |
+| Graceful Demo Mode fallback | The product works — and demos — with no credentials and survives API errors, returning realistic pre-generated drafts instead of errors. |
 
 ## Request flow: generating a document
 
 1. The user opens a saved system and clicks a document type.
 2. The client POSTs the `ClassificationResult` to `/api/generate-doc`.
 3. The route handler calls `generateDocument()` in `claude.ts`.
-4. With a key, Claude drafts system-specific Markdown; without one, a structured
-   template is returned. The response is tagged with its `source` so the UI can show
-   provenance.
+4. With a key, Claude drafts system-specific Markdown; without one (Demo Mode), a
+   realistic pre-generated draft is returned. The response is tagged with its
+   `source` (`"claude"` / `"demo"`) so the UI can show provenance.

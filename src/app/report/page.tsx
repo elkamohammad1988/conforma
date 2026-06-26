@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import { RiskBadge } from "@/components/RiskBadge";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { compliancePct, useSystems } from "@/lib/store";
 import { RISK_TIERS, type RiskTier } from "@/lib/eu-ai-act";
 import { useClientValue } from "@/lib/use-client-value";
@@ -20,7 +21,15 @@ export default function ReportPage() {
   );
 
   if (systems === null) {
-    return <div className="mx-auto max-w-4xl px-5 py-16 text-slate-400">Loading…</div>;
+    return (
+      <div className="mx-auto max-w-4xl px-5 py-10">
+        <div className="mb-6 flex items-center justify-between">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-10 w-40 rounded-xl" />
+        </div>
+        <Skeleton className="h-[36rem] rounded-2xl" />
+      </div>
+    );
   }
 
   const counts = systems.reduce(

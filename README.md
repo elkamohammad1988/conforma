@@ -70,8 +70,10 @@ regulatory documents.
 
 - **Cited, not vibes.** Risk tiers come from a deterministic decision tree mapped
   directly to the Act's text — every result links to the Article that drives it.
-- **Works offline, scales online.** The core engine needs no API key; Claude is a
-  graceful enhancement layer that degrades to structured templates when absent.
+- **Works offline, scales online.** The core engine needs no API key. When an
+  `ANTHROPIC_API_KEY` is absent the app drops into **Demo Mode** — realistic,
+  system-specific pre-generated AI documents — so the public repo and the Vercel
+  deployment are fully functional, and premium, with zero paid credentials.
 - **One source of truth.** The entire regulation lives in a single typed module
   ([`eu-ai-act.ts`](src/lib/eu-ai-act.ts)) that the classifier, the obligation
   checklist and the document generator all read from.
@@ -101,7 +103,8 @@ regulatory documents.
   compliance, and the nearest deadline across every system.
 - 🤖 **AI-drafted documents** — generate the Annex IV technical file, Art. 50
   transparency notice and the EU declaration of conformity, tailored per system
-  (powered by Claude when configured, structured templates otherwise).
+  (powered by Claude when configured; realistic Demo Mode drafts otherwise, with a
+  clear in-app indicator).
 - ⏳ **Live deadline countdowns** — to each phased application date from Art. 113.
 - 🧠 **GPAI aware** — flags general-purpose AI model obligations (Art. 53+) on top of
   the system-level tier.
@@ -125,8 +128,8 @@ flowchart TD
     ENG --> R{"Risk tier<br/>+ cited rationale<br/>+ obligations"}
     R --> STORE["store.ts<br/>registry (useSyncExternalStore + localStorage)"]
     R --> AI["claude.ts<br/>optional drafting layer (server-only)"]
-    AI -->|ANTHROPIC_API_KEY set| C["Claude documents & narrative"]
-    AI -->|no key| T["Offline templates"]
+    AI -->|ANTHROPIC_API_KEY set| C["Claude documents & narrative (live)"]
+    AI -->|no key / error| T["Demo Mode<br/>realistic pre-generated drafts"]
     STORE --> UI["App Router pages<br/>classify · dashboard · systems · report"]
     R --> UI
 ```
@@ -176,8 +179,9 @@ npm run dev
 # 4. Open http://localhost:3000
 ```
 
-No credentials are required — the classifier and document templates work fully
-offline.
+No credentials are required. With no `ANTHROPIC_API_KEY`, the app runs in **Demo
+Mode**: the classifier works fully offline and document generation returns
+realistic pre-generated AI drafts, clearly labelled in the UI.
 
 ### Scripts
 
@@ -201,7 +205,7 @@ cp .env.example .env.local
 
 | Variable | Required | Description |
 | --- | :---: | --- |
-| `ANTHROPIC_API_KEY` | No | Enables live Claude drafting of compliance documents and plain-language narratives. Without it, Conforma falls back to structured offline templates. Get one at [console.anthropic.com](https://console.anthropic.com/). |
+| `ANTHROPIC_API_KEY` | No | Enables live Claude drafting of compliance documents and plain-language narratives. Without it, Conforma runs in **Demo Mode** with realistic pre-generated drafts — no paid API required. Get one at [console.anthropic.com](https://console.anthropic.com/). |
 | `NEXT_PUBLIC_APP_URL` | No | Public base URL used for absolute links, canonical tags and Open Graph (defaults to `http://localhost:3000`). |
 
 > `.env.local` is git-ignored. **Never commit real secrets** — only `.env.example`

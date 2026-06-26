@@ -1,13 +1,14 @@
 # Deployment
 
 Conforma is a standard Next.js 16 app and deploys anywhere Next.js runs. It needs no
-database or external service to function — the API routes degrade gracefully without
-an Anthropic key.
+database or external service to function — without an Anthropic key the API routes
+run in **Demo Mode**, returning realistic pre-generated AI documents, so a public
+deployment is fully functional with zero paid credentials.
 
 ## Prerequisites
 
 - Node.js `>= 20`
-- (Optional) An `ANTHROPIC_API_KEY` for live AI document drafting
+- (Optional) An `ANTHROPIC_API_KEY` to upgrade Demo Mode to live AI drafting
 
 ## Deploy to Vercel (recommended)
 
@@ -59,7 +60,7 @@ CMD ["npm", "run", "start"]
 
 | Variable | Required | Purpose |
 | --- | :---: | --- |
-| `ANTHROPIC_API_KEY` | No | Live Claude drafting; templates are used when unset. |
+| `ANTHROPIC_API_KEY` | No | Live Claude drafting; Demo Mode (realistic pre-generated drafts) is used when unset. |
 | `NEXT_PUBLIC_APP_URL` | No | Absolute base URL for SEO/OG (defaults to `http://localhost:3000`). |
 
 > Set `NEXT_PUBLIC_APP_URL` in production so `sitemap.xml`, canonical tags and Open

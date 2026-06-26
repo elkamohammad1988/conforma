@@ -32,9 +32,10 @@ should confirm classifications and obligations with qualified counsel. See the
 
 ### Do I need any API keys or accounts?
 
-No. The classifier, obligation checklists and document templates all work fully
-offline. An `ANTHROPIC_API_KEY` is optional and only upgrades the AI-drafted
-documents and narratives from templates to live, system-specific output.
+No. The classifier and obligation checklists run fully offline, and document
+generation works out of the box in **Demo Mode** — realistic, pre-generated AI
+documents, clearly labelled in the UI. An `ANTHROPIC_API_KEY` is optional and only
+upgrades Demo Mode to live, system-specific drafting by Claude.
 
 ### Where is my data stored?
 

@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Demo Mode** — when no `ANTHROPIC_API_KEY` is configured (or a request fails),
+  AI generation now returns realistic, system-specific **pre-generated documents**
+  instead of bare placeholder templates, and is clearly labelled as Demo Mode in the
+  UI. Added `GET /api/ai-status` and a `DemoModeBadge` so the mode is shown
+  proactively. The public repo and Vercel deployment are fully functional, premium
+  and error-free with zero paid API credentials (`src/lib/claude.ts`).
+
 ## [1.0.0] — 2026-06-26
 
 First public release.
@@ -20,7 +31,7 @@ First public release.
   penalties and the Art. 113 application timeline (`src/lib/eu-ai-act.ts`).
 - **Optional Claude integration** — server-only AI drafting of the Annex IV technical
   file, transparency notices and the EU declaration of conformity, with graceful
-  fallback to structured offline templates (`src/lib/claude.ts`).
+  fallback to a built-in Demo Mode (`src/lib/claude.ts`).
 - **AI system registry** — classify, save, track obligations, and view a portfolio
   dashboard with risk distribution and deadline countdowns.
 - **Printable readiness report** with an executive summary.
@@ -35,4 +46,5 @@ First public release.
   `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` and this changelog.
 - GitHub Actions CI (lint · typecheck · build), issue templates and a PR template.
 
+[Unreleased]: https://github.com/elkamohammad1988/conforma/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/elkamohammad1988/conforma/releases/tag/v1.0.0

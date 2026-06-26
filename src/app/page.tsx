@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Countdown } from "@/components/Countdown";
 import { PricingTable } from "@/components/PricingTable";
+import { LandingDemo } from "@/components/LandingDemo";
+import { ComplianceTimeline } from "@/components/ComplianceTimeline";
+import { Reveal } from "@/components/Reveal";
+import { RiskBadge } from "@/components/RiskBadge";
 import {
   ANNEX_III_AREAS,
   PENALTIES,
@@ -140,6 +144,13 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ------------------------------------------------------- Product showcase */}
+      <section className="relative bg-gradient-to-b from-ink to-slate-50">
+        <div className="mx-auto -mt-12 max-w-5xl px-5 pb-16 sm:-mt-16">
+          <ProductShowcase />
+        </div>
+      </section>
+
       {/* ------------------------------------------------------------ Stat strip */}
       <section className="border-b border-slate-200 bg-slate-50">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden px-5 py-10 text-center sm:grid-cols-4">
@@ -158,6 +169,25 @@ export default function Home() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* ------------------------------------------------------- Interactive demo */}
+      <section id="try" className="mx-auto max-w-6xl px-5 py-20 scroll-mt-20">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+            Interactive demo
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Classify a system right now
+          </h2>
+          <p className="mt-4 text-lg text-slate-600">
+            No sign-up. Pick a system below and watch the deterministic engine pin
+            its risk tier, cite the Articles, and count the obligations — live.
+          </p>
+        </Reveal>
+        <Reveal className="mt-12" delay={80}>
+          <LandingDemo />
+        </Reveal>
       </section>
 
       {/* --------------------------------------------------------- The problem */}
@@ -235,7 +265,7 @@ export default function Home() {
             ].map((p) => (
               <div
                 key={p.role}
-                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="card-hover rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
               >
                 <div className="text-base font-semibold text-slate-900">
                   {p.role}
@@ -270,7 +300,7 @@ export default function Home() {
             return (
               <div
                 key={t}
-                className={`rounded-xl border border-slate-200 border-t-4 bg-white p-5 shadow-sm ${accent[t]}`}
+                className={`card-hover rounded-xl border border-slate-200 border-t-4 bg-white p-5 shadow-sm ${accent[t]}`}
               >
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {meta.primaryCitation}
@@ -332,8 +362,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --------------------------------------------------- Compliance timeline */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <Reveal className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-wide text-brand-600">
+            The clock is ticking
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            The EU AI Act application timeline
+          </h2>
+          <p className="mt-4 text-lg text-slate-600">
+            Obligations switch on in phases under Art. 113. Conforma tracks every
+            milestone so nothing slips.
+          </p>
+        </Reveal>
+        <Reveal className="mt-14" delay={80}>
+          <ComplianceTimeline />
+        </Reveal>
+      </section>
+
       {/* ------------------------------------------------------------- Features */}
       <section className="mx-auto max-w-6xl px-5 py-20">
+        <Reveal className="mx-auto mb-12 max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Everything you need to prove conformity
+          </h2>
+          <p className="mt-4 text-lg text-slate-600">
+            A complete toolkit — from cited classification to audit-ready documents.
+          </p>
+        </Reveal>
         <div className="grid gap-6 md:grid-cols-3">
           {[
             {
@@ -363,7 +420,7 @@ export default function Home() {
           ].map((f) => (
             <div
               key={f.t}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="card-hover rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <h3 className="text-base font-semibold text-slate-900">{f.t}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.d}</p>
@@ -442,7 +499,7 @@ export default function Home() {
           ].map((t) => (
             <figure
               key={t.n}
-              className="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="card-hover flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
             >
               <div className="text-brand-500" aria-hidden>
                 ★★★★★
@@ -611,6 +668,100 @@ export default function Home() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+/** A crisp, in-browser product mockup — stays in sync with the real design. */
+function ProductShowcase() {
+  const rows: { name: string; tier: "high" | "limited" | "minimal"; owner: string; pct: number }[] = [
+    { name: "TalentRank — CV screening", tier: "high", owner: "People Ops", pct: 45 },
+    { name: "HelpDesk Copilot", tier: "limited", owner: "Support", pct: 75 },
+    { name: "ForecastIQ — demand planning", tier: "minimal", owner: "Supply Chain", pct: 100 },
+  ];
+  return (
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 ring-1 ring-black/5">
+      {/* Browser chrome */}
+      <div className="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <span className="h-3 w-3 rounded-full bg-red-400" />
+        <span className="h-3 w-3 rounded-full bg-amber-400" />
+        <span className="h-3 w-3 rounded-full bg-emerald-400" />
+        <div className="ml-3 hidden flex-1 rounded-md border border-slate-200 bg-white px-3 py-1 text-xs text-slate-400 sm:block">
+          app.conforma.eu/dashboard
+        </div>
+      </div>
+      {/* App body */}
+      <div className="p-5 sm:p-7">
+        <div className="flex items-end justify-between">
+          <div>
+            <div className="text-lg font-bold tracking-tight text-slate-900">
+              AI System Registry
+            </div>
+            <div className="text-xs text-slate-500">3 systems · 1 high-risk</div>
+          </div>
+          <div className="rounded-lg bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">
+            + Classify
+          </div>
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-3">
+          {[
+            ["Systems", "3"],
+            ["Compliance", "73%"],
+            ["Nearest", "2026-08"],
+          ].map(([l, v]) => (
+            <div key={l} className="rounded-xl border border-slate-200 bg-white p-3">
+              <div className="text-[10px] uppercase tracking-wide text-slate-400">
+                {l}
+              </div>
+              <div className="mt-0.5 text-lg font-bold text-slate-900">{v}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 text-[10px] uppercase tracking-wide text-slate-400">
+              <tr>
+                <th className="px-4 py-2.5 font-medium">System</th>
+                <th className="px-4 py-2.5 font-medium">Risk</th>
+                <th className="hidden px-4 py-2.5 font-medium sm:table-cell">Owner</th>
+                <th className="px-4 py-2.5 font-medium">Compliance</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {rows.map((r) => (
+                <tr key={r.name}>
+                  <td className="px-4 py-2.5 font-medium text-slate-800">{r.name}</td>
+                  <td className="px-4 py-2.5">
+                    <RiskBadge tier={r.tier} size="sm" />
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-slate-500 sm:table-cell">
+                    {r.owner}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`h-full rounded-full ${
+                            r.pct === 100
+                              ? "bg-emerald-500"
+                              : r.pct >= 50
+                                ? "bg-brand-500"
+                                : "bg-amber-500"
+                          }`}
+                          style={{ width: `${r.pct}%` }}
+                        />
+                      </div>
+                      <span className="text-[11px] font-medium text-slate-500 tabular-nums">
+                        {r.pct}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
