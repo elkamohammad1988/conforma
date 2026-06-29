@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateDocument, DOC_LABELS, type DocType } from "@/lib/claude";
 import type { ClassificationResult } from "@/lib/classifier";
+import { isLocale } from "@/i18n/config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -11,6 +12,7 @@ interface Body {
   description?: string;
   organisation?: string;
   result: ClassificationResult;
+  locale?: string;
 }
 
 export async function POST(req: Request) {
@@ -31,12 +33,16 @@ export async function POST(req: Request) {
     );
   }
 
-  const { markdown, source } = await generateDocument(body.docType, {
-    systemName: body.systemName,
-    description: body.description ?? "",
-    organisation: body.organisation,
-    result: body.result,
-  });
+  const { markdown, source } = await generateDocument(
+    body.docType,
+    {
+      systemName: body.systemName,
+      description: body.description ?? "",
+      organisation: body.organisation,
+      result: body.result,
+    },
+    isLocale(body.locale) ? body.locale : undefined,
+  );
 
   return NextResponse.json({
     docType: body.docType,

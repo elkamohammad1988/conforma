@@ -1,27 +1,27 @@
+"use client";
+
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
+import { useT } from "@/i18n/I18nProvider";
 
 export default function NotFound() {
+  const t = useT();
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center px-5 py-28 text-center">
       <LogoMark className="h-12 w-12" />
-      <div className="mt-6 text-6xl font-bold tracking-tight text-brand-600">404</div>
-      <h1 className="mt-3 text-2xl font-bold tracking-tight">Page not found</h1>
-      <p className="mt-2 text-slate-600">
-        The page you&apos;re looking for doesn&apos;t exist or has moved.
-      </p>
+      <div className="mt-6 text-5xl font-semibold tracking-tight text-ink-3 nums">
+        {t("notFound.code")}
+      </div>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">
+        {t("notFound.title")}
+      </h1>
+      <p className="mt-2 text-ink-2">{t("notFound.body")}</p>
       <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Link
-          href="/"
-          className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-        >
-          Back home
+        <Link href="/" className="btn btn-primary">
+          {t("notFound.backHome")}
         </Link>
-        <Link
-          href="/classify"
-          className="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-        >
-          Classify a system
+        <Link href="/classify" className="btn btn-secondary">
+          {t("notFound.classify")}
         </Link>
       </div>
     </div>

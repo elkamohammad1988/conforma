@@ -2,25 +2,28 @@
 
 import { useState } from "react";
 import Link from "next/link";
-
-const LINKS = [
-  { href: "/#how", label: "How it works" },
-  { href: "/security", label: "Security" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/demo", label: "Book a demo" },
-];
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function MobileNav() {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
+
+  const links = [
+    { href: "/#how", label: t("nav.howItWorks") },
+    { href: "/security", label: t("nav.security") },
+    { href: "/pricing", label: t("nav.pricing") },
+    { href: "/dashboard", label: t("nav.dashboard") },
+    { href: "/demo", label: t("nav.bookDemo") },
+  ];
 
   return (
     <div className="md:hidden">
       <button
-        aria-label={open ? "Close menu" : "Open menu"}
+        aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="grid h-9 w-9 place-items-center rounded-lg text-slate-700 hover:bg-slate-100"
+        className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 hover:bg-white/5"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
           {open ? (
@@ -37,14 +40,14 @@ export function MobileNav() {
             className="fixed inset-0 top-16 z-30 bg-black/20"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute left-0 right-0 top-full z-40 border-b border-slate-200 bg-white p-4 shadow-lg">
+          <div className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl">
             <nav className="flex flex-col">
-              {LINKS.map((l) => (
+              {links.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-2 hover:bg-white/5"
                 >
                   {l.label}
                 </Link>
@@ -52,10 +55,13 @@ export function MobileNav() {
               <Link
                 href="/classify"
                 onClick={() => setOpen(false)}
-                className="mt-2 rounded-lg bg-brand-600 px-3 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-700"
+                className="btn btn-primary mt-2 w-full"
               >
-                Start free
+                {t("nav.startFree")}
               </Link>
+              <div className="mt-3 border-t border-line pt-3">
+                <LanguageSwitcher align="start" />
+              </div>
             </nav>
           </div>
         </>

@@ -2,154 +2,131 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ArrowForward } from "@/components/Arrow";
+import { useI18n } from "@/i18n/I18nProvider";
 
 interface Tier {
-  name: string;
-  tagline: string;
-  monthly: number | null;
-  annual: number | null; // per-month price when billed annually
-  cta: string;
+  key: "starter" | "team" | "business";
+  monthly: number;
+  annual: number; // per-month price when billed annually
   href: string;
   highlight?: boolean;
-  features: string[];
+  featureKeys: string[];
 }
 
 const TIERS: Tier[] = [
   {
-    name: "Starter",
-    tagline: "Map your first system",
+    key: "starter",
     monthly: 0,
     annual: 0,
-    cta: "Start free",
     href: "/classify",
-    features: [
-      "1 AI system",
-      "Risk classification with cited Articles",
-      "Obligation checklist",
-      "Deadline tracking",
-    ],
+    featureKeys: ["oneSystem", "classification", "checklist", "deadlines"],
   },
   {
-    name: "Team",
-    tagline: "For teams shipping AI",
+    key: "team",
     monthly: 149,
     annual: 119,
-    cta: "Start 14-day trial",
     href: "/demo",
     highlight: true,
-    features: [
-      "Up to 25 AI systems",
-      "AI-drafted documentation",
-      "Annex IV technical files",
-      "Audit-ready exports",
-      "Email support",
-    ],
+    featureKeys: ["systems", "drafted", "annexIV", "exports", "email"],
   },
   {
-    name: "Business",
-    tagline: "For scaling AI portfolios",
+    key: "business",
     monthly: 399,
     annual: 319,
-    cta: "Start 14-day trial",
     href: "/demo",
-    features: [
-      "Up to 100 AI systems",
-      "Multiple users & roles",
-      "Audit log & change history",
-      "API access",
-      "Priority support",
-    ],
+    featureKeys: ["systems", "users", "auditLog", "api", "priority"],
   },
 ];
 
 export function PricingTable() {
+  const { t, formatCurrency } = useI18n();
   const [annual, setAnnual] = useState(true);
 
   return (
     <div>
       {/* Billing toggle */}
       <div className="flex items-center justify-center gap-3">
-        <span
-          className={`text-sm font-medium ${annual ? "text-slate-400" : "text-slate-900"}`}
-        >
-          Monthly
+        <span className={`text-sm font-medium ${annual ? "text-ink-3" : "text-ink"}`}>
+          {t("pricingTable.monthly")}
         </span>
         <button
           role="switch"
           aria-checked={annual}
+          aria-label={t("pricingTable.annual")}
           onClick={() => setAnnual((a) => !a)}
           className={`relative h-6 w-11 rounded-full transition ${
-            annual ? "bg-brand-600" : "bg-slate-300"
+            annual ? "bg-brand-600" : "bg-white/10"
           }`}
         >
           <span
             className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${
-              annual ? "left-[1.375rem]" : "left-0.5"
+              annual ? "start-[1.375rem]" : "start-0.5"
             }`}
           />
         </button>
-        <span
-          className={`text-sm font-medium ${annual ? "text-slate-900" : "text-slate-400"}`}
-        >
-          Annual
+        <span className={`text-sm font-medium ${annual ? "text-ink" : "text-ink-3"}`}>
+          {t("pricingTable.annual")}
         </span>
-        <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
-          Save 20%
+        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+          {t("pricingTable.save")}
         </span>
       </div>
 
       {/* Tier cards */}
       <div className="mt-10 grid gap-6 md:grid-cols-3">
-        {TIERS.map((t) => {
-          const price = annual ? t.annual : t.monthly;
+        {TIERS.map((tier) => {
+          const price = annual ? tier.annual : tier.monthly;
           return (
             <div
-              key={t.name}
-              className={`flex flex-col rounded-2xl border bg-white p-7 ${
-                t.highlight
-                  ? "border-brand-600 shadow-xl shadow-brand-600/10 ring-1 ring-brand-600"
-                  : "border-slate-200 shadow-sm"
+              key={tier.key}
+              className={`flex flex-col rounded-2xl border bg-surface p-7 ${
+                tier.highlight
+                  ? "border-brand-500/40 shadow-[var(--shadow-card)] ring-1 ring-brand-500/30"
+                  : "border-line shadow-[var(--shadow-card)]"
               }`}
             >
-              {t.highlight && (
-                <div className="mb-3 inline-flex w-fit rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-700">
-                  Most popular
+              {tier.highlight && (
+                <div className="mb-3 inline-flex w-fit rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-300">
+                  {t("pricingTable.mostPopular")}
                 </div>
               )}
-              <h3 className="text-lg font-semibold">{t.name}</h3>
-              <p className="mt-0.5 text-sm text-slate-500">{t.tagline}</p>
+              <h3 className="text-lg font-semibold">
+                {t(`pricingTable.tiers.${tier.key}.name`)}
+              </h3>
+              <p className="mt-0.5 text-sm text-ink-3">
+                {t(`pricingTable.tiers.${tier.key}.tagline`)}
+              </p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-bold tracking-tight">
-                  {price === 0 ? "€0" : `€${price}`}
+                <span className="text-4xl font-semibold tracking-tight">
+                  {formatCurrency(price)}
                 </span>
                 {price !== 0 && (
-                  <span className="text-sm text-slate-500">/mo</span>
+                  <span className="text-sm text-ink-3">{t("pricingTable.perMonth")}</span>
                 )}
               </div>
-              <p className="mt-1 h-4 text-xs text-slate-400">
-                {price !== 0 && price !== null
+              <p className="mt-1 h-4 text-xs text-ink-3">
+                {price !== 0
                   ? annual
-                    ? "billed annually"
-                    : "billed monthly"
-                  : "free forever"}
+                    ? t("pricingTable.billedAnnually")
+                    : t("pricingTable.billedMonthly")
+                  : t("pricingTable.freeForever")}
               </p>
-              <ul className="mt-6 flex-1 space-y-2.5 text-sm text-slate-600">
-                {t.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
+              <ul className="mt-6 flex-1 space-y-2.5 text-sm text-ink-2">
+                {tier.featureKeys.map((fk) => (
+                  <li key={fk} className="flex items-start gap-2">
                     <CheckIcon />
-                    {f}
+                    {t(`pricingTable.tiers.${tier.key}.features.${fk}`)}
                   </li>
                 ))}
               </ul>
               <Link
-                href={t.href}
-                className={`mt-7 rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition ${
-                  t.highlight
-                    ? "bg-brand-600 text-white hover:bg-brand-700"
-                    : "border border-slate-300 text-slate-700 hover:bg-slate-50"
+                href={tier.href}
+                className={`mt-7 w-full ${
+                  tier.highlight ? "btn btn-primary" : "btn btn-secondary"
                 }`}
               >
-                {t.cta}
+                {t(`pricingTable.tiers.${tier.key}.cta`)}
               </Link>
             </div>
           );
@@ -157,24 +134,23 @@ export function PricingTable() {
       </div>
 
       {/* Enterprise band */}
-      <div className="mt-6 flex flex-col items-start justify-between gap-5 rounded-2xl border border-slate-200 bg-ink p-7 text-white sm:flex-row sm:items-center">
+      <div className="mt-6 flex flex-col items-start justify-between gap-5 rounded-2xl border border-line bg-surface p-7 text-white sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-lg font-semibold">Enterprise</h3>
+            <h3 className="text-lg font-semibold">{t("pricingTable.enterprise.name")}</h3>
             <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-brand-200">
-              SSO · RBAC · DPA
+              {t("pricingTable.enterprise.badge")}
             </span>
           </div>
-          <p className="mt-1.5 max-w-xl text-sm text-slate-300">
-            Unlimited systems, SSO/SAML, role-based access, EU data residency,
-            audit logs, custom DPA, and a dedicated compliance success manager.
+          <p className="mt-1.5 max-w-xl text-sm text-ink-2">
+            {t("pricingTable.enterprise.desc")}
           </p>
         </div>
         <Link
           href="/demo"
-          className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-ink transition hover:bg-slate-100"
+          className="btn shrink-0 bg-white text-paper hover:bg-white/90"
         >
-          Talk to sales →
+          {t("pricingTable.enterprise.cta")} <ArrowForward />
         </Link>
       </div>
     </div>
@@ -186,7 +162,7 @@ function CheckIcon() {
     <svg
       viewBox="0 0 20 20"
       fill="currentColor"
-      className="mt-0.5 h-4 w-4 shrink-0 text-brand-600"
+      className="mt-0.5 h-4 w-4 shrink-0 text-brand-400"
     >
       <path
         fillRule="evenodd"

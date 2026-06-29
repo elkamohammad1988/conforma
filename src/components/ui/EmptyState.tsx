@@ -20,24 +20,21 @@ export function EmptyState({
 }) {
   return (
     <div
-      className={`flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 px-6 py-16 text-center ${className}`}
+      className={`flex flex-col items-center rounded-2xl border border-dashed border-line-2 bg-surface-2/60 px-6 py-16 text-center ${className}`}
     >
       {icon && (
-        <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-white text-brand-600 shadow-sm ring-1 ring-slate-200">
+        <div className="mb-4 grid h-12 w-12 place-items-center rounded-xl border border-line bg-surface-2 text-brand-400">
           {icon}
         </div>
       )}
-      <p className="text-lg font-semibold text-slate-800">{title}</p>
+      <p className="text-lg font-semibold tracking-tight text-ink">{title}</p>
       {description && (
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-ink-2">
           {description}
         </p>
       )}
       {action && (
-        <Link
-          href={action.href}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
-        >
+        <Link href={action.href} className="btn btn-primary mt-6">
           {action.label}
         </Link>
       )}

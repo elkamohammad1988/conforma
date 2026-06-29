@@ -1,13 +1,22 @@
 import { ImageResponse } from "next/og";
+import { getServerLocale } from "@/i18n/server";
+import { getMessages } from "@/i18n/messages";
 
 export const alt = "Conforma — EU AI Act compliance, automated";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#818cf8"/><stop offset="1" stop-color="#4338ca"/></linearGradient></defs><rect width="32" height="32" rx="7" fill="url(#g)"/><path d="M9.5 16.4 14 20.6l8.5-8.8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#6a72e6"/><stop offset="1" stop-color="#4f57d4"/></linearGradient></defs><rect width="32" height="32" rx="7" fill="url(#g)"/><path d="M9.5 16.4 14 20.6l8.5-8.8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const markUri = `data:image/svg+xml;utf8,${encodeURIComponent(markSvg)}`;
 
-export default function OpengraphImage() {
+export default async function OpengraphImage() {
+  const locale = await getServerLocale();
+  // The default OG font can't shape Arabic / CJK; fall back to the Latin copy
+  // for those locales to avoid rendering missing-glyph boxes in the share card.
+  const useLatin = locale === "ar" || locale === "zh-CN";
+  const m = getMessages(useLatin ? "en" : locale).og;
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   return new ImageResponse(
     (
       <div
@@ -17,19 +26,20 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#0b1020",
+          background: "#0c0c0f",
           backgroundImage:
-            "radial-gradient(900px 400px at 70% -10%, rgba(79,70,229,0.45), transparent)",
+            "radial-gradient(800px 420px at 70% -15%, rgba(94,102,224,0.22), transparent 70%)",
           padding: "72px",
           fontFamily: "sans-serif",
         }}
+        dir={dir}
       >
         <div style={{ display: "flex", alignItems: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={markUri} width={64} height={64} alt="" />
           <div
             style={{
-              marginLeft: 20,
+              marginInlineStart: 20,
               color: "white",
               fontSize: 40,
               fontWeight: 700,
@@ -51,7 +61,7 @@ export default function OpengraphImage() {
               maxWidth: 920,
             }}
           >
-            EU AI Act compliance, on autopilot
+            {m.title}
           </div>
           <div
             style={{
@@ -62,8 +72,7 @@ export default function OpengraphImage() {
               lineHeight: 1.3,
             }}
           >
-            Classify your AI systems, close obligation gaps, and generate
-            audit-ready documentation.
+            {m.subtitle}
           </div>
         </div>
 
@@ -81,10 +90,10 @@ export default function OpengraphImage() {
               fontWeight: 600,
             }}
           >
-            High-risk obligations apply 2 Aug 2026
+            {m.badge}
           </div>
-          <div style={{ marginLeft: "auto", color: "#94a3b8", fontSize: 24 }}>
-            Regulation (EU) 2024/1689
+          <div style={{ marginInlineStart: "auto", color: "#94a3b8", fontSize: 24 }}>
+            {m.regulation}
           </div>
         </div>
       </div>

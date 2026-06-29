@@ -9,24 +9,23 @@ import {
   type ClassificationAnswers,
   type ProviderRole,
 } from "@/lib/classifier";
-import {
-  ANNEX_III_AREAS,
-  PROHIBITED_PRACTICES,
-  RISK_TIERS,
-} from "@/lib/eu-ai-act";
+import { ANNEX_III_AREAS, PROHIBITED_PRACTICES } from "@/lib/eu-ai-act";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { ArrowForward, ArrowBackward } from "@/components/Arrow";
 import { DemoModeBadge } from "@/components/DemoModeBadge";
 import { saveSystem, newId, type RegisteredSystem } from "@/lib/store";
+import { useI18n } from "@/i18n/I18nProvider";
+import { renderRationale } from "@/i18n/rationale";
 
-const STEPS = ["Basics", "Definition", "Prohibited", "High-risk", "Transparency"];
+const STEP_KEYS = ["basics", "definition", "prohibited", "highRisk", "transparency"] as const;
+const TRANSPARENCY_KEYS = ["interacts", "synthetic", "deepfake", "emotion"] as const;
 
 export default function ClassifyPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<ClassificationAnswers>({
-    ...EMPTY_ANSWERS,
-  });
+  const [answers, setAnswers] = useState<ClassificationAnswers>({ ...EMPTY_ANSWERS });
   const [showResult, setShowResult] = useState(false);
 
   const set = <K extends keyof ClassificationAnswers>(
@@ -76,78 +75,73 @@ export default function ClassifyPage() {
       {/* Stepper */}
       <div className="mb-8">
         <div className="flex items-center justify-between text-xs font-medium">
-          {STEPS.map((label, i) => (
+          {STEP_KEYS.map((key, i) => (
             <div
-              key={label}
-              className={`flex items-center gap-2 ${
-                i <= step ? "text-brand-700" : "text-slate-400"
-              }`}
+              key={key}
+              className={`flex items-center gap-2 ${i <= step ? "text-ink" : "text-ink-3"}`}
             >
               <span
-                className={`grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold ${
+                className={`grid h-6 w-6 place-items-center rounded-full border text-[11px] font-semibold ${
                   i < step
-                    ? "bg-brand-600 text-white"
+                    ? "border-brand-500 bg-brand-600 text-white"
                     : i === step
-                      ? "bg-brand-100 text-brand-700 ring-2 ring-brand-600"
-                      : "bg-slate-100 text-slate-400"
+                      ? "border-brand-500 bg-brand-500/15 text-brand-200"
+                      : "border-line bg-surface-2 text-ink-3"
                 }`}
               >
                 {i < step ? "✓" : i + 1}
               </span>
-              <span className="hidden sm:inline">{label}</span>
+              <span className="hidden sm:inline">{t(`classify.steps.${key}`)}</span>
             </div>
           ))}
         </div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10">
           <div
-            className="h-full rounded-full bg-brand-600 transition-all"
-            style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
+            className="h-full rounded-full bg-brand-500 transition-[width] duration-300"
+            style={{ width: `${((step + 1) / STEP_KEYS.length) * 100}%` }}
           />
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+      <div className="rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)] sm:p-8">
         {step === 0 && (
-          <Section
-            title="Tell us about the system"
-            sub="The basics. You can register systems you build (provider) or systems you use (deployer)."
-          >
-            <Field label="System name">
+          <Section title={t("classify.step0.title")} sub={t("classify.step0.sub")}>
+            <Field label={t("classify.step0.nameLabel")}>
               <input
                 autoFocus
                 value={answers.name}
                 onChange={(e) => set("name", e.target.value)}
-                placeholder="e.g. CV screening model"
-                className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                placeholder={t("classify.step0.namePlaceholder")}
+                className={INPUT}
               />
             </Field>
-            <Field label="What does it do?" optional>
+            <Field label={t("classify.step0.descLabel")} optional>
               <textarea
                 value={answers.description}
                 onChange={(e) => set("description", e.target.value)}
                 rows={3}
-                placeholder="Short description of its intended purpose."
-                className="w-full resize-none rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                placeholder={t("classify.step0.descPlaceholder")}
+                className={`${INPUT} resize-none`}
               />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Your role">
+              <Field label={t("classify.step0.roleLabel")}>
                 <select
                   value={answers.role}
                   onChange={(e) => set("role", e.target.value as ProviderRole)}
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  className={INPUT}
                 >
-                  <option value="provider">Provider (we build it)</option>
-                  <option value="deployer">Deployer (we use it)</option>
-                  <option value="both">Both</option>
+                  <option value="provider">{t("classify.step0.roleProvider")}</option>
+                  <option value="deployer">{t("classify.step0.roleDeployer")}</option>
+                  <option value="both">{t("classify.step0.roleBoth")}</option>
                 </select>
               </Field>
-              <Field label="Owner / team" optional>
+              <Field label={t("classify.step0.ownerLabel")} optional>
                 <input
                   value={answers.owner ?? ""}
                   onChange={(e) => set("owner", e.target.value)}
-                  placeholder="e.g. People Ops"
-                  className="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                  placeholder={t("classify.step0.ownerPlaceholder")}
+                  className={INPUT}
                 />
               </Field>
             </div>
@@ -155,18 +149,15 @@ export default function ClassifyPage() {
         )}
 
         {step === 1 && (
-          <Section
-            title="Is it an AI system?"
-            sub="The Act applies to systems that infer outputs from inputs with some autonomy (Art. 3(1))."
-          >
+          <Section title={t("classify.step1.title")} sub={t("classify.step1.sub")}>
             <YesNo
-              label="This meets the definition of an AI system"
+              label={t("classify.step1.isAi")}
               value={answers.isAISystem}
               onChange={(v) => set("isAISystem", v)}
             />
             <YesNo
-              label="It is built on a general-purpose AI model (e.g. an LLM)"
-              hint="Triggers extra GPAI provider obligations (Art. 53+)."
+              label={t("classify.step1.isGpai")}
+              hint={t("classify.step1.isGpaiHint")}
               value={answers.isGPAI}
               onChange={(v) => set("isGPAI", v)}
             />
@@ -174,18 +165,15 @@ export default function ClassifyPage() {
         )}
 
         {step === 2 && (
-          <Section
-            title="Does it do any of these?"
-            sub="These practices are prohibited outright under Art. 5. Select all that apply — or none."
-          >
+          <Section title={t("classify.step2.title")} sub={t("classify.step2.sub")}>
             <div className="space-y-2.5">
               {PROHIBITED_PRACTICES.map((p) => (
                 <CheckCard
                   key={p.id}
                   checked={answers.prohibited.includes(p.id)}
                   onToggle={() => toggleIn("prohibited", p.id)}
-                  title={p.title}
-                  desc={p.description}
+                  title={t(`domain.prohibited.${p.id}.title`)}
+                  desc={t(`domain.prohibited.${p.id}.description`)}
                   cite={p.citation}
                   danger
                 />
@@ -195,18 +183,15 @@ export default function ClassifyPage() {
         )}
 
         {step === 3 && (
-          <Section
-            title="High-risk use cases"
-            sub="High-risk systems carry the full weight of the Act. Select any that match the system's intended purpose."
-          >
+          <Section title={t("classify.step3.title")} sub={t("classify.step3.sub")}>
             <YesNo
-              label="It is a safety component of a product covered by EU harmonised law (Annex I)"
-              hint="e.g. machinery, medical devices, vehicles."
+              label={t("classify.step3.annexI")}
+              hint={t("classify.step3.annexIHint")}
               value={answers.annexI}
               onChange={(v) => set("annexI", v)}
             />
-            <p className="pt-2 text-sm font-medium text-slate-700">
-              Annex III areas
+            <p className="pt-2 text-sm font-medium text-ink-2">
+              {t("classify.step3.annexIIIHeading")}
             </p>
             <div className="space-y-2.5">
               {ANNEX_III_AREAS.map((a) => (
@@ -214,17 +199,17 @@ export default function ClassifyPage() {
                   key={a.id}
                   checked={answers.annexIII.includes(a.id)}
                   onToggle={() => toggleIn("annexIII", a.id)}
-                  title={a.title}
-                  desc={a.examples}
+                  title={t(`domain.annexIII.${a.id}.title`)}
+                  desc={t(`domain.annexIII.${a.id}.examples`)}
                   cite={a.citation}
                 />
               ))}
             </div>
             {answers.annexIII.length > 0 && (
-              <div className="mt-2 rounded-lg bg-amber-50 p-4 ring-1 ring-amber-200">
+              <div className="mt-2 rounded-lg bg-amber-500/10 p-4 ring-1 ring-amber-500/30">
                 <YesNo
-                  label="It performs only a narrow procedural task and does not materially influence decisions"
-                  hint="The Art. 6(3) derogation — may take it out of high-risk, but you must document the assessment."
+                  label={t("classify.step3.derogation")}
+                  hint={t("classify.step3.derogationHint")}
                   value={answers.annexIIIDerogation}
                   onChange={(v) => set("annexIIIDerogation", v)}
                 />
@@ -234,21 +219,13 @@ export default function ClassifyPage() {
         )}
 
         {step === 4 && (
-          <Section
-            title="Transparency triggers"
-            sub="Even outside high-risk, some uses carry disclosure duties under Art. 50."
-          >
-            {[
-              ["interacts", "Interacts directly with people (e.g. a chatbot)"],
-              ["synthetic", "Generates synthetic audio, image, video or text"],
-              ["deepfake", "Produces deepfakes"],
-              ["emotion", "Emotion recognition or biometric categorisation"],
-            ].map(([id, label]) => (
+          <Section title={t("classify.step4.title")} sub={t("classify.step4.sub")}>
+            {TRANSPARENCY_KEYS.map((id) => (
               <CheckCard
                 key={id}
                 checked={answers.transparency.includes(id)}
                 onToggle={() => toggleIn("transparency", id)}
-                title={label}
+                title={t(`classify.step4.${id}`)}
                 cite="Art. 50"
               />
             ))}
@@ -256,36 +233,33 @@ export default function ClassifyPage() {
         )}
 
         {/* Nav buttons */}
-        <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
+        <div className="mt-8 flex items-center justify-between border-t border-line pt-6">
           <button
             onClick={() => setStep((s) => Math.max(0, s - 1))}
             disabled={step === 0}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 enabled:hover:bg-slate-100 disabled:opacity-40"
+            className="btn btn-ghost disabled:opacity-40"
           >
-            ← Back
+            <ArrowBackward /> {t("classify.nav.back")}
           </button>
-          {step < STEPS.length - 1 ? (
+          {step < STEP_KEYS.length - 1 ? (
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canContinue}
-              className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-40"
+              className="btn btn-primary disabled:opacity-40"
             >
-              Continue →
+              {t("classify.nav.continue")} <ArrowForward />
             </button>
           ) : (
-            <button
-              onClick={() => setShowResult(true)}
-              className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              See classification →
+            <button onClick={() => setShowResult(true)} className="btn btn-primary">
+              {t("classify.nav.seeClassification")} <ArrowForward />
             </button>
           )}
         </div>
       </div>
 
       {/* Live preview */}
-      <div className="mt-4 flex items-center justify-center gap-2 text-sm text-slate-500">
-        Provisional tier:
+      <div className="mt-4 flex items-center justify-center gap-2 text-sm text-ink-3">
+        {t("classify.provisional")}
         <RiskBadge tier={result.tier} size="sm" />
       </div>
     </div>
@@ -303,8 +277,8 @@ function ResultView({
   onBack: () => void;
   onSave: () => void;
 }) {
+  const { t, formatDate, locale } = useI18n();
   const result = useMemo(() => classify(answers), [answers]);
-  const meta = RISK_TIERS[result.tier];
   const [narrative, setNarrative] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const [aiSource, setAiSource] = useState<string | null>(null);
@@ -319,13 +293,14 @@ function ResultView({
           systemName: answers.name,
           description: answers.description,
           result,
+          locale,
         }),
       });
       const data = await res.json();
       setNarrative(data.narrative);
       setAiSource(data.source);
     } catch {
-      setNarrative("Could not reach the explanation service.");
+      setNarrative(t("classify.result.couldNotReach"));
     } finally {
       setLoadingAI(false);
     }
@@ -333,82 +308,93 @@ function ResultView({
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
-      <div className="animate-in overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="bg-ink px-7 py-8 text-white">
-          <div className="text-sm text-slate-400">
-            {answers.name || "Untitled system"}
+      <div className="animate-in overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+        <div className="border-b border-line bg-paper-2 px-7 py-8">
+          <div className="text-sm text-ink-3">
+            {answers.name || t("classify.result.untitled")}
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <RiskBadge tier={result.tier} />
-            <h1 className="text-2xl font-bold">{meta.label}</h1>
+            <h1 className="text-2xl font-semibold text-ink">
+              {t(`domain.riskTiers.${result.tier}.label`)}
+            </h1>
             {result.isGPAI && (
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-brand-200">
-                + GPAI obligations
+              <span className="rounded-full border border-line bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-2">
+                {t("classify.result.plusGpai")}
               </span>
             )}
           </div>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300">
-            {meta.summary}
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2">
+            {t(`domain.riskTiers.${result.tier}.summary`)}
           </p>
         </div>
 
         <div className="p-7">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Why this tier
+          <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+            {t("classify.result.whyTier")}
           </h2>
           <ul className="mt-3 space-y-2.5">
             {result.rationale.map((r, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
-                <span className="mt-0.5 rounded bg-brand-50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-700">
+                <span className="mt-0.5 rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-200 ring-1 ring-brand-500/25">
                   {r.citation}
                 </span>
-                <span className="text-slate-700">{r.text}</span>
+                <span className="text-ink-2">{renderRationale(r, t)}</span>
               </li>
             ))}
           </ul>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl bg-slate-50 p-4 text-sm ring-1 ring-slate-200">
+          <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl bg-white/[0.03] p-4 text-sm ring-1 ring-white/10">
             <div>
-              <div className="text-xs uppercase tracking-wide text-slate-400">
-                Applicable deadline
+              <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
+                {t("classify.result.applicableDeadline")}
               </div>
-              <div className="font-semibold text-slate-800">
-                {result.deadline.label}
+              <div className="font-semibold text-ink">
+                {t(`domain.deadlines.${result.deadline.id}.label`)}
               </div>
             </div>
-            <div className="ml-auto text-right">
-              <div className="font-mono text-sm text-slate-500">
-                {result.deadline.date}
+            <div className="ms-auto text-end">
+              <div className="font-mono text-sm text-ink-3">
+                {formatDate(result.deadline.date, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
               </div>
               <Countdown
                 deadline={result.deadline.date}
-                className="text-sm font-semibold text-amber-600"
+                className="text-sm font-semibold text-amber-400"
               />
             </div>
           </div>
 
           {result.obligations.length > 0 && (
             <div className="mt-6">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-                {result.obligations.length} obligations to satisfy
+              <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+                {t("classify.result.obligationsToSatisfy", {
+                  count: result.obligations.length,
+                })}
               </h2>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
                 {result.obligations.slice(0, 6).map((o) => (
                   <div
                     key={o.id}
-                    className="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                    className="rounded-lg border border-line px-3 py-2 text-sm"
                   >
-                    <span className="font-medium text-slate-800">{o.title}</span>
-                    <span className="ml-1.5 font-mono text-[11px] text-slate-400">
+                    <span className="font-medium text-ink">
+                      {t(`domain.obligations.${o.id}.title`)}
+                    </span>
+                    <span className="ms-1.5 font-mono text-[11px] text-ink-3">
                       {o.citation}
                     </span>
                   </div>
                 ))}
               </div>
               {result.obligations.length > 6 && (
-                <p className="mt-2 text-xs text-slate-400">
-                  + {result.obligations.length - 6} more — full checklist after you
-                  save.
+                <p className="mt-2 text-xs text-ink-3">
+                  {t("classify.result.moreObligations", {
+                    count: result.obligations.length - 6,
+                  })}
                 </p>
               )}
             </div>
@@ -421,52 +407,46 @@ function ResultView({
                 <button
                   onClick={explain}
                   disabled={loadingAI}
-                  className="inline-flex items-center gap-2 rounded-lg border border-brand-200 bg-brand-50 px-4 py-2 text-sm font-semibold text-brand-700 transition hover:bg-brand-100 disabled:opacity-60"
+                  className="btn btn-secondary disabled:opacity-60"
                 >
-                  {loadingAI ? "Thinking…" : "✨ Explain in plain English"}
+                  {loadingAI ? t("common.thinking") : t("classify.result.explain")}
                 </button>
                 <DemoModeBadge />
               </div>
             )}
             {narrative && (
-              <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-4">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-brand-700">
-                  ✨ AI explanation
+              <div className="rounded-xl border border-line bg-white/[0.02] p-4">
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">
+                  {t("classify.result.aiExplanation")}
                   {aiSource === "demo" && (
                     <span
-                      title="Realistic, pre-generated sample. Add an ANTHROPIC_API_KEY to switch to live, system-specific drafting."
-                      className="inline-flex items-center gap-1 rounded bg-brand-100 px-1.5 py-0.5 text-[10px] font-medium text-brand-700 ring-1 ring-brand-200"
+                      title={t("classify.result.demoModeTitle")}
+                      className="inline-flex items-center gap-1 rounded border border-line bg-white/[0.03] px-1.5 py-0.5 text-[10px] font-medium normal-case tracking-normal text-ink-2"
                     >
-                      Demo Mode
+                      {t("classify.result.demoModeTag")}
                     </span>
                   )}
                 </div>
-                <p className="prose-doc text-sm text-slate-700">{narrative}</p>
+                <p className="prose-doc text-sm text-ink-2">{narrative}</p>
               </div>
             )}
           </div>
 
-          <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
-            <button
-              onClick={onBack}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 hover:bg-slate-100"
-            >
-              ← Edit answers
+          <div className="mt-8 flex items-center justify-between border-t border-line pt-6">
+            <button onClick={onBack} className="btn btn-ghost">
+              <ArrowBackward /> {t("classify.result.editAnswers")}
             </button>
-            <button
-              onClick={onSave}
-              className="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
-              Save to registry →
+            <button onClick={onSave} className="btn btn-primary">
+              {t("classify.result.saveToRegistry")} <ArrowForward />
             </button>
           </div>
         </div>
       </div>
 
-      <p className="mt-4 text-center text-xs text-slate-400">
-        Decision-support only — not legal advice. Confirm with qualified counsel.{" "}
-        <Link href="/dashboard" className="underline hover:text-slate-600">
-          View dashboard
+      <p className="mt-4 text-center text-xs text-ink-3">
+        {t("classify.result.disclaimer")}{" "}
+        <Link href="/dashboard" className="underline hover:text-ink-2">
+          {t("classify.result.viewDashboard")}
         </Link>
       </p>
     </div>
@@ -474,6 +454,9 @@ function ResultView({
 }
 
 /* --------------------------------------------------------------- Primitives */
+
+const INPUT =
+  "w-full rounded-lg border border-line-2 bg-white/[0.03] px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
 
 function Section({
   title,
@@ -486,8 +469,8 @@ function Section({
 }) {
   return (
     <div className="animate-in">
-      <h2 className="text-xl font-bold tracking-tight">{title}</h2>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{sub}</p>
+      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+      <p className="mt-1.5 text-sm leading-relaxed text-ink-3">{sub}</p>
       <div className="mt-6 space-y-4">{children}</div>
     </div>
   );
@@ -502,11 +485,12 @@ function Field({
   optional?: boolean;
   children: React.ReactNode;
 }) {
+  const { t } = useI18n();
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-slate-700">
+      <span className="mb-1.5 block text-sm font-medium text-ink-2">
         {label}
-        {optional && <span className="ml-1 text-slate-400">(optional)</span>}
+        {optional && <span className="ms-1 text-ink-3">{t("common.optional")}</span>}
       </span>
       {children}
     </label>
@@ -524,16 +508,17 @@ function YesNo({
   value: boolean;
   onChange: (v: boolean) => void;
 }) {
+  const { t } = useI18n();
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 px-4 py-3">
+    <div className="flex items-start justify-between gap-4 rounded-lg border border-line px-4 py-3">
       <div>
-        <div className="text-sm font-medium text-slate-800">{label}</div>
-        {hint && <div className="mt-0.5 text-xs text-slate-500">{hint}</div>}
+        <div className="text-sm font-medium text-ink">{label}</div>
+        {hint && <div className="mt-0.5 text-xs text-ink-3">{hint}</div>}
       </div>
-      <div className="flex shrink-0 overflow-hidden rounded-lg border border-slate-200">
+      <div className="flex shrink-0 overflow-hidden rounded-lg border border-line">
         {[
-          ["No", false],
-          ["Yes", true],
+          [t("common.no"), false],
+          [t("common.yes"), true],
         ].map(([txt, val]) => (
           <button
             key={txt as string}
@@ -541,7 +526,7 @@ function YesNo({
             className={`px-4 py-1.5 text-sm font-medium transition ${
               value === val
                 ? "bg-brand-600 text-white"
-                : "bg-white text-slate-500 hover:bg-slate-50"
+                : "bg-white/5 text-ink-3 hover:bg-white/10"
             }`}
           >
             {txt}
@@ -568,32 +553,32 @@ function CheckCard({
   danger?: boolean;
 }) {
   const activeRing = danger
-    ? "border-red-400 bg-red-50 ring-1 ring-red-300"
-    : "border-brand-400 bg-brand-50 ring-1 ring-brand-300";
+    ? "border-rose-500/50 bg-rose-500/10 ring-1 ring-rose-500/30"
+    : "border-brand-500/60 bg-brand-500/10 ring-1 ring-brand-500/40";
   return (
     <button
       onClick={onToggle}
-      className={`flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition ${
-        checked ? activeRing : "border-slate-200 hover:border-slate-300"
+      className={`flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-start transition ${
+        checked ? activeRing : "border-line hover:border-line-2"
       }`}
     >
       <span
         className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border text-xs text-white ${
           checked
             ? danger
-              ? "border-red-500 bg-red-500"
+              ? "border-rose-500 bg-rose-500"
               : "border-brand-600 bg-brand-600"
-            : "border-slate-300 bg-white"
+            : "border-line-2 bg-white/5"
         }`}
       >
         {checked && "✓"}
       </span>
       <span className="flex-1">
         <span className="flex items-center gap-2">
-          <span className="text-sm font-medium text-slate-800">{title}</span>
-          <span className="font-mono text-[11px] text-slate-400">{cite}</span>
+          <span className="text-sm font-medium text-ink">{title}</span>
+          <span className="font-mono text-[11px] text-ink-3">{cite}</span>
         </span>
-        {desc && <span className="mt-0.5 block text-xs text-slate-500">{desc}</span>}
+        {desc && <span className="mt-0.5 block text-xs text-ink-3">{desc}</span>}
       </span>
     </button>
   );

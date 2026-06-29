@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { ArrowBackward } from "@/components/Arrow";
 import { DemoModeBadge, AiSourceTag } from "@/components/DemoModeBadge";
 import { Markdown } from "@/components/ui/Markdown";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -18,19 +19,14 @@ import {
   type ObligationState,
   type RegisteredSystem,
 } from "@/lib/store";
-import { RISK_TIERS } from "@/lib/eu-ai-act";
+import { useI18n } from "@/i18n/I18nProvider";
+import { renderRationale } from "@/i18n/rationale";
 
 const DOC_TYPES = [
-  { id: "technical-documentation", label: "Technical Documentation", cite: "Annex IV / Art. 11" },
-  { id: "transparency-notice", label: "Transparency Notice", cite: "Art. 50" },
-  { id: "conformity-declaration", label: "Declaration of Conformity", cite: "Art. 47" },
+  { id: "technical-documentation", key: "technical" },
+  { id: "transparency-notice", key: "transparency" },
+  { id: "conformity-declaration", key: "conformity" },
 ] as const;
-
-const STATE_LABEL: Record<ObligationState, string> = {
-  todo: "To do",
-  "in-progress": "In progress",
-  done: "Done",
-};
 
 export default function SystemDetailPage({
   params,
@@ -38,6 +34,7 @@ export default function SystemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  const { t, formatDate } = useI18n();
   const router = useRouter();
   const system = useSystem(id);
 
@@ -58,63 +55,80 @@ export default function SystemDetailPage({
     return (
       <div className="mx-auto max-w-4xl px-5 py-20">
         <EmptyState
-          title="System not found"
-          description="It may have been deleted, or it was saved in another browser. Your registry is stored locally on this device."
-          action={{ href: "/dashboard", label: "Back to dashboard" }}
+          title={t("system.notFoundTitle")}
+          description={t("system.notFoundBody")}
+          action={{ href: "/dashboard", label: t("system.backToDashboard") }}
         />
       </div>
     );
   }
 
-  const meta = RISK_TIERS[system.result.tier];
   const pct = compliancePct(system);
 
   const cycle = (obId: string) => {
     const order: ObligationState[] = ["todo", "in-progress", "done"];
     const current = system.obligationStatus[obId] ?? "todo";
     const next = order[(order.indexOf(current) + 1) % order.length];
-    // The store notifies subscribers, so `useSystem` re-renders with the update.
     setObligationState(system.id, obId, next);
+  };
+
+  const stateLabel: Record<ObligationState, string> = {
+    todo: t("system.states.todo"),
+    "in-progress": t("system.states.inProgress"),
+    done: t("system.states.done"),
   };
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-10">
       <Link
         href="/dashboard"
-        className="text-sm font-medium text-slate-500 hover:text-slate-700"
+        className="inline-flex items-center gap-1 text-sm font-medium text-ink-3 hover:text-ink-2"
       >
-        ← Registry
+        <ArrowBackward /> {t("system.backRegistry")}
       </Link>
 
       {/* Header */}
-      <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-ink text-white shadow-sm">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface text-white shadow-[var(--shadow-card)]">
         <div className="px-7 py-7">
           <div className="flex flex-wrap items-center gap-3">
             <RiskBadge tier={system.result.tier} />
-            <h1 className="text-2xl font-bold">{system.name}</h1>
+            <h1 className="text-2xl font-semibold">{system.name}</h1>
             {system.result.isGPAI && (
               <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-brand-200">
-                + GPAI
+                {t("system.plusGpai")}
               </span>
             )}
           </div>
           {system.description && (
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2">
               {system.description}
             </p>
           )}
           <div className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-            <Meta label="Tier" value={meta.label} />
-            <Meta label="Role" value={system.answers.role} />
-            <Meta label="Owner" value={system.owner || "Unassigned"} />
             <Meta
-              label="Deadline"
+              label={t("system.meta.tier")}
+              value={t(`domain.riskTiers.${system.result.tier}.label`)}
+            />
+            <Meta
+              label={t("system.meta.role")}
+              value={t(`domain.roles.${system.answers.role}`)}
+            />
+            <Meta
+              label={t("system.meta.owner")}
+              value={system.owner || t("system.unassigned")}
+            />
+            <Meta
+              label={t("system.meta.deadline")}
               value={
                 <span className="flex items-center gap-2">
-                  {system.result.deadline.date}
+                  {formatDate(system.result.deadline.date, {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                   <Countdown
                     deadline={system.result.deadline.date}
-                    className="text-amber-300"
+                    className="text-brass-300"
                   />
                 </span>
               }
@@ -124,7 +138,7 @@ export default function SystemDetailPage({
         {/* Compliance bar */}
         <div className="border-t border-white/10 bg-white/5 px-7 py-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-300">Compliance</span>
+            <span className="text-ink-2">{t("system.compliance")}</span>
             <span className="font-semibold">{pct}%</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
@@ -140,16 +154,16 @@ export default function SystemDetailPage({
 
       {/* Rationale */}
       <section className="mt-8">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Classification rationale
+        <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+          {t("system.rationaleTitle")}
         </h2>
         <ul className="mt-3 space-y-2">
           {system.result.rationale.map((r, i) => (
             <li key={i} className="flex items-start gap-3 text-sm">
-              <span className="mt-0.5 rounded bg-brand-50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-700">
+              <span className="mt-0.5 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300">
                 {r.citation}
               </span>
-              <span className="text-slate-700">{r.text}</span>
+              <span className="text-ink-2">{renderRationale(r, t)}</span>
             </li>
           ))}
         </ul>
@@ -158,47 +172,45 @@ export default function SystemDetailPage({
       {/* Obligations checklist */}
       {system.result.obligations.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Obligations checklist
+          <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+            {t("system.obligationsTitle")}
           </h2>
-          <p className="mt-1 text-xs text-slate-400">
-            Tap a status to cycle: To do → In progress → Done.
-          </p>
+          <p className="mt-1 text-xs text-ink-3">{t("system.obligationsHint")}</p>
           <div className="mt-3 space-y-2">
             {system.result.obligations.map((o) => {
               const state = system.obligationStatus[o.id] ?? "todo";
               return (
                 <div
                   key={o.id}
-                  className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 bg-white px-4 py-3"
+                  className="flex items-start justify-between gap-4 rounded-lg border border-line bg-surface px-4 py-3"
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-slate-800">
-                        {o.title}
+                      <span className="text-sm font-medium text-ink">
+                        {t(`domain.obligations.${o.id}.title`)}
                       </span>
-                      <span className="font-mono text-[11px] text-slate-400">
+                      <span className="font-mono text-[11px] text-ink-3">
                         {o.citation}
                       </span>
-                      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium uppercase text-slate-500">
-                        {o.role}
+                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase text-ink-3">
+                        {t(`domain.roles.${o.role}`)}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                      {o.description}
+                    <p className="mt-1 text-xs leading-relaxed text-ink-3">
+                      {t(`domain.obligations.${o.id}.description`)}
                     </p>
                   </div>
                   <button
                     onClick={() => cycle(o.id)}
                     className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                       state === "done"
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-emerald-500/20 text-emerald-300"
                         : state === "in-progress"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-slate-100 text-slate-500"
+                          ? "bg-amber-500/20 text-amber-300"
+                          : "bg-white/5 text-ink-3"
                     }`}
                   >
-                    {STATE_LABEL[state]}
+                    {stateLabel[state]}
                   </button>
                 </div>
               );
@@ -211,23 +223,23 @@ export default function SystemDetailPage({
       <DocSection system={system} />
 
       {/* Danger zone */}
-      <div className="mt-12 flex items-center justify-between border-t border-slate-100 pt-6">
+      <div className="mt-12 flex items-center justify-between border-t border-line pt-6">
         <Link
           href="/classify"
-          className="text-sm font-medium text-brand-600 hover:underline"
+          className="text-sm font-medium text-brand-400 hover:underline"
         >
-          + Classify another system
+          + {t("system.classifyAnother")}
         </Link>
         <button
           onClick={() => {
-            if (confirm(`Delete "${system.name}" from the registry?`)) {
+            if (confirm(t("system.deleteConfirm", { name: system.name }))) {
               deleteSystem(system.id);
               router.push("/dashboard");
             }
           }}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+          className="rounded-lg px-4 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
         >
-          Delete system
+          {t("system.deleteSystem")}
         </button>
       </div>
     </div>
@@ -237,8 +249,8 @@ export default function SystemDetailPage({
 function Meta({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
-      <div className="text-xs uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-0.5 font-medium capitalize text-slate-100">{value}</div>
+      <div className="text-xs uppercase tracking-[0.1em] text-ink-3">{label}</div>
+      <div className="mt-0.5 font-medium text-ink">{value}</div>
     </div>
   );
 }
@@ -258,6 +270,7 @@ const EXPORT_CSS = `
 `;
 
 function DocSection({ system }: { system: RegisteredSystem }) {
+  const { t, locale } = useI18n();
   const [active, setActive] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [docs, setDocs] = useState<
@@ -266,6 +279,11 @@ function DocSection({ system }: { system: RegisteredSystem }) {
   const [copied, setCopied] = useState(false);
   const [view, setView] = useState<"preview" | "raw">("preview");
   const previewRef = useRef<HTMLDivElement>(null);
+
+  const labelFor = (id: string) => {
+    const dt = DOC_TYPES.find((d) => d.id === id);
+    return dt ? t(`system.docs.types.${dt.key}.label`) : "document";
+  };
 
   const generate = async (docType: string) => {
     setActive(docType);
@@ -282,6 +300,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
           description: system.description,
           organisation: system.owner,
           result: system.result,
+          locale,
         }),
       });
       const data = await res.json();
@@ -293,7 +312,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
       setDocs((d) => ({
         ...d,
         [docType]: {
-          markdown: "Could not generate this document. Please try again.",
+          markdown: t("system.docs.couldNotGenerate"),
           source: "error",
         },
       }));
@@ -303,7 +322,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
   };
 
   const activeDoc = active ? docs[active] : null;
-  const activeLabel = DOC_TYPES.find((d) => d.id === active)?.label ?? "document";
+  const activeLabel = active ? labelFor(active) : "document";
   const fileBase = `${system.name}-${active}`.replace(/[^A-Za-z0-9-]+/g, "-");
 
   const download = (content: string, type: string, ext: string) => {
@@ -335,15 +354,12 @@ function DocSection({ system }: { system: RegisteredSystem }) {
   return (
     <section className="mt-8">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Compliance documents
+        <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+          {t("system.docs.title")}
         </h2>
         <DemoModeBadge />
       </div>
-      <p className="mt-1 text-xs text-slate-400">
-        Generate first-draft regulatory documents tailored to this system, then
-        preview and export to Markdown, Word or PDF.
-      </p>
+      <p className="mt-1 text-xs text-ink-3">{t("system.docs.hint")}</p>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         {DOC_TYPES.map((d) => {
           const isLoading = loading === d.id;
@@ -352,15 +368,19 @@ function DocSection({ system }: { system: RegisteredSystem }) {
               key={d.id}
               onClick={() => generate(d.id)}
               aria-pressed={active === d.id}
-              className={`flex items-center justify-between gap-2 rounded-lg border px-3.5 py-2.5 text-left text-sm transition ${
+              className={`flex items-center justify-between gap-2 rounded-lg border px-3.5 py-2.5 text-start text-sm transition ${
                 active === d.id
-                  ? "border-brand-400 bg-brand-50 ring-1 ring-brand-300"
-                  : "border-slate-200 bg-white hover:border-slate-300"
+                  ? "border-brand-400 bg-brand-500/10 ring-1 ring-brand-500/30"
+                  : "border-line bg-surface hover:border-line-2"
               }`}
             >
               <span>
-                <span className="block font-medium text-slate-800">{d.label}</span>
-                <span className="font-mono text-[11px] text-slate-400">{d.cite}</span>
+                <span className="block font-medium text-ink">
+                  {t(`system.docs.types.${d.key}.label`)}
+                </span>
+                <span className="font-mono text-[11px] text-ink-3">
+                  {t(`system.docs.types.${d.key}.cite`)}
+                </span>
               </span>
               {isLoading && <Spinner className="h-4 w-4 shrink-0 text-brand-500" />}
             </button>
@@ -369,10 +389,10 @@ function DocSection({ system }: { system: RegisteredSystem }) {
       </div>
 
       {loading && (
-        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5 text-xs text-slate-400">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
+          <div className="flex items-center gap-2 border-b border-line bg-white/[0.03] px-4 py-2.5 text-xs text-ink-3">
             <Spinner className="h-3.5 w-3.5 text-brand-500" />
-            Drafting {DOC_TYPES.find((d) => d.id === loading)?.label}…
+            {t("system.docs.drafting", { label: labelFor(loading) })}
           </div>
           <div className="space-y-3 p-5">
             <Skeleton className="h-6 w-2/3" />
@@ -386,55 +406,53 @@ function DocSection({ system }: { system: RegisteredSystem }) {
       )}
 
       {activeDoc && !loading && (
-        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+        <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white/[0.03] px-4 py-2.5">
             <div className="flex items-center gap-2 text-xs">
               <AiSourceTag source={activeDoc.source} />
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {/* View toggle */}
-              <div className="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
+              <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 text-xs">
                 {(["preview", "raw"] as const).map((v) => (
                   <button
                     key={v}
                     onClick={() => setView(v)}
                     aria-pressed={view === v}
-                    className={`rounded-md px-2.5 py-1 font-medium capitalize transition ${
-                      view === v
-                        ? "bg-brand-600 text-white"
-                        : "text-slate-500 hover:bg-slate-100"
+                    className={`rounded-md px-2.5 py-1 font-medium transition ${
+                      view === v ? "bg-brand-600 text-white" : "text-ink-3 hover:bg-white/5"
                     }`}
                   >
-                    {v === "raw" ? "Markdown" : "Preview"}
+                    {v === "raw" ? t("system.docs.markdown") : t("system.docs.preview")}
                   </button>
                 ))}
               </div>
-              <span className="h-4 w-px bg-slate-200" aria-hidden />
+              <span className="h-4 w-px bg-white/10" aria-hidden />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(activeDoc.markdown);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 1500);
                 }}
-                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
               >
-                {copied ? "Copied!" : "Copy"}
+                {copied ? t("system.docs.copied") : t("system.docs.copy")}
               </button>
               <button
                 onClick={() => download(activeDoc.markdown, "text/markdown", "md")}
-                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
               >
                 .md
               </button>
               <button
                 onClick={exportWord}
-                className="rounded px-2.5 py-1 text-xs font-medium text-slate-500 transition hover:bg-slate-100"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
               >
                 Word
               </button>
               <button
                 onClick={exportPdf}
-                className="rounded bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
+                className="rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
               >
                 PDF
               </button>
@@ -452,7 +470,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
           </div>
           {/* Raw markdown */}
           {view === "raw" && (
-            <div className="prose-doc scrollbar-thin max-h-[32rem] overflow-y-auto px-5 py-4 font-mono text-[13px] text-slate-700">
+            <div className="prose-doc scrollbar-thin max-h-[32rem] overflow-y-auto px-5 py-4 font-mono text-[13px] text-ink-2">
               {activeDoc.markdown}
             </div>
           )}

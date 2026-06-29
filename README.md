@@ -20,6 +20,12 @@ obligations that apply, and generate the documentation regulators expect.
 
 <br/>
 
+**▶ [Live demo](#)** &nbsp;·&nbsp; runs in **Demo Mode** — no sign-up, no API key, no backend
+<br/>
+<sub>Deploying your own? Replace the link above with your Vercel/Netlify URL.</sub>
+
+<br/>
+
 <img src="docs/screenshots/landing.png" alt="Conforma landing page" width="860" />
 
 </div>
@@ -66,6 +72,10 @@ regulatory documents.
 > demo-able with **zero credentials**. It is decision-support tooling, **not legal
 > advice** — see the [Disclaimer](#disclaimer).
 
+📂 **Portfolio:** read the full **[case study](docs/case-study.md)**, follow the
+**[90-second demo script](docs/demo-script.md)**, or dive into the
+**[architecture write-up](docs/architecture.md)**.
+
 ### Why it stands out
 
 - **Cited, not vibes.** Risk tiers come from a deterministic decision tree mapped
@@ -82,11 +92,19 @@ regulatory documents.
 
 ## Screenshots
 
-| Risk classifier (guided wizard) | AI system registry (dashboard) |
+| Guided risk classifier | AI system registry (dashboard) |
 | :---: | :---: |
-| <img src="docs/screenshots/classifier.png" alt="Guided risk-classification wizard" width="420" /> | <img src="docs/screenshots/dashboard.png" alt="AI system registry dashboard" width="420" /> |
-| **Transparent pricing** | **Marketing landing** |
-| <img src="docs/screenshots/pricing.png" alt="Pricing page" width="420" /> | <img src="docs/screenshots/landing.png" alt="Landing page" width="420" /> |
+| <img src="docs/screenshots/classify.png" alt="Guided risk-classification wizard" width="420" /> | <img src="docs/screenshots/dashboard.png" alt="AI system registry dashboard" width="420" /> |
+| **System detail — rationale, obligations & AI docs** | **Audit-ready readiness report** |
+| <img src="docs/screenshots/system-detail.png" alt="System detail with cited rationale and obligation checklist" width="420" /> | <img src="docs/screenshots/report.png" alt="Audit-ready compliance readiness report" width="420" /> |
+| **Transparent pricing** | **Security &amp; trust** |
+| <img src="docs/screenshots/pricing.png" alt="Pricing page" width="420" /> | <img src="docs/screenshots/security.png" alt="Security and trust page" width="420" /> |
+| **Marketing landing** | **Mobile (responsive)** |
+| <img src="docs/screenshots/landing.png" alt="Landing page" width="420" /> | <img src="docs/screenshots/mobile.png" alt="Mobile responsive view" width="240" /> |
+
+> Every shot is generated from the running app with `npm run screenshots`
+> (Playwright drives your installed Chrome/Edge at 2× — no browser download). A
+> longer narrated walkthrough lives in **[docs/demo-script.md](docs/demo-script.md)**.
 
 ---
 
@@ -157,7 +175,7 @@ A deeper write-up lives in **[docs/architecture.md](docs/architecture.md)**.
 | Icons | [lucide-react](https://lucide.dev/) |
 | AI (optional) | [`@anthropic-ai/sdk`](https://github.com/anthropics/anthropic-sdk-typescript) — Claude (`claude-opus-4-8`) |
 | Persistence (demo) | Browser `localStorage` via an external store |
-| Tooling | ESLint 9 (flat config) · `tsc` · GitHub Actions CI |
+| Tooling | ESLint 9 (flat config) · `tsc` · Vitest · GitHub Actions CI |
 
 ---
 
@@ -194,6 +212,7 @@ realistic pre-generated AI drafts, clearly labelled in the UI.
 | `npm run typecheck` | Type-check with `tsc --noEmit` |
 | `npm test` | Run the Vitest unit suite |
 | `npm run test:watch` | Run Vitest in watch mode |
+| `npm run screenshots` | Regenerate `docs/screenshots/` from a running build (Playwright) |
 
 ---
 
@@ -270,7 +289,7 @@ directions:
 - [ ] **Audit trail** — immutable change history per classification and document.
 - [ ] **Annex IV exports** — DOCX/PDF generation of the technical file.
 - [ ] **Regulation versioning** — track amendments and re-flag affected systems.
-- [ ] **Test suite** — unit tests for the classifier decision tree and obligation mapping.
+- [x] **Test suite** — Vitest unit tests over the classifier, obligation mapping and Demo Mode, wired into CI.
 
 See [open issues](https://github.com/elkamohammad1988/conforma/issues) for the
 current list.

@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
+import { AppShell } from "@/components/AppShell";
+import { getServerI18n } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  title: "AI system",
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("metadata.system.title"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function SystemsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AppShell>{children}</AppShell>;
 }

@@ -1,75 +1,52 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
+import { useT } from "@/i18n/I18nProvider";
 
-export const metadata: Metadata = {
-  title: "Security & Trust",
-  description:
-    "How Conforma protects your data: EU data residency, encryption in transit and at rest, SSO/SAML, role-based access, audit logging, sub-processor transparency and a custom DPA.",
-};
-
+const BADGES = ["gdpr", "iso", "nist", "dpa"] as const;
 const PRINCIPLES = [
-  {
-    t: "Encryption everywhere",
-    d: "All data is encrypted in transit with TLS 1.2+ and at rest with AES-256. Secrets are managed in a dedicated key-management service.",
-  },
-  {
-    t: "EU data residency",
-    d: "Enterprise data is stored and processed in EU regions, so your compliance record never leaves the jurisdiction it covers.",
-  },
-  {
-    t: "Least-privilege access",
-    d: "Role-based access control, SSO/SAML and enforced MFA mean people see only what their role requires — and you can prove it.",
-  },
-  {
-    t: "Full audit trail",
-    d: "Every change to a classification, obligation or document is logged with actor and timestamp — your evidence for an audit.",
-  },
-  {
-    t: "Tenant isolation",
-    d: "Customer data is logically isolated per organisation, with strict access boundaries enforced at the application and data layers.",
-  },
-  {
-    t: "Resilient by design",
-    d: "Automated backups, monitored infrastructure and a tested recovery process keep your registry available and intact.",
-  },
-];
-
-const SUBPROCESSORS = [
-  ["Cloud hosting", "EU region application & database hosting", "EU"],
-  ["AI document drafting", "Generates draft compliance documents on request", "EU / US"],
-  ["Error monitoring", "Aggregated, scrubbed application telemetry", "EU"],
-  ["Email delivery", "Transactional and notification email", "EU"],
-];
+  "encryption",
+  "residency",
+  "leastPrivilege",
+  "audit",
+  "isolation",
+  "resilient",
+] as const;
+const PRIVACY_CARDS = ["residency", "retention", "portability"] as const;
+const SUBPROCESSORS = ["hosting", "ai", "monitoring", "email"] as const;
 
 export default function SecurityPage() {
+  const t = useT();
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-ink text-white">
-        <div className="bg-grid absolute inset-0" />
-        <div className="relative mx-auto max-w-4xl px-5 py-20 text-center">
-          <p className="text-sm font-semibold uppercase tracking-wide text-brand-300">
-            Security &amp; Trust
+      <section className="relative overflow-hidden border-b border-line bg-paper">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-72"
+          style={{
+            background:
+              "radial-gradient(60% 100% at 50% 0%, rgba(94,102,224,0.08), transparent 72%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
+            {t("security.eyebrow")}
           </p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-            Your compliance tool should be compliant too
+          <h1 className="mt-3 text-[2.25rem] font-semibold leading-[1.08] text-ink sm:text-[2.75rem]">
+            {t("security.title")}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
-            Conforma holds the most sensitive map of your AI estate. We protect it
-            with enterprise-grade controls and full transparency about how your data
-            is handled.
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-ink-2">
+            {t("security.subtitle")}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-2">
-            {["GDPR-aligned", "ISO/IEC 42001 aligned", "NIST AI RMF", "Custom DPA"].map(
-              (b) => (
-                <span
-                  key={b}
-                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm font-medium text-slate-200"
-                >
-                  {b}
-                </span>
-              ),
-            )}
+            {BADGES.map((b) => (
+              <span
+                key={b}
+                className="rounded-full border border-line bg-white/[0.03] px-3 py-1 text-sm font-medium text-ink-2"
+              >
+                {t(`security.badges.${b}`)}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -79,46 +56,37 @@ export default function SecurityPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {PRINCIPLES.map((p) => (
             <div
-              key={p.t}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              key={p}
+              className="rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
             >
-              <h3 className="text-base font-semibold text-slate-900">{p.t}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{p.d}</p>
+              <h3 className="text-base font-semibold text-ink">
+                {t(`security.principles.${p}.title`)}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-2">
+                {t(`security.principles.${p}.desc`)}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Privacy / data handling */}
-      <section
-        id="privacy"
-        className="scroll-mt-20 border-y border-slate-200 bg-slate-50"
-      >
+      <section id="privacy" className="scroll-mt-20 border-y border-line bg-white/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
-          <h2 className="text-2xl font-bold tracking-tight">
-            Data protection &amp; privacy
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {t("security.privacy.title")}
           </h2>
-          <div className="mt-6 space-y-5 text-slate-600">
-            <p className="leading-relaxed">
-              You own your data. We process it solely to provide the service, never
-              to train third-party models, and we make it exportable at any time.
-              Enterprise customers receive a custom Data Processing Agreement (DPA)
-              covering roles, sub-processors and security commitments under the GDPR.
-            </p>
+          <div className="mt-6 space-y-5 text-ink-2">
+            <p className="leading-relaxed">{t("security.privacy.body")}</p>
             <div className="grid gap-4 sm:grid-cols-3">
-              {[
-                ["Data residency", "EU regions (Enterprise)"],
-                ["Retention", "Yours to control; deleted on request"],
-                ["Portability", "Full export, any time"],
-              ].map(([t, d]) => (
-                <div
-                  key={t}
-                  className="rounded-lg border border-slate-200 bg-white p-4"
-                >
-                  <div className="text-xs uppercase tracking-wide text-slate-400">
-                    {t}
+              {PRIVACY_CARDS.map((c) => (
+                <div key={c} className="rounded-lg border border-line bg-surface p-4">
+                  <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
+                    {t(`security.privacy.cards.${c}.title`)}
                   </div>
-                  <div className="mt-1 text-sm font-medium text-slate-800">{d}</div>
+                  <div className="mt-1 text-sm font-medium text-ink">
+                    {t(`security.privacy.cards.${c}.value`)}
+                  </div>
                 </div>
               ))}
             </div>
@@ -128,58 +96,66 @@ export default function SecurityPage() {
 
       {/* Sub-processors */}
       <section id="subprocessors" className="scroll-mt-20 mx-auto max-w-4xl px-5 py-16">
-        <h2 className="text-2xl font-bold tracking-tight">Sub-processors</h2>
-        <p className="mt-3 text-slate-600">
-          We use a small, vetted set of sub-processors to deliver the service. Each
-          is bound by data-protection terms consistent with our commitments to you.
-        </p>
-        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          {t("security.subprocessors.title")}
+        </h2>
+        <p className="mt-3 text-ink-2">{t("security.subprocessors.intro")}</p>
+        <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+          <table className="w-full text-start text-sm">
+            <thead className="border-b border-line bg-white/[0.03] text-xs uppercase tracking-[0.1em] text-ink-3">
               <tr>
-                <th className="px-5 py-3 font-medium">Category</th>
-                <th className="px-5 py-3 font-medium">Purpose</th>
-                <th className="px-5 py-3 font-medium">Region</th>
+                <th className="px-5 py-3 text-start font-medium">
+                  {t("security.subprocessors.table.category")}
+                </th>
+                <th className="px-5 py-3 text-start font-medium">
+                  {t("security.subprocessors.table.purpose")}
+                </th>
+                <th className="px-5 py-3 text-start font-medium">
+                  {t("security.subprocessors.table.region")}
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-line text-ink-2">
               {SUBPROCESSORS.map((s) => (
-                <tr key={s[0]}>
-                  <td className="px-5 py-3 font-medium">{s[0]}</td>
-                  <td className="px-5 py-3 text-slate-600">{s[1]}</td>
-                  <td className="px-5 py-3">{s[2]}</td>
+                <tr key={s}>
+                  <td className="px-5 py-3 font-medium">
+                    {t(`security.subprocessors.rows.${s}.category`)}
+                  </td>
+                  <td className="px-5 py-3 text-ink-2">
+                    {t(`security.subprocessors.rows.${s}.purpose`)}
+                  </td>
+                  <td className="px-5 py-3">
+                    {t(`security.subprocessors.rows.${s}.region`)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-slate-400">
-          Representative list for the current product stage; the binding list is
-          maintained in your DPA.
-        </p>
+        <p className="mt-3 text-xs text-ink-3">{t("security.subprocessors.note")}</p>
       </section>
 
       {/* Disclosure / CTA */}
-      <section className="border-t border-slate-200 bg-slate-50">
+      <section className="border-t border-line bg-white/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:flex-row sm:items-center">
+          <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-surface p-8 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
             <div>
-              <h2 className="text-xl font-bold tracking-tight">
-                Responsible disclosure
+              <h2 className="text-xl font-semibold tracking-tight">
+                {t("security.disclosure.title")}
               </h2>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
-                Found a vulnerability? We want to hear from you. Report it to{" "}
-                <span className="font-medium text-slate-800">
-                  security@conforma.eu
-                </span>{" "}
-                and we&apos;ll acknowledge within one business day.
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-2">
+                {t("security.disclosure.bodyBefore")}
+                <span className="font-medium text-ink">
+                  {t("security.disclosure.email")}
+                </span>
+                {t("security.disclosure.bodyAfter")}
               </p>
             </div>
             <Link
               href="/demo"
               className="shrink-0 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
             >
-              Request our security pack
+              {t("security.disclosure.cta")}
             </Link>
           </div>
         </div>

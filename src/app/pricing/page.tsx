@@ -1,24 +1,41 @@
-import type { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import { PricingTable } from "@/components/PricingTable";
+import { ArrowForward } from "@/components/Arrow";
+import { useI18n } from "@/i18n/I18nProvider";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "Simple, transparent pricing for EU AI Act compliance. Start free, scale to unlimited systems with SSO, audit logs and EU data residency on Enterprise.",
-};
+const CHECK = "✓";
+const DASH = "—";
 
 export default function PricingPage() {
+  const { t } = useI18n();
+  const UN = t("pricing.table.unlimited");
+
+  const rows: { key: string; values: string[] }[] = [
+    { key: "systems", values: ["1", "25", "100", UN] },
+    { key: "classification", values: [CHECK, CHECK, CHECK, CHECK] },
+    { key: "checklists", values: [CHECK, CHECK, CHECK, CHECK] },
+    { key: "drafted", values: [DASH, CHECK, CHECK, CHECK] },
+    { key: "exports", values: [DASH, CHECK, CHECK, CHECK] },
+    { key: "users", values: ["1", "5", UN, UN] },
+    { key: "auditLog", values: [DASH, DASH, CHECK, CHECK] },
+    { key: "api", values: [DASH, DASH, CHECK, CHECK] },
+    { key: "sso", values: [DASH, DASH, DASH, CHECK] },
+    { key: "residency", values: [DASH, DASH, DASH, CHECK] },
+    { key: "dpa", values: [DASH, DASH, DASH, CHECK] },
+    { key: "successManager", values: [DASH, DASH, DASH, CHECK] },
+  ];
+
   return (
     <div>
-      <section className="border-b border-slate-200 bg-slate-50">
+      <section className="border-b border-line bg-white/[0.03]">
         <div className="mx-auto max-w-3xl px-5 py-16 text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-            Pricing that beats a compliance retainer
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            {t("pricing.hero.title")}
           </h1>
-          <p className="mt-4 text-lg text-slate-600">
-            A single high-risk audit from a law firm costs more than a year of
-            Conforma. Start free — no credit card required.
+          <p className="mt-4 text-lg leading-relaxed text-ink-2">
+            {t("pricing.hero.subtitle")}
           </p>
         </div>
       </section>
@@ -28,50 +45,47 @@ export default function PricingPage() {
       </section>
 
       {/* Feature comparison */}
-      <section className="border-t border-slate-200 bg-slate-50">
+      <section className="border-t border-line bg-white/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
-          <h2 className="text-center text-2xl font-bold tracking-tight">
-            Compare plans
+          <h2 className="text-center text-2xl font-semibold tracking-tight">
+            {t("pricing.comparePlans")}
           </h2>
-          <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
+          <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+            <table className="w-full text-start text-sm">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-500">
-                  <th className="px-5 py-3 font-medium">Feature</th>
-                  <th className="px-4 py-3 text-center font-medium">Starter</th>
-                  <th className="px-4 py-3 text-center font-medium">Team</th>
-                  <th className="px-4 py-3 text-center font-medium">Business</th>
-                  <th className="px-4 py-3 text-center font-medium">Enterprise</th>
+                <tr className="border-b border-line bg-white/[0.03] text-ink-3">
+                  <th className="px-5 py-3 text-start font-medium">
+                    {t("pricing.table.feature")}
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium">
+                    {t("pricing.table.starter")}
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium">
+                    {t("pricing.table.team")}
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium">
+                    {t("pricing.table.business")}
+                  </th>
+                  <th className="px-4 py-3 text-center font-medium">
+                    {t("pricing.table.enterprise")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {(
-                  [
-                    ["AI systems", "1", "25", "100", "Unlimited"],
-                    ["Risk classification", "✓", "✓", "✓", "✓"],
-                    ["Obligation checklists", "✓", "✓", "✓", "✓"],
-                    ["AI-drafted documents", "—", "✓", "✓", "✓"],
-                    ["Audit-ready exports", "—", "✓", "✓", "✓"],
-                    ["Users & roles", "1", "5", "Unlimited", "Unlimited"],
-                    ["Audit log", "—", "—", "✓", "✓"],
-                    ["API access", "—", "—", "✓", "✓"],
-                    ["SSO / SAML", "—", "—", "—", "✓"],
-                    ["EU data residency", "—", "—", "—", "✓"],
-                    ["Custom DPA", "—", "—", "—", "✓"],
-                    ["Dedicated success manager", "—", "—", "—", "✓"],
-                  ] as const
-                ).map((row) => (
-                  <tr key={row[0]}>
-                    <td className="px-5 py-3 font-medium">{row[0]}</td>
-                    {row.slice(1).map((v, i) => (
+              <tbody className="divide-y divide-line text-ink-2">
+                {rows.map((row) => (
+                  <tr key={row.key}>
+                    <td className="px-5 py-3 font-medium">
+                      {t(`pricing.table.rows.${row.key}`)}
+                    </td>
+                    {row.values.map((v, i) => (
                       <td
                         key={i}
                         className={`px-4 py-3 text-center ${
-                          v === "✓"
-                            ? "text-emerald-600"
-                            : v === "—"
-                              ? "text-slate-300"
-                              : "text-slate-600"
+                          v === CHECK
+                            ? "text-emerald-400"
+                            : v === DASH
+                              ? "text-ink-3"
+                              : "text-ink-2"
                         }`}
                       >
                         {v}
@@ -82,10 +96,10 @@ export default function PricingPage() {
               </tbody>
             </table>
           </div>
-          <p className="mt-8 text-center text-slate-600">
-            Need something custom?{" "}
-            <Link href="/demo" className="font-semibold text-brand-700 hover:underline">
-              Talk to sales →
+          <p className="mt-8 text-center text-ink-2">
+            {t("pricing.custom.text")}{" "}
+            <Link href="/demo" className="font-semibold text-brand-300 hover:underline">
+              {t("pricing.custom.cta")} <ArrowForward />
             </Link>
           </p>
         </div>

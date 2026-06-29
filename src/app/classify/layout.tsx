@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
+import { AppShell } from "@/components/AppShell";
+import { getServerI18n } from "@/i18n/server";
 
-export const metadata: Metadata = {
-  title: "Classify an AI system",
-  description:
-    "Answer a few questions and get an EU AI Act risk classification with cited Articles, the obligations that apply, and your compliance deadline — in 30 seconds.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getServerI18n();
+  return {
+    title: t("metadata.classify.title"),
+    description: t("metadata.classify.description"),
+  };
+}
 
 export default function ClassifyLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AppShell>{children}</AppShell>;
 }

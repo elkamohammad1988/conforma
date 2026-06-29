@@ -4,50 +4,23 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { ArrowForward } from "@/components/Arrow";
 import { classify, EMPTY_ANSWERS, type ClassificationAnswers } from "@/lib/classifier";
-import { RISK_TIERS } from "@/lib/eu-ai-act";
+import { useI18n } from "@/i18n/I18nProvider";
+import { renderRationale } from "@/i18n/rationale";
 
 /** Preset scenarios that exercise each branch of the real decision tree. */
-const SCENARIOS: { id: string; label: string; hint: string; patch: Partial<ClassificationAnswers> }[] = [
-  {
-    id: "employment",
-    label: "CV screening",
-    hint: "Ranks job applicants",
-    patch: { annexIII: ["employment"] },
-  },
-  {
-    id: "credit",
-    label: "Credit scoring",
-    hint: "Assesses creditworthiness",
-    patch: { annexIII: ["essential-services"] },
-  },
-  {
-    id: "chatbot",
-    label: "Support chatbot",
-    hint: "Talks to customers",
-    patch: { transparency: ["interacts"] },
-  },
-  {
-    id: "deepfake",
-    label: "Deepfake studio",
-    hint: "Generates synthetic media",
-    patch: { transparency: ["synthetic", "deepfake"] },
-  },
-  {
-    id: "social",
-    label: "Social scoring",
-    hint: "Ranks citizens by behaviour",
-    patch: { prohibited: ["social-scoring"] },
-  },
-  {
-    id: "forecast",
-    label: "Demand forecasting",
-    hint: "Predicts inventory needs",
-    patch: {},
-  },
+const SCENARIOS: { id: string; patch: Partial<ClassificationAnswers> }[] = [
+  { id: "employment", patch: { annexIII: ["employment"] } },
+  { id: "credit", patch: { annexIII: ["essential-services"] } },
+  { id: "chatbot", patch: { transparency: ["interacts"] } },
+  { id: "deepfake", patch: { transparency: ["synthetic", "deepfake"] } },
+  { id: "social", patch: { prohibited: ["social-scoring"] } },
+  { id: "forecast", patch: {} },
 ];
 
 export function LandingDemo() {
+  const { t, formatDate } = useI18n();
   const [active, setActive] = useState("employment");
   const [gpai, setGpai] = useState(false);
 
@@ -62,14 +35,12 @@ export function LandingDemo() {
     return classify(answers);
   }, [active, gpai]);
 
-  const meta = RISK_TIERS[result.tier];
-
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
       {/* Controls */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Pick a system
+      <div className="rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]">
+        <div className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          {t("landingDemo.pickSystem")}
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           {SCENARIOS.map((s) => {
@@ -79,41 +50,45 @@ export function LandingDemo() {
                 key={s.id}
                 onClick={() => setActive(s.id)}
                 aria-pressed={selected}
-                className={`rounded-xl border px-3.5 py-3 text-left transition ${
+                className={`rounded-xl border px-3.5 py-3 text-start transition ${
                   selected
-                    ? "border-brand-400 bg-brand-50 ring-1 ring-brand-300"
-                    : "border-slate-200 bg-white hover:border-slate-300"
+                    ? "border-brand-500/40 bg-brand-500/10 ring-1 ring-brand-500/30"
+                    : "border-line bg-surface hover:border-line-2"
                 }`}
               >
-                <div className="text-sm font-semibold text-slate-800">{s.label}</div>
-                <div className="mt-0.5 text-xs text-slate-500">{s.hint}</div>
+                <div className="text-sm font-semibold text-ink">
+                  {t(`landingDemo.scenarios.${s.id}.label`)}
+                </div>
+                <div className="mt-0.5 text-xs text-ink-3">
+                  {t(`landingDemo.scenarios.${s.id}.hint`)}
+                </div>
               </button>
             );
           })}
         </div>
 
-        <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl border border-slate-200 px-3.5 py-3">
+        <label className="mt-4 flex cursor-pointer items-center justify-between rounded-xl border border-line px-3.5 py-3">
           <span>
-            <span className="text-sm font-medium text-slate-800">
-              Built on a general-purpose model
+            <span className="text-sm font-medium text-ink">
+              {t("landingDemo.builtOnGpai")}
             </span>
-            <span className="mt-0.5 block text-xs text-slate-500">
-              Adds GPAI provider duties (Art. 53+)
+            <span className="mt-0.5 block text-xs text-ink-3">
+              {t("landingDemo.builtOnGpaiHint")}
             </span>
           </span>
           <button
             type="button"
             role="switch"
             aria-checked={gpai}
-            aria-label="Built on a general-purpose model"
+            aria-label={t("landingDemo.builtOnGpai")}
             onClick={() => setGpai((g) => !g)}
             className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-              gpai ? "bg-brand-600" : "bg-slate-300"
+              gpai ? "bg-brand-600" : "bg-white/10"
             }`}
           >
             <span
               className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
-                gpai ? "left-[1.375rem]" : "left-0.5"
+                gpai ? "start-[1.375rem]" : "start-0.5"
               }`}
             />
           </button>
@@ -121,17 +96,19 @@ export function LandingDemo() {
       </div>
 
       {/* Live result */}
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 bg-slate-50 px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Live classification
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+        <div className="border-b border-line bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+          {t("landingDemo.liveClassification")}
         </div>
         <div key={`${active}-${gpai}`} className="animate-in flex flex-1 flex-col p-6">
           <div className="flex flex-wrap items-center gap-3">
             <RiskBadge tier={result.tier} />
-            <span className="text-lg font-bold text-slate-900">{meta.label}</span>
+            <span className="text-lg font-semibold text-ink">
+              {t(`domain.riskTiers.${result.tier}.label`)}
+            </span>
             {result.isGPAI && (
-              <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 ring-1 ring-brand-200">
-                + GPAI
+              <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[11px] font-semibold text-brand-300 ring-1 ring-brand-500/30">
+                {t("landingDemo.plusGpai")}
               </span>
             )}
           </div>
@@ -139,42 +116,43 @@ export function LandingDemo() {
           <ul className="mt-4 space-y-2">
             {result.rationale.slice(0, 3).map((r, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm">
-                <span className="mt-0.5 shrink-0 rounded bg-brand-50 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-700">
+                <span className="mt-0.5 shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300">
                   {r.citation}
                 </span>
-                <span className="text-slate-600">{r.text}</span>
+                <span className="text-ink-2">{renderRationale(r, t)}</span>
               </li>
             ))}
           </ul>
 
           <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
-            <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
-              <div className="text-xs uppercase tracking-wide text-slate-400">
-                Obligations
+            <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+              <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
+                {t("landingDemo.obligations")}
               </div>
-              <div className="mt-0.5 text-xl font-bold text-slate-900 tabular-nums">
+              <div className="mt-0.5 text-xl font-semibold text-ink tabular-nums">
                 {result.obligations.length}
               </div>
             </div>
-            <div className="rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
-              <div className="text-xs uppercase tracking-wide text-slate-400">
-                Deadline
+            <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+              <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
+                {t("landingDemo.deadline")}
               </div>
-              <div className="mt-0.5 text-sm font-semibold text-slate-900">
-                {result.deadline.date}
+              <div className="mt-0.5 text-sm font-semibold text-ink">
+                {formatDate(result.deadline.date, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
               </div>
               <Countdown
                 deadline={result.deadline.date}
-                className="text-xs font-medium text-amber-600"
+                className="text-xs font-medium text-brass-300"
               />
             </div>
           </div>
 
-          <Link
-            href="/classify"
-            className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-          >
-            Run the full 5-step classifier →
+          <Link href="/classify" className="btn btn-primary mt-4 w-full">
+            {t("landingDemo.runFull")} <ArrowForward />
           </Link>
         </div>
       </div>

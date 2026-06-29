@@ -16,6 +16,10 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClassificationResult } from "./classifier";
 import { RISK_TIERS, PENALTIES } from "./eu-ai-act";
+import { createTranslator, type Translator } from "@/i18n/translator";
+import { getMessages } from "@/i18n/messages";
+import { renderRationale } from "@/i18n/rationale";
+import { LOCALE_META, DEFAULT_LOCALE, type Locale } from "@/i18n/config";
 
 /** The model is fixed per project policy; adaptive thinking, no sampling params. */
 const MODEL = "claude-opus-4-8";
@@ -62,16 +66,23 @@ interface DocContext {
 const firstSentence = (text: string) =>
   (text.split(/(?<=[.!?])\s/)[0] ?? text).trim();
 
-function docPrompt(docType: DocType, ctx: DocContext): string {
+function docPrompt(docType: DocType, ctx: DocContext, locale: Locale): string {
   const { systemName, description, result, organisation } = ctx;
-  const tier = RISK_TIERS[result.tier].label;
+  const tr = createTranslator(locale, getMessages(locale));
+  const language = LOCALE_META[locale].englishName;
+  const tier = tr.t(`domain.riskTiers.${result.tier}.label`);
   const obligations = result.obligations
-    .map((o) => `- ${o.title} (${o.citation}): ${o.description}`)
+    .map(
+      (o) =>
+        `- ${tr.t(`domain.obligations.${o.id}.title`)} (${o.citation}): ${tr.t(
+          `domain.obligations.${o.id}.description`,
+        )}`,
+    )
     .join("\n");
   const org = organisation || "the provider";
 
   const shared = `You are an EU AI Act compliance specialist drafting a real, usable document for ${org}.
-Be precise, cite specific Articles/Annexes of Regulation (EU) 2024/1689, and write in formal regulatory English.
+Write the entire document in ${language} (natural, professional, native-quality — not a literal translation). Be precise, cite specific Articles/Annexes of Regulation (EU) 2024/1689 (keep these regulatory identifiers as-is), and write in formal regulatory ${language}.
 Output GitHub-flavoured Markdown only — no preamble, no "here is" framing. Use [BRACKETED PLACEHOLDERS] for details the organisation must fill in.
 
 AI system: "${systemName}"
@@ -102,6 +113,7 @@ ${obligations}`;
 export async function generateDocument(
   docType: DocType,
   ctx: DocContext,
+  locale: Locale = DEFAULT_LOCALE,
 ): Promise<{ markdown: string; source: AiSource }> {
   if (!isClaudeConfigured()) {
     return { markdown: demoDocument(docType, ctx), source: "demo" };
@@ -112,7 +124,7 @@ export async function generateDocument(
       model: MODEL,
       max_tokens: 8000,
       thinking: { type: "adaptive" },
-      messages: [{ role: "user", content: docPrompt(docType, ctx) }],
+      messages: [{ role: "user", content: docPrompt(docType, ctx, locale) }],
     });
     const markdown = message.content
       .filter((b): b is Anthropic.TextBlock => b.type === "text")
@@ -129,15 +141,22 @@ export async function generateDocument(
 /** A short plain-language narrative explaining the classification. */
 export async function explainClassification(
   ctx: DocContext,
+  locale: Locale = DEFAULT_LOCALE,
 ): Promise<{ narrative: string; source: AiSource }> {
+  const tr = createTranslator(locale, getMessages(locale));
   if (!isClaudeConfigured()) {
-    return { narrative: demoNarrative(ctx), source: "demo" };
+    return { narrative: demoNarrative(ctx, tr), source: "demo" };
   }
   try {
-    const prompt = `You are an EU AI Act compliance specialist. In 2-3 short paragraphs of plain English, explain to a non-lawyer why the AI system "${ctx.systemName}" was classified as "${RISK_TIERS[ctx.result.tier].label}", what that means in practice, and the single most urgent next step. Cite the key Article(s). Do not use Markdown headers; write flowing prose.
+    const language = LOCALE_META[locale].englishName;
+    const tier = tr.t(`domain.riskTiers.${ctx.result.tier}.label`);
+    const reasoning = ctx.result.rationale
+      .map((r) => `${renderRationale(r, tr.t)} [${r.citation}]`)
+      .join(" ");
+    const prompt = `You are an EU AI Act compliance specialist. Write your answer entirely in ${language} (natural, native-quality prose). In 2-3 short paragraphs of plain ${language}, explain to a non-lawyer why the AI system "${ctx.systemName}" was classified as "${tier}", what that means in practice, and the single most urgent next step. Cite the key Article(s) (keep "Art." references as-is). Do not use Markdown headers; write flowing prose.
 
 System description: ${ctx.description || "(not provided)"}
-Engine reasoning: ${ctx.result.rationale.map((r) => `${r.text} [${r.citation}]`).join(" ")}`;
+Engine reasoning: ${reasoning}`;
 
     const message = await getClient().messages.create({
       model: MODEL,
@@ -150,9 +169,9 @@ Engine reasoning: ${ctx.result.rationale.map((r) => `${r.text} [${r.citation}]`)
       .map((b) => b.text)
       .join("\n")
       .trim();
-    return { narrative: narrative || demoNarrative(ctx), source: "claude" };
+    return { narrative: narrative || demoNarrative(ctx, tr), source: "claude" };
   } catch {
-    return { narrative: demoNarrative(ctx), source: "demo" };
+    return { narrative: demoNarrative(ctx, tr), source: "demo" };
   }
 }
 
@@ -173,31 +192,35 @@ const DEMO_HEADER =
   `with zero credentials. Replace every \`[BRACKETED PLACEHOLDER]\` with your own ` +
   `details before use. Decision-support, not legal advice.\n\n`;
 
-function demoNarrative(ctx: DocContext): string {
-  const meta = RISK_TIERS[ctx.result.tier];
-  const reasons = ctx.result.rationale.map((r) => firstSentence(r.text)).join(" ");
+function demoNarrative(ctx: DocContext, tr: Translator): string {
+  const tierId = ctx.result.tier;
+  const label = tr.t(`domain.riskTiers.${tierId}.label`);
+  const summary = tr.t(`domain.riskTiers.${tierId}.summary`);
+  const reasons = ctx.result.rationale
+    .map((r) => firstSentence(renderRationale(r, tr.t)))
+    .join(" ");
   const penalty =
-    ctx.result.tier === "prohibited"
-      ? PENALTIES.prohibited
-      : PENALTIES.highRisk;
-  const gpai = ctx.result.isGPAI
-    ? " Because it is built on a general-purpose AI model, the GPAI provider duties in Art. 53 apply on top of the tier above — keep model technical documentation and a training-data summary ready."
-    : "";
+    tierId === "prohibited" ? PENALTIES.prohibited : PENALTIES.highRisk;
+  const gpai = ctx.result.isGPAI ? tr.t("ai.narrative.gpai") : "";
 
-  const nextStep =
-    ctx.result.tier === "prohibited"
-      ? "stop placing the system on the market or putting it into service, because the practice is banned outright under Art. 5"
-      : ctx.result.tier === "high"
-        ? "stand up the Art. 9 risk-management process and begin the Annex IV technical file, since these gate the conformity assessment you must pass before the deadline"
-        : ctx.result.tier === "limited"
-          ? "implement the Art. 50 transparency disclosures — tell people they are dealing with AI and machine-readably label any synthetic content"
-          : "record this assessment in your AI inventory and keep it under review, since intended-purpose changes can move the system into a higher tier";
+  const intro = tr.t("ai.narrative.intro", {
+    system: ctx.systemName,
+    tier: label,
+    reasons,
+    summary,
+    gpai,
+  });
+  const next = tr.t("ai.narrative.nextStep", {
+    step: tr.t(`ai.narrative.steps.${tierId}`),
+    deadline: tr.t(`domain.deadlines.${ctx.result.deadline.id}.label`),
+    date: tr.formatDateLong(ctx.result.deadline.date),
+    penalty: tr.formatCurrency(penalty.amountEur),
+    pct: penalty.turnoverPct,
+    citation: penalty.citation,
+  });
+  const closing = tr.t("ai.narrative.closing");
 
-  return `"${ctx.systemName}" has been classified as ${meta.label} under Regulation (EU) 2024/1689. ${reasons} In practice this means ${meta.summary.charAt(0).toLowerCase()}${meta.summary.slice(1)}${gpai}
-
-The single most urgent next step is to ${nextStep}. The clock that matters here is ${ctx.result.deadline.label.toLowerCase()} — ${ctx.result.deadline.date} — after which the obligations become enforceable. Non-compliance can attract penalties of up to €${penalty.amountEur.toLocaleString("en-GB")} or ${penalty.turnoverPct}% of worldwide annual turnover, whichever is higher (${penalty.citation}).
-
-Treat the obligation checklist below as your gap analysis: assign an owner to each item, capture the evidence that shows you meet it, and close anything still open well ahead of the deadline. None of this is legal advice — confirm the final classification and your remediation plan with qualified counsel.`;
+  return `${intro}\n\n${next}\n\n${closing}`;
 }
 
 function demoDocument(docType: DocType, ctx: DocContext): string {

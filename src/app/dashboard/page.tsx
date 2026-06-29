@@ -4,31 +4,36 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
+import { ArrowForward } from "@/components/Arrow";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { compliancePct, useSystems } from "@/lib/store";
-import { RISK_TIERS, type RiskTier } from "@/lib/eu-ai-act";
+import { compliancePct, useSystems, type RegisteredSystem } from "@/lib/store";
+import { type RiskTier } from "@/lib/eu-ai-act";
+import { useI18n } from "@/i18n/I18nProvider";
 
-const DIST_COLOR: Record<RiskTier, string> = {
-  prohibited: "bg-red-500",
-  high: "bg-amber-500",
-  limited: "bg-blue-500",
-  minimal: "bg-emerald-500",
+/** CSS custom-property colour for each tier — drives dots, bars and the donut. */
+const RISK_VAR: Record<RiskTier, string> = {
+  prohibited: "var(--color-risk-prohibited)",
+  high: "var(--color-risk-high)",
+  limited: "var(--color-risk-limited)",
+  minimal: "var(--color-risk-minimal)",
 };
 
-/** Severity order for the "highest risk first" sort. */
+/** Severity order — used for the donut, posture bar and "highest risk" sort. */
 const RISK_RANK: Record<RiskTier, number> = {
   prohibited: 0,
   high: 1,
   limited: 2,
   minimal: 3,
 };
+const TIER_ORDER: RiskTier[] = ["prohibited", "high", "limited", "minimal"];
 
 type SortKey = "recent" | "name" | "risk" | "compliance";
 type TierFilter = "all" | RiskTier;
 const PAGE_SIZE = 8;
 
 export default function DashboardPage() {
+  const { t, formatMonthYear, formatNumber } = useI18n();
   const systems = useSystems();
 
   const [query, setQuery] = useState("");
@@ -42,7 +47,10 @@ export default function DashboardPage() {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       const typing =
-        el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+        el &&
+        (el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.isContentEditable);
       if (e.key === "/" && !typing) {
         e.preventDefault();
         searchRef.current?.focus();
@@ -103,9 +111,16 @@ export default function DashboardPage() {
     .map((s) => s.result.deadline)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
+  // Highest risk, then least compliant — the systems that need a human now.
+  const attention = [...systems]
+    .sort(
+      (a, b) =>
+        RISK_RANK[a.result.tier] - RISK_RANK[b.result.tier] ||
+        compliancePct(a) - compliancePct(b),
+    )
+    .slice(0, 3);
+
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  // Clamp during render so a shrinking result set (after filtering) can't strand
-  // the view on an out-of-range page — no page-reset effect needed.
   const currentPage = Math.min(page, pageCount - 1);
   const paged = filtered.slice(
     currentPage * PAGE_SIZE,
@@ -113,342 +128,617 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI System Registry</h1>
-          <p className="mt-1 text-slate-500">
-            Every AI system you build or deploy, with its EU AI Act status.
+    <div className="mx-auto max-w-6xl px-5 py-9 sm:px-7 lg:py-11">
+      {/* ------------------------------- Header ------------------------------ */}
+      <header className="flex flex-wrap items-end justify-between gap-5">
+        <div className="animate-rise">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
+            {t("dashboard.eyebrow")}
+          </p>
+          <h1 className="mt-2 text-[1.9rem] font-semibold leading-[1.05] text-ink sm:text-[2.15rem]">
+            {t("dashboard.title")}
+          </h1>
+          <p className="mt-2 max-w-md text-[0.95rem] leading-relaxed text-ink-2">
+            {t("dashboard.subtitle")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div
+          className="flex animate-rise items-center gap-2.5"
+          style={{ animationDelay: "60ms" }}
+        >
           {systems.length > 0 && (
-            <Link
-              href="/report"
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-            >
-              Export report
+            <Link href="/report" className="btn btn-secondary">
+              <DownloadIcon />
+              {t("dashboard.exportReport")}
             </Link>
           )}
-          <Link
-            href="/classify"
-            className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700"
-          >
-            + Classify a system
+          <Link href="/classify" className="btn btn-primary">
+            <PlusIcon />
+            {t("dashboard.classifySystem")}
           </Link>
         </div>
-      </div>
+      </header>
 
-      {/* Summary cards */}
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard
-          label="Systems registered"
-          value={String(systems.length)}
-          sub={`${highRiskCount} high-risk or prohibited`}
+      {/* ----------------------------- KPI cards ----------------------------- */}
+      <section className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          delay={0}
+          label={t("dashboard.kpi.systems")}
+          tip={t("dashboard.kpi.systemsTip")}
+          value={formatNumber(systems.length)}
+          sub={t("dashboard.kpi.systemsSub", { count: highRiskCount })}
+          icon={<RegistryGlyph />}
         />
-        <SummaryCard
-          label="Portfolio compliance"
+        <StatCard
+          delay={70}
+          label={t("dashboard.kpi.compliance")}
+          tip={t("dashboard.kpi.complianceTip")}
           value={`${avg}%`}
-          sub="avg. obligations closed"
-          accent
+          progress={avg}
+          sub={t("dashboard.kpi.complianceSub")}
+          icon={<CheckGlyph />}
+          featured
         />
-        <SummaryCard
-          label="High-risk systems"
-          value={String(counts.high ?? 0)}
-          sub="full Chapter III obligations"
+        <StatCard
+          delay={140}
+          label={t("dashboard.kpi.highRisk")}
+          tip={t("dashboard.kpi.highRiskTip")}
+          value={formatNumber(counts.high ?? 0)}
+          sub={t("dashboard.kpi.highRiskSub")}
+          icon={<ShieldGlyph />}
         />
-        <SummaryCard
-          label="Nearest deadline"
-          value={nearest ? nearest.date.slice(0, 7) : "—"}
-          sub={nearest ? <Countdown deadline={nearest.date} /> : "no systems yet"}
+        <StatCard
+          delay={210}
+          label={t("dashboard.kpi.nearest")}
+          tip={t("dashboard.kpi.nearestTip")}
+          value={nearest ? formatMonthYear(nearest.date) : "—"}
+          sub={
+            nearest ? (
+              <Countdown deadline={nearest.date} />
+            ) : (
+              t("dashboard.kpi.nearestNoSystems")
+            )
+          }
+          icon={<ClockGlyph />}
         />
-      </div>
+      </section>
 
-      {/* Compliance posture */}
-      {systems.length > 0 && (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              Compliance posture
-            </h2>
-            <Link
-              href="/report"
-              className="text-xs font-semibold text-brand-600 hover:underline"
-            >
-              View full report →
-            </Link>
-          </div>
-          <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-slate-100">
-            {(["prohibited", "high", "limited", "minimal"] as RiskTier[]).map((t) =>
-              counts[t] ? (
-                <div
-                  key={t}
-                  className={DIST_COLOR[t]}
-                  style={{ width: `${((counts[t] ?? 0) / systems.length) * 100}%` }}
-                  title={`${t}: ${counts[t]}`}
-                />
-              ) : null,
-            )}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-xs text-slate-500">
-            {(["prohibited", "high", "limited", "minimal"] as RiskTier[]).map((t) => (
-              <span key={t} className="flex items-center gap-1.5">
-                <span className={`h-2 w-2 rounded-full ${DIST_COLOR[t]}`} />
-                {RISK_TIERS[t].short} · {counts[t] ?? 0}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Empty state */}
       {systems.length === 0 ? (
         <EmptyState
           className="mt-10"
-          icon={<RegistryIcon />}
-          title="No systems registered yet"
-          description="Classify your first AI system to see exactly what the EU AI Act requires of it — with cited Articles and a tracked obligation checklist."
-          action={{ href: "/classify", label: "Classify a system" }}
+          icon={<RegistryGlyph />}
+          title={t("dashboard.emptyTitle")}
+          description={t("dashboard.emptyBody")}
+          action={{ href: "/classify", label: t("dashboard.classifySystem") }}
         />
       ) : (
         <>
-          {/* Toolbar: search · tier filter · sort */}
-          <div className="mt-8 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative max-w-xs flex-1">
-              <SearchIcon />
-              <input
-                ref={searchRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search systems…"
-                aria-label="Search systems"
-                className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-12 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-              />
-              <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 sm:block">
-                /
-              </kbd>
+          {/* ----------------------- Charts / overview ---------------------- */}
+          <section className="mt-5 grid gap-4 lg:grid-cols-12">
+            <RiskDistribution
+              counts={counts}
+              total={systems.length}
+              className="lg:col-span-5"
+            />
+            <AttentionPanel
+              systems={attention}
+              avg={avg}
+              nearest={nearest?.date}
+              className="lg:col-span-7"
+            />
+          </section>
+
+          {/* ------------------------- Registry table ----------------------- */}
+          <section className="mt-9">
+            <div className="flex items-end justify-between gap-4">
+              <h2 className="text-lg font-semibold tracking-tight text-ink">
+                {t("dashboard.allSystems")}
+                <span className="ms-2 align-middle text-sm font-sans font-normal text-ink-3">
+                  {formatNumber(filtered.length)}
+                </span>
+              </h2>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1">
-                {(["all", "prohibited", "high", "limited", "minimal"] as TierFilter[]).map(
-                  (t) => (
+            {/* Toolbar */}
+            <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="relative max-w-xs flex-1">
+                <SearchIcon />
+                <input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t("dashboard.searchPlaceholder")}
+                  aria-label={t("dashboard.searchAria")}
+                  className="field py-2.5 ps-9 pe-12"
+                />
+                <kbd className="pointer-events-none absolute end-3 top-1/2 hidden -translate-y-1/2 rounded border border-line bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-ink-3 sm:block">
+                  /
+                </kbd>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="seg" role="group" aria-label={t("dashboard.filterAria")}>
+                  {(["all", ...TIER_ORDER] as TierFilter[]).map((tf) => (
                     <button
-                      key={t}
-                      onClick={() => setTier(t)}
-                      aria-pressed={tier === t}
-                      className={`rounded-lg px-2.5 py-1.5 text-xs font-medium capitalize transition ${
-                        tier === t
-                          ? "bg-brand-600 text-white"
-                          : "text-slate-500 hover:bg-slate-100"
-                      }`}
+                      key={tf}
+                      onClick={() => setTier(tf)}
+                      data-active={tier === tf}
+                      aria-pressed={tier === tf}
+                      className="seg-item"
                     >
-                      {t === "all" ? "All" : RISK_TIERS[t as RiskTier].short}
+                      {tf === "all"
+                        ? t("dashboard.all")
+                        : t(`domain.riskTiers.${tf}.short`)}
                     </button>
-                  ),
+                  ))}
+                </div>
+                <label className="sr-only" htmlFor="sort">
+                  {t("dashboard.sortAria")}
+                </label>
+                <select
+                  id="sort"
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortKey)}
+                  className="field px-3 py-2.5"
+                >
+                  <option value="recent">{t("dashboard.sortRecent")}</option>
+                  <option value="risk">{t("dashboard.sortRisk")}</option>
+                  <option value="compliance">{t("dashboard.sortCompliance")}</option>
+                  <option value="name">{t("dashboard.sortName")}</option>
+                </select>
+              </div>
+            </div>
+
+            {filtered.length === 0 ? (
+              <div className="mt-5 rounded-2xl border border-dashed border-line-2 bg-surface-2/60 py-16 text-center">
+                <p className="text-sm font-semibold text-ink">
+                  {t("dashboard.noMatches")}
+                </p>
+                <p className="mt-1 text-sm text-ink-2">{t("dashboard.noMatchesBody")}</p>
+                <button
+                  onClick={() => {
+                    setQuery("");
+                    setTier("all");
+                  }}
+                  className="btn btn-secondary btn-sm mt-4"
+                >
+                  {t("dashboard.clearFilters")}
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+                <table className="w-full text-start text-sm">
+                  <thead className="border-b border-line bg-surface-2 text-[11px] uppercase tracking-[0.08em] text-ink-3">
+                    <tr>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("dashboard.table.system")}
+                      </th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("dashboard.table.risk")}
+                      </th>
+                      <th className="hidden px-5 py-3 text-start font-semibold sm:table-cell">
+                        {t("dashboard.table.owner")}
+                      </th>
+                      <th className="px-5 py-3 text-start font-semibold">
+                        {t("dashboard.table.compliance")}
+                      </th>
+                      <th className="hidden px-5 py-3 text-start font-semibold md:table-cell">
+                        {t("dashboard.table.deadline")}
+                      </th>
+                      <th className="px-5 py-3" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {paged.map((s) => {
+                      const pct = compliancePct(s);
+                      return (
+                        <tr
+                          key={s.id}
+                          className="group transition-colors hover:bg-surface-2/70"
+                        >
+                          <td className="px-5 py-3.5">
+                            <Link
+                              href={`/systems/${s.id}`}
+                              className="font-semibold text-ink transition-colors group-hover:text-brand-200"
+                            >
+                              {s.name}
+                            </Link>
+                            {s.result.isGPAI && (
+                              <span className="ms-2 rounded-md border border-brass-300/60 bg-brass-300/15 px-1.5 py-0.5 text-[10px] font-semibold text-brass-600">
+                                GPAI
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <RiskBadge tier={s.result.tier} size="sm" />
+                          </td>
+                          <td className="hidden px-5 py-3.5 text-ink-2 sm:table-cell">
+                            {s.owner || "—"}
+                          </td>
+                          <td className="px-5 py-3.5">
+                            <ComplianceMeter pct={pct} />
+                          </td>
+                          <td className="hidden px-5 py-3.5 md:table-cell">
+                            <Countdown
+                              deadline={s.result.deadline.date}
+                              className="text-xs font-medium text-ink-2"
+                            />
+                          </td>
+                          <td className="px-5 py-3.5 text-end">
+                            <Link
+                              href={`/systems/${s.id}`}
+                              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-300 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
+                            >
+                              {t("dashboard.table.open")}
+                              <ArrowIcon />
+                            </Link>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {pageCount > 1 && (
+                  <div className="flex items-center justify-between border-t border-line bg-surface-2/60 px-5 py-3 text-sm">
+                    <span className="text-ink-2">
+                      {t("dashboard.showing", {
+                        from: formatNumber(currentPage * PAGE_SIZE + 1),
+                        to: formatNumber(
+                          Math.min((currentPage + 1) * PAGE_SIZE, filtered.length),
+                        ),
+                        total: formatNumber(filtered.length),
+                      })}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setPage(Math.max(0, currentPage - 1))}
+                        disabled={currentPage === 0}
+                        className="btn btn-ghost btn-sm disabled:opacity-40"
+                      >
+                        <ArrowBack /> {t("dashboard.prev")}
+                      </button>
+                      <span className="px-2 text-xs text-ink-3 nums">
+                        {formatNumber(currentPage + 1)} / {formatNumber(pageCount)}
+                      </span>
+                      <button
+                        onClick={() => setPage(Math.min(pageCount - 1, currentPage + 1))}
+                        disabled={currentPage >= pageCount - 1}
+                        className="btn btn-ghost btn-sm disabled:opacity-40"
+                      >
+                        {t("dashboard.next")} <ArrowForward />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
-              <label className="sr-only" htmlFor="sort">
-                Sort systems
-              </label>
-              <select
-                id="sort"
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
-                className="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-              >
-                <option value="recent">Most recent</option>
-                <option value="risk">Highest risk</option>
-                <option value="compliance">Lowest compliance</option>
-                <option value="name">Name (A–Z)</option>
-              </select>
-            </div>
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 py-16 text-center">
-              <p className="text-sm font-semibold text-slate-700">No matches</p>
-              <p className="mt-1 text-sm text-slate-500">
-                Try a different search or clear the filters.
-              </p>
-              <button
-                onClick={() => {
-                  setQuery("");
-                  setTier("all");
-                }}
-                className="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-              >
-                Clear filters
-              </button>
-            </div>
-          ) : (
-            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
-                  <tr>
-                    <th className="px-5 py-3 font-medium">System</th>
-                    <th className="px-5 py-3 font-medium">Risk</th>
-                    <th className="hidden px-5 py-3 font-medium sm:table-cell">Owner</th>
-                    <th className="px-5 py-3 font-medium">Compliance</th>
-                    <th className="hidden px-5 py-3 font-medium md:table-cell">
-                      Deadline
-                    </th>
-                    <th className="px-5 py-3" />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {paged.map((s) => {
-                    const pct = compliancePct(s);
-                    return (
-                      <tr key={s.id} className="group transition hover:bg-slate-50">
-                        <td className="px-5 py-3.5">
-                          <Link
-                            href={`/systems/${s.id}`}
-                            className="font-semibold text-slate-800 group-hover:text-brand-700"
-                          >
-                            {s.name}
-                          </Link>
-                          {s.result.isGPAI && (
-                            <span className="ml-2 rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-medium text-brand-700">
-                              GPAI
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <RiskBadge tier={s.result.tier} size="sm" />
-                        </td>
-                        <td className="hidden px-5 py-3.5 text-slate-500 sm:table-cell">
-                          {s.owner || "—"}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
-                              <div
-                                className={`h-full rounded-full ${
-                                  pct === 100
-                                    ? "bg-emerald-500"
-                                    : pct >= 50
-                                      ? "bg-brand-500"
-                                      : "bg-amber-500"
-                                }`}
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                            <span className="text-xs font-medium text-slate-500 tabular-nums">
-                              {pct}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="hidden px-5 py-3.5 md:table-cell">
-                          <Countdown
-                            deadline={s.result.deadline.date}
-                            className="text-xs font-medium text-slate-500"
-                          />
-                        </td>
-                        <td className="px-5 py-3.5 text-right">
-                          <Link
-                            href={`/systems/${s.id}`}
-                            className="text-sm font-medium text-brand-600 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
-                          >
-                            Open →
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              {/* Pagination */}
-              {pageCount > 1 && (
-                <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-5 py-3 text-sm">
-                  <span className="text-slate-500">
-                    Showing{" "}
-                    <span className="font-medium text-slate-700">
-                      {currentPage * PAGE_SIZE + 1}–
-                      {Math.min((currentPage + 1) * PAGE_SIZE, filtered.length)}
-                    </span>{" "}
-                    of {filtered.length}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setPage(Math.max(0, currentPage - 1))}
-                      disabled={currentPage === 0}
-                      className="rounded-lg px-3 py-1.5 font-medium text-slate-600 transition enabled:hover:bg-slate-200 disabled:opacity-40"
-                    >
-                      ← Prev
-                    </button>
-                    <span className="px-2 text-xs text-slate-400">
-                      {currentPage + 1} / {pageCount}
-                    </span>
-                    <button
-                      onClick={() => setPage(Math.min(pageCount - 1, currentPage + 1))}
-                      disabled={currentPage >= pageCount - 1}
-                      className="rounded-lg px-3 py-1.5 font-medium text-slate-600 transition enabled:hover:bg-slate-200 disabled:opacity-40"
-                    >
-                      Next →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </section>
         </>
       )}
     </div>
   );
 }
 
-function SummaryCard({
+/* -------------------------------------------------------------------------- */
+/* KPI card                                                                   */
+/* -------------------------------------------------------------------------- */
+function StatCard({
   label,
   value,
   sub,
-  accent,
+  tip,
+  icon,
+  progress,
+  featured,
+  delay = 0,
 }: {
   label: string;
   value: string;
   sub: React.ReactNode;
-  accent?: boolean;
+  tip?: string;
+  icon: React.ReactNode;
+  progress?: number;
+  featured?: boolean;
+  delay?: number;
 }) {
   return (
     <div
-      className={`rounded-xl border p-5 transition ${
-        accent
-          ? "border-brand-200 bg-brand-50/40"
-          : "border-slate-200 bg-white hover:border-slate-300"
+      className={`lift group animate-rise rounded-2xl border p-5 shadow-[var(--shadow-card)] ${
+        featured ? "border-brand-500/35 bg-brand-500/[0.06]" : "border-line bg-surface"
       }`}
+      style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="text-xs uppercase tracking-wide text-slate-400">{label}</div>
-      <div className="mt-1.5 text-2xl font-bold text-slate-900 tabular-nums">{value}</div>
-      <div className="mt-0.5 text-xs text-slate-500">{sub}</div>
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+          {label}
+          {tip && (
+            <span
+              className="tip cursor-help text-ink-3/70"
+              data-tip={tip}
+              tabIndex={0}
+              aria-label={tip}
+            >
+              <InfoIcon />
+            </span>
+          )}
+        </div>
+        <span
+          className={`grid h-8 w-8 place-items-center rounded-lg border ${
+            featured
+              ? "border-brand-500 bg-brand-600 text-white"
+              : "border-line bg-surface-2 text-ink-2"
+          }`}
+        >
+          {icon}
+        </span>
+      </div>
+      <div className="mt-3 text-[2rem] font-semibold leading-none tracking-tight text-ink nums">
+        {value}
+      </div>
+      {progress !== undefined ? (
+        <div className="mt-3">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full transition-[width] duration-700"
+              style={{ width: `${progress}%`, background: "var(--color-brand-500)" }}
+            />
+          </div>
+          <div className="mt-1.5 text-xs text-ink-2">{sub}</div>
+        </div>
+      ) : (
+        <div className="mt-1.5 text-xs text-ink-2">{sub}</div>
+      )}
     </div>
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Risk distribution — bespoke donut                                          */
+/* -------------------------------------------------------------------------- */
+function RiskDistribution({
+  counts,
+  total,
+  className = "",
+}: {
+  counts: Record<RiskTier, number>;
+  total: number;
+  className?: string;
+}) {
+  const { t, formatNumber } = useI18n();
+  const R = 54;
+  const C = 2 * Math.PI * R;
+  const gap = total > 1 ? C * 0.014 : 0;
+
+  const present = TIER_ORDER.filter((tier) => counts[tier]).map((tier) => ({
+    t: tier,
+    frac: (counts[tier] ?? 0) / total,
+  }));
+  const segments = present.map((s, i) => {
+    const startFrac = present.slice(0, i).reduce((a, x) => a + x.frac, 0);
+    const len = s.frac * C;
+    return { t: s.t, len: Math.max(len - gap, 0.5), offset: -startFrac * C };
+  });
+
+  return (
+    <div
+      className={`animate-fade-in rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)] ${className}`}
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-ink">
+          {t("dashboard.riskDistribution")}
+        </h2>
+        <span className="rounded-full border border-line bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-ink-3">
+          {t("dashboard.total", { count: total })}
+        </span>
+      </div>
+
+      <div className="mt-5 flex items-center gap-6">
+        <div className="relative h-[140px] w-[140px] shrink-0">
+          <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90">
+            <circle
+              cx="70"
+              cy="70"
+              r={R}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="15"
+            />
+            {segments.map((s) => (
+              <circle
+                key={s.t}
+                cx="70"
+                cy="70"
+                r={R}
+                fill="none"
+                stroke={RISK_VAR[s.t]}
+                strokeWidth="15"
+                strokeLinecap="round"
+                strokeDasharray={`${s.len} ${C - s.len}`}
+                strokeDashoffset={s.offset}
+                style={{ transition: "stroke-dasharray .8s var(--ease-out-quint)" }}
+              />
+            ))}
+          </svg>
+          <div className="absolute inset-0 grid place-items-center">
+            <div className="text-center">
+              <div className="text-[1.9rem] font-semibold leading-none text-ink nums">
+                {formatNumber(total)}
+              </div>
+              <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3">
+                {t("dashboard.systemsUnit")}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <ul className="flex-1 space-y-2.5">
+          {TIER_ORDER.map((tier) => {
+            const n = counts[tier] ?? 0;
+            const pct = total ? Math.round((n / total) * 100) : 0;
+            return (
+              <li key={tier} className="flex items-center gap-3">
+                <span
+                  className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
+                  style={{ background: RISK_VAR[tier] }}
+                />
+                <span className="text-sm text-ink-2">
+                  {t(`domain.riskTiers.${tier}.short`)}
+                </span>
+                <span className="ms-auto text-sm font-semibold text-ink nums">
+                  {formatNumber(n)}
+                </span>
+                <span className="w-10 text-end text-xs text-ink-3 nums">{pct}%</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Needs-attention panel                                                      */
+/* -------------------------------------------------------------------------- */
+function AttentionPanel({
+  systems,
+  avg,
+  nearest,
+  className = "",
+}: {
+  systems: RegisteredSystem[];
+  avg: number;
+  nearest?: string;
+  className?: string;
+}) {
+  const { t } = useI18n();
+  return (
+    <div
+      className={`animate-fade-in rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)] ${className}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold text-ink">{t("dashboard.needsAttention")}</h2>
+          <p className="mt-0.5 text-xs text-ink-3">{t("dashboard.needsAttentionSub")}</p>
+        </div>
+        {nearest && (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-2.5 py-1 text-[11px] font-medium text-ink-2">
+            <ClockGlyph className="h-3.5 w-3.5 text-brass-500" />
+            <Countdown deadline={nearest} /> {t("dashboard.toNearestDeadline")}
+          </span>
+        )}
+      </div>
+
+      <ul className="mt-4 divide-y divide-line">
+        {systems.map((s) => {
+          const pct = compliancePct(s);
+          return (
+            <li key={s.id}>
+              <Link
+                href={`/systems/${s.id}`}
+                className="group -mx-2 flex items-center gap-3 rounded-xl px-2 py-3 transition hover:bg-surface-2/70"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-semibold text-ink group-hover:text-brand-200">
+                      {s.name}
+                    </span>
+                    {s.result.isGPAI && (
+                      <span className="rounded border border-brass-300/60 bg-brass-300/15 px-1 py-0.5 text-[9px] font-semibold text-brass-600">
+                        GPAI
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-ink-3">
+                    {s.owner || t("dashboard.unassigned")}
+                  </p>
+                </div>
+                <RiskBadge tier={s.result.tier} size="sm" />
+                <div className="hidden w-28 sm:block">
+                  <ComplianceMeter pct={pct} />
+                </div>
+                <ArrowIcon className="h-4 w-4 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-brand-300 rtl:-scale-x-100" />
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
+        <span className="text-xs text-ink-2">
+          {t("dashboard.portfolioCompliance")}{" "}
+          <span className="font-semibold text-ink nums">{avg}%</span>
+        </span>
+        <Link
+          href="/report"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-300 hover:text-brand-200"
+        >
+          {t("dashboard.viewFullReport")}
+          <ArrowIcon />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Compliance meter                                                           */
+/* -------------------------------------------------------------------------- */
+function ComplianceMeter({ pct }: { pct: number }) {
+  const color =
+    pct === 100
+      ? "var(--color-brand-600)"
+      : pct >= 50
+        ? "var(--color-brass-500)"
+        : "var(--color-risk-prohibited)";
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+        <div
+          className="h-full rounded-full transition-[width] duration-700"
+          style={{ width: `${pct}%`, background: color }}
+        />
+      </div>
+      <span className="w-9 text-end text-xs font-medium text-ink-2 nums">{pct}%</span>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Skeleton                                                                   */
+/* -------------------------------------------------------------------------- */
 function DashboardSkeleton() {
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
-      <Skeleton className="h-9 w-72" />
-      <Skeleton className="mt-2 h-4 w-96 max-w-full" />
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mx-auto max-w-6xl px-5 py-9 sm:px-7 lg:py-11">
+      <Skeleton className="h-4 w-28" />
+      <Skeleton className="mt-3 h-10 w-72" />
+      <Skeleton className="mt-3 h-4 w-96 max-w-full" />
+      <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[88px]" />
+          <Skeleton key={i} className="h-[124px] rounded-2xl" />
         ))}
       </div>
-      <Skeleton className="mt-4 h-28" />
-      <Skeleton className="mt-8 h-12" />
-      <Skeleton className="mt-4 h-72" />
+      <div className="mt-5 grid gap-4 lg:grid-cols-12">
+        <Skeleton className="h-56 rounded-2xl lg:col-span-5" />
+        <Skeleton className="h-56 rounded-2xl lg:col-span-7" />
+      </div>
+      <Skeleton className="mt-9 h-12 rounded-xl" />
+      <Skeleton className="mt-4 h-80 rounded-2xl" />
     </div>
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/* Helpers + icons                                                            */
+/* -------------------------------------------------------------------------- */
 function SearchIcon() {
   return (
     <svg
       viewBox="0 0 20 20"
       fill="currentColor"
       aria-hidden
-      className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-3"
     >
       <path
         fillRule="evenodd"
@@ -459,15 +749,39 @@ function SearchIcon() {
   );
 }
 
-function RegistryIcon() {
+function stroke(d: string, className = "h-[18px] w-[18px]") {
   return (
-    <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7" aria-hidden>
-      <path
-        d="M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-      />
-      <path d="M4 9h16M9 13h6M9 16h4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={className}
+    >
+      {d.split("|").map((p, i) => (
+        <path key={i} d={p} />
+      ))}
     </svg>
   );
 }
+
+const PlusIcon = () => stroke("M12 5v14|M5 12h14", "h-4 w-4");
+const ArrowIcon = ({ className = "h-3.5 w-3.5" }: { className?: string }) =>
+  stroke("M5 12h14|M13 6l6 6-6 6", `${className} rtl:-scale-x-100`);
+const ArrowBack = ({ className = "h-3.5 w-3.5" }: { className?: string }) =>
+  stroke("M19 12H5|M11 6l-6 6 6 6", `${className} rtl:-scale-x-100`);
+const DownloadIcon = () =>
+  stroke("M12 4v11|M7.5 10.5 12 15l4.5-4.5|M5 19h14", "h-4 w-4");
+const InfoIcon = () =>
+  stroke("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z|M12 11v5|M12 7.5h.01", "h-3.5 w-3.5");
+const RegistryGlyph = () =>
+  stroke("M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z|M4 9h16|M8 13h8|M8 16.5h5");
+const CheckGlyph = () =>
+  stroke("M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z|M8 12.5l2.5 2.5L16 9.5");
+const ShieldGlyph = () =>
+  stroke("M12 3l7 2.5v5.5c0 4.6-3 8-7 9.5-4-1.5-7-4.9-7-9.5V5.5L12 3z|M12 8v4|M12 15.5h.01");
+const ClockGlyph = ({ className = "h-[18px] w-[18px]" }: { className?: string }) =>
+  stroke("M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z|M12 7v5l3 2", className);

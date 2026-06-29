@@ -43,10 +43,22 @@ export interface ClassificationAnswers {
   transparency: string[]; // 'interacts' | 'synthetic' | 'deepfake' | 'emotion'
 }
 
-export interface RationalePoint {
-  text: string;
-  citation: string;
-}
+/**
+ * A reason for the assigned tier, expressed as a locale-free key (plus any
+ * referenced domain id) rather than English prose. The UI / AI layer renders it
+ * through the active locale's catalog via `renderRationale`, which keeps the
+ * deterministic engine pure and fully translatable. `citation` is a regulatory
+ * identifier and is never translated.
+ */
+export type RationalePoint =
+  | { kind: "notAISystem"; citation: string }
+  | { kind: "prohibitedMatch"; practiceId: string; citation: string }
+  | { kind: "annexIMatch"; citation: string }
+  | { kind: "annexIIIMatch"; areaId: string; citation: string }
+  | { kind: "derogation"; citation: string }
+  | { kind: "transparencyMatch"; triggerId: string; citation: string }
+  | { kind: "minimalDefault"; citation: string }
+  | { kind: "gpaiOverlay"; citation: string };
 
 export interface ClassificationResult {
   tier: RiskTier;
@@ -73,10 +85,7 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
 
   // Gate: not an AI system → out of scope (treated as minimal).
   if (!answers.isAISystem) {
-    rationale.push({
-      text: "The system does not meet the Art. 3(1) definition of an 'AI system', so the Act's system-level obligations do not apply.",
-      citation: "Art. 3(1)",
-    });
+    rationale.push({ kind: "notAISystem", citation: "Art. 3(1)" });
     return finalize("minimal", rationale, answers, 0.7);
   }
 
@@ -86,7 +95,8 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
       const p = PROHIBITED_PRACTICES.find((x) => x.id === id);
       if (p) {
         rationale.push({
-          text: `Matches a prohibited practice: ${p.title}.`,
+          kind: "prohibitedMatch",
+          practiceId: p.id,
           citation: p.citation,
         });
       }
@@ -96,10 +106,7 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
 
   // 2) High risk — Annex I (safety component of a regulated product).
   if (answers.annexI) {
-    rationale.push({
-      text: "The AI is a safety component of, or is itself, a product covered by EU harmonised legislation listed in Annex I, and requires third-party conformity assessment.",
-      citation: "Art. 6(1) + Annex I",
-    });
+    rationale.push({ kind: "annexIMatch", citation: "Art. 6(1) + Annex I" });
     return finalize("high", rationale, answers, 0.9);
   }
 
@@ -109,7 +116,8 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
       const a = ANNEX_III_AREAS.find((x) => x.id === id);
       if (a) {
         rationale.push({
-          text: `Intended purpose falls within a high-risk area: ${a.title}.`,
+          kind: "annexIIIMatch",
+          areaId: a.id,
           citation: a.citation,
         });
       }
@@ -118,10 +126,7 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
     if (answers.annexIIIDerogation) {
       // Art. 6(3): may not be high-risk if it performs only a narrow task and
       // does not materially influence decisions — BUT registration still applies.
-      rationale.push({
-        text: "You indicated the system performs only a narrow procedural or preparatory task and does not materially influence decision outcomes. Under the Art. 6(3) derogation it may fall outside high-risk — but you must document this assessment and still register the system.",
-        citation: "Art. 6(3)–(4)",
-      });
+      rationale.push({ kind: "derogation", citation: "Art. 6(3)–(4)" });
       return finalize("limited", rationale, answers, 0.55);
     }
 
@@ -130,15 +135,10 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
 
   // 4) Limited risk — transparency triggers (Art. 50).
   if (answers.transparency.length > 0) {
-    const labels: Record<string, string> = {
-      interacts: "interacts directly with people",
-      synthetic: "generates synthetic audio/image/video/text",
-      deepfake: "produces deepfakes",
-      emotion: "performs emotion recognition or biometric categorisation",
-    };
-    for (const t of answers.transparency) {
+    for (const trigger of answers.transparency) {
       rationale.push({
-        text: `The system ${labels[t] ?? t}, triggering transparency duties.`,
+        kind: "transparencyMatch",
+        triggerId: trigger,
         citation: "Art. 50",
       });
     }
@@ -146,10 +146,7 @@ export function classify(answers: ClassificationAnswers): ClassificationResult {
   }
 
   // 5) Minimal risk — default.
-  rationale.push({
-    text: "No prohibited practice, high-risk use case or transparency trigger was identified. The system falls into the minimal-risk category.",
-    citation: "—",
-  });
+  rationale.push({ kind: "minimalDefault", citation: "—" });
   return finalize("minimal", rationale, answers, 0.75);
 }
 
@@ -160,10 +157,7 @@ function finalize(
   confidence: number,
 ): ClassificationResult {
   if (answers.isGPAI) {
-    rationale.push({
-      text: "The system is built on a general-purpose AI model, so the GPAI provider obligations apply in addition to the system-level tier above.",
-      citation: "Art. 53",
-    });
+    rationale.push({ kind: "gpaiOverlay", citation: "Art. 53" });
   }
 
   const deadline =

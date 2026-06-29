@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { explainClassification } from "@/lib/claude";
 import type { ClassificationResult } from "@/lib/classifier";
+import { isLocale } from "@/i18n/config";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -9,6 +10,7 @@ interface Body {
   systemName: string;
   description?: string;
   result: ClassificationResult;
+  locale?: string;
 }
 
 export async function POST(req: Request) {
@@ -25,11 +27,14 @@ export async function POST(req: Request) {
     );
   }
 
-  const { narrative, source } = await explainClassification({
-    systemName: body.systemName,
-    description: body.description ?? "",
-    result: body.result,
-  });
+  const { narrative, source } = await explainClassification(
+    {
+      systemName: body.systemName,
+      description: body.description ?? "",
+      result: body.result,
+    },
+    isLocale(body.locale) ? body.locale : undefined,
+  );
 
   return NextResponse.json({ narrative, source });
 }

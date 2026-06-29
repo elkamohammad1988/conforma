@@ -3,22 +3,17 @@
 import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import { RiskBadge } from "@/components/RiskBadge";
+import { ArrowBackward } from "@/components/Arrow";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { compliancePct, useSystems } from "@/lib/store";
-import { RISK_TIERS, type RiskTier } from "@/lib/eu-ai-act";
+import { type RiskTier } from "@/lib/eu-ai-act";
 import { useClientValue } from "@/lib/use-client-value";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function ReportPage() {
+  const { t, formatDateLong } = useI18n();
   const systems = useSystems();
-  const generated = useClientValue(
-    () =>
-      new Date().toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
-    "",
-  );
+  const generated = useClientValue(() => formatDateLong(new Date()), "");
 
   if (systems === null) {
     return (
@@ -53,61 +48,54 @@ export default function ReportPage() {
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link
           href="/dashboard"
-          className="text-sm font-medium text-slate-500 hover:text-slate-700"
+          className="inline-flex items-center gap-1 text-sm font-medium text-ink-3 hover:text-ink-2"
         >
-          ← Dashboard
+          <ArrowBackward /> {t("report.backDashboard")}
         </Link>
-        <button
-          onClick={() => window.print()}
-          className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-        >
-          Print / Save as PDF
+        <button onClick={() => window.print()} className="btn btn-primary">
+          {t("report.printSave")}
         </button>
       </div>
 
       {/* Report sheet */}
-      <article className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm print:border-0 print:shadow-none sm:p-12">
-        <header className="flex items-start justify-between border-b border-slate-200 pb-6">
+      <article className="rounded-2xl border border-line bg-surface p-8 shadow-[var(--shadow-card)] print:border-0 print:shadow-none sm:p-12">
+        <header className="flex items-start justify-between border-b border-line pb-6">
           <div className="flex items-center gap-3">
             <LogoMark className="h-9 w-9" />
             <div>
               <div className="text-lg font-semibold tracking-tight">Conforma</div>
-              <div className="text-xs text-slate-500">
-                EU AI Act Compliance Readiness Report
-              </div>
+              <div className="text-xs text-ink-3">{t("report.reportTitle")}</div>
             </div>
           </div>
-          <div className="text-right text-xs text-slate-500">
-            <div>Generated {generated}</div>
-            <div>Regulation (EU) 2024/1689</div>
+          <div className="text-end text-xs text-ink-3">
+            <div>{t("report.generated", { date: generated })}</div>
+            <div>{t("report.regulation")}</div>
           </div>
         </header>
 
         {/* Executive summary */}
         <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Executive summary
+          <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+            {t("report.executiveSummary")}
           </h2>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
-              ["Systems", String(systems.length)],
-              ["High-risk +", String(highRisk)],
-              ["Avg. compliance", `${avg}%`],
-              ["Tiers in use", String(Object.keys(counts).length)],
+              [t("report.summary.systems"), String(systems.length)],
+              [t("report.summary.highRiskPlus"), String(highRisk)],
+              [t("report.summary.avgCompliance"), `${avg}%`],
+              [t("report.summary.tiersInUse"), String(Object.keys(counts).length)],
             ].map(([l, v]) => (
-              <div key={l} className="rounded-lg border border-slate-200 p-4">
-                <div className="text-xs uppercase tracking-wide text-slate-400">
-                  {l}
-                </div>
-                <div className="mt-1 text-2xl font-bold text-slate-900">{v}</div>
+              <div key={l} className="rounded-lg border border-line p-4">
+                <div className="text-xs uppercase tracking-[0.1em] text-ink-3">{l}</div>
+                <div className="mt-1 text-2xl font-semibold text-ink">{v}</div>
               </div>
             ))}
           </div>
 
           {/* Risk distribution */}
           <div className="mt-6">
-            <div className="mb-2 text-xs font-medium text-slate-500">
-              Risk distribution
+            <div className="mb-2 text-xs font-medium text-ink-3">
+              {t("report.riskDistribution")}
             </div>
             <RiskDistribution counts={counts} total={systems.length} />
           </div>
@@ -115,20 +103,24 @@ export default function ReportPage() {
 
         {/* Per-system table */}
         <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            System register
+          <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+            {t("report.systemRegister")}
           </h2>
-          <table className="mt-3 w-full text-left text-sm">
-            <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-400">
+          <table className="mt-3 w-full text-start text-sm">
+            <thead className="border-b border-line text-xs uppercase tracking-[0.1em] text-ink-3">
               <tr>
-                <th className="py-2 font-medium">System</th>
-                <th className="py-2 font-medium">Risk</th>
-                <th className="py-2 font-medium">Owner</th>
-                <th className="py-2 text-right font-medium">Outstanding</th>
-                <th className="py-2 text-right font-medium">Compliance</th>
+                <th className="py-2 text-start font-medium">{t("report.table.system")}</th>
+                <th className="py-2 text-start font-medium">{t("report.table.risk")}</th>
+                <th className="py-2 text-start font-medium">{t("report.table.owner")}</th>
+                <th className="py-2 text-end font-medium">
+                  {t("report.table.outstanding")}
+                </th>
+                <th className="py-2 text-end font-medium">
+                  {t("report.table.compliance")}
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-line">
               {systems.map((s) => {
                 const done = s.result.obligations.filter(
                   (o) => s.obligationStatus[o.id] === "done",
@@ -136,15 +128,15 @@ export default function ReportPage() {
                 const outstanding = s.result.obligations.length - done;
                 return (
                   <tr key={s.id}>
-                    <td className="py-2.5 font-medium text-slate-800">{s.name}</td>
+                    <td className="py-2.5 font-medium text-ink">{s.name}</td>
                     <td className="py-2.5">
                       <RiskBadge tier={s.result.tier} size="sm" />
                     </td>
-                    <td className="py-2.5 text-slate-500">{s.owner || "—"}</td>
-                    <td className="py-2.5 text-right tabular-nums text-slate-700">
+                    <td className="py-2.5 text-ink-3">{s.owner || "—"}</td>
+                    <td className="py-2.5 text-end tabular-nums text-ink-2">
                       {outstanding}
                     </td>
-                    <td className="py-2.5 text-right font-medium tabular-nums">
+                    <td className="py-2.5 text-end font-medium tabular-nums">
                       {compliancePct(s)}%
                     </td>
                   </tr>
@@ -152,8 +144,8 @@ export default function ReportPage() {
               })}
               {systems.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400">
-                    No systems registered.
+                  <td colSpan={5} className="py-8 text-center text-ink-3">
+                    {t("report.noSystems")}
                   </td>
                 </tr>
               )}
@@ -161,10 +153,8 @@ export default function ReportPage() {
           </table>
         </section>
 
-        <footer className="mt-10 border-t border-slate-200 pt-5 text-xs leading-relaxed text-slate-400">
-          This report is generated by Conforma as decision-support for Regulation
-          (EU) 2024/1689. It does not constitute legal advice. Classifications
-          should be confirmed with qualified counsel before reliance.
+        <footer className="mt-10 border-t border-line pt-5 text-xs leading-relaxed text-ink-3">
+          {t("report.footer")}
         </footer>
       </article>
     </div>
@@ -178,32 +168,33 @@ function RiskDistribution({
   counts: Record<RiskTier, number>;
   total: number;
 }) {
+  const { t } = useI18n();
   const order: RiskTier[] = ["prohibited", "high", "limited", "minimal"];
   const color: Record<RiskTier, string> = {
-    prohibited: "bg-red-500",
-    high: "bg-amber-500",
-    limited: "bg-blue-500",
-    minimal: "bg-emerald-500",
+    prohibited: "bg-[var(--color-risk-prohibited)]",
+    high: "bg-[var(--color-risk-high)]",
+    limited: "bg-[var(--color-risk-limited)]",
+    minimal: "bg-[var(--color-risk-minimal)]",
   };
   return (
     <div>
-      <div className="flex h-3 overflow-hidden rounded-full bg-slate-100">
+      <div className="flex h-3 overflow-hidden rounded-full bg-white/10">
         {total > 0 &&
-          order.map((t) =>
-            counts[t] ? (
+          order.map((tier) =>
+            counts[tier] ? (
               <div
-                key={t}
-                className={color[t]}
-                style={{ width: `${((counts[t] ?? 0) / total) * 100}%` }}
+                key={tier}
+                className={color[tier]}
+                style={{ width: `${((counts[tier] ?? 0) / total) * 100}%` }}
               />
             ) : null,
           )}
       </div>
-      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-500">
-        {order.map((t) => (
-          <span key={t} className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full ${color[t]}`} />
-            {RISK_TIERS[t].short} · {counts[t] ?? 0}
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-3">
+        {order.map((tier) => (
+          <span key={tier} className="flex items-center gap-1.5">
+            <span className={`h-2 w-2 rounded-full ${color[tier]}`} />
+            {t(`domain.riskTiers.${tier}.short`)} · {counts[tier] ?? 0}
           </span>
         ))}
       </div>

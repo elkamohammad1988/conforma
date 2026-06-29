@@ -1,26 +1,83 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   CONFORMA — design system
+   A calm, engineered dark interface. One restrained indigo accent. One amber
+   reserved for the regulatory deadline. A semantic risk scale. Hairline
+   borders, soft layered shadows, and motion you barely notice.
+   Reference register: Linear / Vercel — quiet, not flashy.
+   ========================================================================== */
+
 @theme {
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-200: #c7d2fe;
-  --color-brand-300: #a5b4fc;
-  --color-brand-400: #818cf8;
-  --color-brand-500: #6366f1;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
-  --color-brand-800: #3730a3;
-  --color-brand-900: #1e1b4b;
-  --color-ink: #0b1020;
-  --color-ink-soft: #141a2e;
+  /* — Accent · a single restrained indigo (actions, focus, active state) —
+     Both `brand-*` and `accent-*` resolve to the same family, on purpose:
+     the product has exactly one accent. */
+  --color-brand-50: #eceefb;
+  --color-brand-100: #daddf6;
+  --color-brand-200: #b9bdef;
+  --color-brand-300: #969ce6;
+  --color-brand-400: #7c82e0;
+  --color-brand-500: #5e66e0; /* accent */
+  --color-brand-600: #4f57d4; /* primary action */
+  --color-brand-700: #4149b8;
+  --color-brand-800: #343a90;
+  --color-brand-900: #262a66;
+
+  --color-accent-300: #969ce6;
+  --color-accent-400: #7c82e0;
+  --color-accent-500: #5e66e0;
+  --color-accent-600: #4f57d4;
+
+  /* — Graphite foundation — */
+  --color-paper: #0c0c0f; /* app canvas / body */
+  --color-paper-2: #0f0f13; /* alternating sections */
+  --color-surface: #151519; /* card / panel */
+  --color-surface-2: #1b1b21; /* table head, inset, hover */
+  --color-raised: #202027; /* popover / elevated control */
+  --color-ink: #ececef; /* primary text (≈ 92% white, calmer than pure) */
+  --color-ink-soft: #cacace; /* dimmed heading */
+  --color-ink-2: #a2a2ac; /* secondary text */
+  --color-ink-3: #7e7e8a; /* muted text — lifted to clear AA on the dark canvas */
+  --color-line: rgba(255, 255, 255, 0.07); /* hairline */
+  --color-line-2: rgba(255, 255, 255, 0.12); /* stronger hairline */
+
+  /* — Amber · reserved for the regulatory deadline / urgency only — */
+  --color-brass-300: #e6cd86;
+  --color-brass-400: #d9b65f;
+  --color-brass-500: #c79a3c;
+  --color-brass-600: #a67e2d;
+
+  /* — Risk scale · semantic, calm, mutually distinct — */
+  --color-risk-prohibited: #e0565b; /* refined red */
+  --color-risk-high: #d6a03a; /* amber */
+  --color-risk-limited: #5a93b8; /* slate blue */
+  --color-risk-minimal: #5ba078; /* sage green */
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* One typeface, used with discipline. `display` is the same sans, tuned
+     tighter at large sizes by the type scale below. */
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #0b1020;
+  --background: #0c0c0f;
+  --foreground: #ececef;
+
+  /* Soft, layered, realistic elevation — no glow. */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 3px rgba(0, 0, 0, 0.4),
+    0 12px 28px -18px rgba(0, 0, 0, 0.65);
+  --shadow-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.45),
+    0 24px 50px -26px rgba(0, 0, 0, 0.7);
+  --shadow-pop:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 30px -12px rgba(0, 0, 0, 0.7);
 }
 
 html {
@@ -31,181 +88,440 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "cv11", "ss01";
 }
 
-::selection {
-  background: var(--color-brand-100);
-  color: var(--color-brand-900);
+/* Display headings: tighter tracking, calm weight. Used via `font-display`. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.022em;
 }
 
-/* Thin, unobtrusive scrollbar for scrollable panels (doc previews, modals). */
+/* ----------------------------------------------------------------------------
+   Localised typography. The active language is reflected on `<html lang dir>`,
+   so these selectors swap the body font the instant the language is switched.
+   Arabic uses a self-hosted face; Simplified Chinese a robust system CJK stack.
+   -------------------------------------------------------------------------- */
+:root[lang="ar"] body,
+:root[dir="rtl"] body {
+  font-family: var(--font-arabic), var(--font-sans);
+}
+:root[lang="zh-CN"] body {
+  font-family:
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+    "Heiti SC", var(--font-sans);
+}
+
+/* Latin tracking (incl. negative and wide-uppercase) breaks Arabic letter
+   joining and reads poorly in CJK — neutralise it for those scripts. */
+:root[dir="rtl"] *,
+:root[lang="zh-CN"] * {
+  letter-spacing: normal !important;
+}
+
+::selection {
+  background: rgba(94, 102, 224, 0.3);
+  color: #ffffff;
+}
+
+/* Tabular numerals helper for metrics. */
+.nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ----------------------------------------------------------------------------
+   App canvas — a single, almost-imperceptible cool vignette. No grid, no orbs.
+   -------------------------------------------------------------------------- */
+.app-canvas {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(
+    120% 80% at 50% -20%,
+    rgba(255, 255, 255, 0.022),
+    transparent 60%
+  );
+  background-attachment: fixed;
+}
+
+.hairline {
+  border-color: var(--color-line);
+}
+
+/* ----------------------------------------------------------------------------
+   Surfaces / panels
+   -------------------------------------------------------------------------- */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 0.875rem;
+  box-shadow: var(--shadow-card);
+}
+.panel-raised {
+  background: var(--color-raised);
+  border: 1px solid var(--color-line);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-raised);
+}
+
+/* Interactive card — quiet. Border brightens, a hair of light lifts the
+   surface. No movement, no glow. */
+.lift {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.lift:hover {
+  border-color: var(--color-line-2);
+  background-color: color-mix(in oklab, var(--color-surface) 92%, white);
+}
+
+/* ----------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 550;
+  letter-spacing: -0.012em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.btn:active {
+  transform: translateY(0.5px);
+}
+
+/* Primary — the one accent. Subtle monochrome depth (a single hue, lighter
+   at the top) plus a 1px highlight: material, not a trendy gradient. */
+.btn-primary {
+  color: #ffffff;
+  background: linear-gradient(180deg, #626add, var(--color-brand-600));
+  border: 1px solid var(--color-brand-700);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    var(--shadow-xs);
+}
+.btn-primary:hover {
+  background: linear-gradient(180deg, #6c73e2, var(--color-brand-500));
+  border-color: var(--color-brand-600);
+}
+
+/* Secondary — quiet surface with a hairline. */
+.btn-secondary {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-line-2);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Ghost — tertiary. */
+.btn-ghost {
+  color: var(--color-ink-2);
+  background: transparent;
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-ink);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  border-radius: 0.5rem;
+}
+
+/* ----------------------------------------------------------------------------
+   Inputs
+   -------------------------------------------------------------------------- */
+.field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-line-2);
+  border-radius: 0.5rem;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  outline: none;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.field::placeholder {
+  color: var(--color-ink-3);
+}
+.field:focus {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px rgba(94, 102, 224, 0.22);
+}
+/* Native options render in the OS palette — keep them dark. */
+.field option,
+select option {
+  background: #16161b;
+  color: var(--color-ink);
+}
+
+/* Segmented control — inset rail, a quiet raised pill for the active item. */
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+}
+.seg-item {
+  border-radius: 0.4rem;
+  padding: 0.32rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 550;
+  color: var(--color-ink-3);
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease;
+}
+.seg-item:hover {
+  color: var(--color-ink);
+}
+.seg-item[data-active="true"] {
+  color: var(--color-ink);
+  background: var(--color-raised);
+  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ----------------------------------------------------------------------------
+   Sidebar navigation
+   -------------------------------------------------------------------------- */
+.navlink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink-2);
+  transition:
+    color 0.16s ease,
+    background-color 0.16s ease;
+}
+.navlink:hover {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+.navlink[data-active="true"] {
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 550;
+}
+/* A thin accent bar pins the active item — no glow. */
+.navlink[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.7rem;
+  top: 50%;
+  height: 1rem;
+  width: 2px;
+  transform: translateY(-50%);
+  border-radius: 9999px;
+  background: var(--color-brand-500);
+}
+
+/* ----------------------------------------------------------------------------
+   Tooltip — quiet dark popover via data-tip.
+   -------------------------------------------------------------------------- */
+.tip {
+  position: relative;
+}
+.tip::after,
+.tip::before {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s var(--ease-out-quint);
+  z-index: 50;
+}
+.tip::after {
+  content: attr(data-tip);
+  bottom: calc(100% + 9px);
+  transform: translate(-50%, 4px);
+  white-space: nowrap;
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-pop);
+}
+.tip::before {
+  content: "";
+  bottom: calc(100% + 4px);
+  transform: translate(-50%, 4px) rotate(45deg);
+  height: 7px;
+  width: 7px;
+  background: var(--color-raised);
+  border-left: 1px solid var(--color-line);
+  border-top: 1px solid var(--color-line);
+}
+.tip:hover::after,
+.tip:hover::before,
+.tip:focus-visible::after,
+.tip:focus-visible::before {
+  opacity: 1;
+  transform: translate(-50%, 0) rotate(0deg);
+}
+.tip:focus-visible::before {
+  transform: translate(-50%, 0) rotate(45deg);
+}
+
+/* Thin scrollbar for scrollable panels. */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-brand-200) transparent;
+  scrollbar-color: var(--color-line-2) transparent;
 }
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: var(--color-brand-200);
+  background-color: var(--color-line-2);
   border-radius: 9999px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-brand-300);
+  background-color: rgba(255, 255, 255, 0.22);
 }
 
-/* Subtle dotted grid used behind hero / dark sections. */
-.bg-grid {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    rgba(255, 255, 255, 0.07) 1px,
-    transparent 0
-  );
-  background-size: 28px 28px;
-}
-
-.bg-grid-dark {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    rgba(15, 23, 42, 0.06) 1px,
-    transparent 0
-  );
-  background-size: 24px 24px;
-}
-
-/* Thin scrollable code/markdown block */
 .prose-doc {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.65;
 }
 
-@keyframes float-up {
+/* ----------------------------------------------------------------------------
+   Motion — kept deliberately small. A single quiet entrance; nothing loops.
+   -------------------------------------------------------------------------- */
+@keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-.animate-in {
-  animation: float-up 0.4s ease-out both;
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Entrance animations. Pair with inline `animationDelay` for stagger. */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out both;
-}
+.animate-in,
+.animate-rise,
 .animate-slide-up {
-  animation: slide-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: enter 0.28s var(--ease-out-quint) both;
 }
+.animate-fade-in,
 .animate-scale-in {
-  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fade 0.3s ease-out both;
 }
 
-/* Skeleton shimmer for loading states. */
-@keyframes shimmer {
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--dash);
+  }
+  to {
+    stroke-dashoffset: var(--offset);
+  }
+}
+
+/* Skeleton — a calm pulse, no sweeping shimmer. */
+@keyframes skeleton-pulse {
+  0%,
   100% {
-    transform: translateX(100%);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
   }
 }
 .skeleton {
-  position: relative;
-  overflow: hidden;
-  background-color: rgb(241 245 249); /* slate-100 */
+  background-color: rgba(255, 255, 255, 0.05);
   border-radius: 0.5rem;
-}
-.skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    transparent 0,
-    rgba(255, 255, 255, 0.65) 50%,
-    transparent 100%
-  );
-  animation: shimmer 1.6s infinite;
+  animation: skeleton-pulse 1.8s ease-in-out infinite;
 }
 
-/* Gentle lift on interactive cards. */
+/* Legacy hook — quiet, matches .lift. */
 .card-hover {
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease;
+    background-color 0.18s ease,
+    border-color 0.18s ease;
 }
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 12px 28px -12px rgba(15, 23, 42, 0.18),
-    0 4px 10px -6px rgba(15, 23, 42, 0.1);
+  border-color: var(--color-line-2);
 }
 
-/* Rendered-markdown styling for document previews (escaped → safe HTML). */
+/* ----------------------------------------------------------------------------
+   Rendered-markdown styling for document previews
+   -------------------------------------------------------------------------- */
 .prose-rendered {
   line-height: 1.7;
-  color: rgb(51 65 85); /* slate-700 */
+  color: var(--color-ink-2);
   font-size: 0.9rem;
 }
 .prose-rendered h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: rgb(15 23 42);
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  color: var(--color-ink);
   margin: 0 0 0.75rem;
 }
 .prose-rendered h2 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: rgb(15 23 42);
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
   margin: 1.5rem 0 0.5rem;
 }
 .prose-rendered h3 {
   font-size: 1rem;
   font-weight: 600;
-  color: rgb(30 41 59);
+  color: var(--color-ink);
   margin: 1.1rem 0 0.4rem;
 }
 .prose-rendered h4 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: rgb(30 41 59);
+  color: var(--color-ink);
   margin: 1rem 0 0.35rem;
 }
 .prose-rendered p {
@@ -214,7 +530,7 @@ body {
 .prose-rendered ul,
 .prose-rendered ol {
   margin: 0.6rem 0;
-  padding-left: 1.4rem;
+  padding-inline-start: 1.4rem;
 }
 .prose-rendered ul {
   list-style: disc;
@@ -227,7 +543,7 @@ body {
 }
 .prose-rendered strong {
   font-weight: 600;
-  color: rgb(15 23 42);
+  color: var(--color-ink);
 }
 .prose-rendered em {
   font-style: italic;
@@ -235,22 +551,23 @@ body {
 .prose-rendered code {
   font-family: var(--font-mono);
   font-size: 0.82em;
-  background: rgb(241 245 249);
+  background: rgba(255, 255, 255, 0.06);
   padding: 0.1rem 0.35rem;
   border-radius: 0.3rem;
 }
 .prose-rendered blockquote {
-  border-left: 3px solid var(--color-brand-300);
-  background: var(--color-brand-50);
+  border-inline-start: 2px solid var(--color-brand-500);
+  background: rgba(255, 255, 255, 0.03);
   padding: 0.6rem 0.9rem;
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-start-end-radius: 0.4rem;
+  border-end-end-radius: 0.4rem;
   margin: 0.8rem 0;
-  color: rgb(71 85 105);
+  color: var(--color-ink-2);
   font-size: 0.85rem;
 }
 .prose-rendered hr {
   border: 0;
-  border-top: 1px solid rgb(226 232 240);
+  border-top: 1px solid var(--color-line);
   margin: 1.25rem 0;
 }
 .prose-rendered table {
@@ -261,29 +578,28 @@ body {
 }
 .prose-rendered th,
 .prose-rendered td {
-  border: 1px solid rgb(226 232 240);
+  border: 1px solid var(--color-line);
   padding: 0.45rem 0.6rem;
-  text-align: left;
+  text-align: start;
   vertical-align: top;
 }
 .prose-rendered th {
-  background: rgb(248 250 252);
+  background: rgba(255, 255, 255, 0.03);
   font-weight: 600;
-  color: rgb(30 41 59);
+  color: var(--color-ink);
 }
 
-/* Visible keyboard focus for interactive elements (mouse users unaffected). */
+/* Visible keyboard focus (mouse users unaffected). */
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible,
 [role="switch"]:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--color-brand-600);
+  outline: 2px solid var(--color-brand-500);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
-/* Respect users who prefer reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

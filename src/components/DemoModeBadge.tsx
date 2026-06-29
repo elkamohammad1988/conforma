@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/i18n/I18nProvider";
 
 type Mode = "live" | "demo" | "loading";
 
@@ -12,6 +13,7 @@ type Mode = "live" | "demo" | "loading";
  * and never surfaces an error — if the status check fails it assumes Demo Mode.
  */
 export function DemoModeBadge({ className = "" }: { className?: string }) {
+  const t = useT();
   const [mode, setMode] = useState<Mode>("loading");
 
   useEffect(() => {
@@ -29,14 +31,11 @@ export function DemoModeBadge({ className = "" }: { className?: string }) {
 
   return (
     <span
-      title="No Anthropic API key is configured, so AI generation runs in Demo Mode — realistic, pre-generated sample documents. No paid API required."
-      className={`inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-700 ${className}`}
+      title={t("ai.demoBadgeTitle")}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-ink-2 ${className}`}
     >
-      <span className="relative flex h-1.5 w-1.5">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
-      </span>
-      Demo Mode · sample AI output
+      <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+      {t("ai.demoBadge")}
     </span>
   );
 }
@@ -48,22 +47,23 @@ export function DemoModeBadge({ className = "" }: { className?: string }) {
  * same premium way.
  */
 export function AiSourceTag({ source }: { source: string }) {
+  const t = useT();
   if (source === "claude") {
     return (
-      <span className="rounded bg-brand-100 px-1.5 py-0.5 font-medium text-brand-700">
-        ✨ Drafted by Claude
+      <span className="rounded border border-brand-500/30 bg-brand-500/10 px-1.5 py-0.5 font-medium text-brand-300">
+        {t("ai.draftedByClaude")}
       </span>
     );
   }
   if (source === "demo") {
     return (
       <span
-        title="Realistic, pre-generated sample. Add an ANTHROPIC_API_KEY to switch to live, system-specific drafting."
-        className="inline-flex items-center gap-1 rounded bg-brand-50 px-1.5 py-0.5 font-medium text-brand-700 ring-1 ring-brand-200"
+        title={t("ai.aiDraftDemoTitle")}
+        className="inline-flex items-center gap-1 rounded border border-line bg-white/[0.03] px-1.5 py-0.5 font-medium text-ink-2"
       >
-        ✨ AI draft · Demo Mode
+        {t("ai.aiDraftDemo")}
       </span>
     );
   }
-  return <span className="text-red-500">Could not generate — please try again.</span>;
+  return <span className="text-rose-400">{t("ai.couldNotGenerate")}</span>;
 }
