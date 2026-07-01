@@ -15,6 +15,7 @@ import {
   classify,
   type ClassificationAnswers,
   type ClassificationResult,
+  type ProviderRole,
 } from "./classifier";
 
 export type ObligationState = "todo" | "in-progress" | "done";
@@ -31,8 +32,8 @@ export interface RegisteredSystem {
   updatedAt: string;
 }
 
-const KEY = "conforma.systems.v1";
-const SEED_FLAG = "conforma.seeded.v1";
+const KEY = "conforma.systems.v2";
+const SEED_FLAG = "conforma.seeded.v2";
 
 /* ----------------------------- External store ---------------------------- */
 
@@ -159,74 +160,144 @@ function maybeSeed() {
     window.localStorage.setItem(SEED_FLAG, "1");
     return;
   }
+  // Compact answer builder — every system is an AI system; overrides set the
+  // few flags that drive its risk tier so `classify()` produces real results.
+  const mk = (
+    name: string,
+    role: ProviderRole,
+    over: Partial<ClassificationAnswers> = {},
+  ): ClassificationAnswers => ({
+    name,
+    role,
+    description: "",
+    isAISystem: true,
+    isGPAI: false,
+    prohibited: [],
+    annexI: false,
+    annexIII: [],
+    annexIIIDerogation: false,
+    transparency: [],
+    ...over,
+  });
+
+  // A believable enterprise AI portfolio spanning all four risk tiers.
   const seeds: Array<{
     name: string;
     description: string;
     owner: string;
     answers: ClassificationAnswers;
-    progress?: number;
+    progress: number;
+    ageDays: number;
   }> = [
     {
       name: "TalentRank — CV screening",
       description:
-        "Ranks and filters job applicants from uploaded CVs to shortlist candidates for recruiters.",
-      owner: "People Ops",
-      answers: {
-        name: "TalentRank — CV screening",
-        role: "provider",
-        description: "Recruitment screening model.",
-        isAISystem: true,
-        isGPAI: false,
-        prohibited: [],
-        annexI: false,
-        annexIII: ["employment"],
-        annexIIIDerogation: false,
-        transparency: [],
-      },
+        "Ranks and filters inbound job applicants from uploaded CVs to shortlist candidates for recruiters.",
+      owner: "People Operations",
+      answers: mk("TalentRank — CV screening", "provider", { annexIII: ["employment"] }),
       progress: 0.45,
+      ageDays: 2,
+    },
+    {
+      name: "CreditScore Pro",
+      description:
+        "Scores retail loan and overdraft applications to support credit-officer decisions.",
+      owner: "Risk & Credit",
+      answers: mk("CreditScore Pro", "provider", { annexIII: ["essential-services"] }),
+      progress: 0.62,
+      ageDays: 5,
+    },
+    {
+      name: "BorderVision — ID verification",
+      description:
+        "Matches a live selfie against identity-document photos during customer onboarding.",
+      owner: "Trust & Safety",
+      answers: mk("BorderVision — ID verification", "deployer", { annexIII: ["biometrics"] }),
+      progress: 0.3,
+      ageDays: 9,
+    },
+    {
+      name: "SmartGrid Optimiser",
+      description:
+        "Balances electricity load across substations to reduce peak-demand strain on the grid.",
+      owner: "Infrastructure",
+      answers: mk("SmartGrid Optimiser", "provider", {
+        annexIII: ["critical-infrastructure"],
+      }),
+      progress: 0.88,
+      ageDays: 13,
     },
     {
       name: "HelpDesk Copilot",
       description:
-        "Customer-facing chatbot that answers product questions and drafts replies.",
-      owner: "Support",
-      answers: {
-        name: "HelpDesk Copilot",
-        role: "deployer",
-        description: "Customer support chatbot built on a GPAI model.",
-        isAISystem: true,
+        "Customer-facing chatbot that answers product questions and drafts support replies.",
+      owner: "Customer Support",
+      answers: mk("HelpDesk Copilot", "deployer", {
         isGPAI: true,
-        prohibited: [],
-        annexI: false,
-        annexIII: [],
-        annexIIIDerogation: false,
         transparency: ["interacts", "synthetic"],
-      },
+      }),
       progress: 0.75,
+      ageDays: 1,
+    },
+    {
+      name: "StudioGen — campaign imagery",
+      description:
+        "Generates marketing images and social creative from text briefs for the brand team.",
+      owner: "Marketing",
+      answers: mk("StudioGen — campaign imagery", "deployer", {
+        isGPAI: true,
+        transparency: ["synthetic"],
+      }),
+      progress: 0.9,
+      ageDays: 7,
+    },
+    {
+      name: "VoiceAssist — call routing",
+      description:
+        "Voice assistant that greets inbound callers and routes them to the right support queue.",
+      owner: "Customer Care",
+      answers: mk("VoiceAssist — call routing", "deployer", { transparency: ["interacts"] }),
+      progress: 0.5,
+      ageDays: 18,
     },
     {
       name: "ForecastIQ — demand planning",
       description:
         "Predicts weekly product demand to optimise inventory ordering. No impact on individuals.",
       owner: "Supply Chain",
-      answers: {
-        name: "ForecastIQ — demand planning",
-        role: "provider",
-        description: "Internal demand-forecasting model.",
-        isAISystem: true,
-        isGPAI: false,
-        prohibited: [],
-        annexI: false,
-        annexIII: [],
-        annexIIIDerogation: false,
-        transparency: [],
-      },
+      answers: mk("ForecastIQ — demand planning", "provider"),
+      progress: 1,
+      ageDays: 21,
+    },
+    {
+      name: "InventoryBot — replenishment",
+      description:
+        "Suggests warehouse restock quantities from historical sales and supplier lead times.",
+      owner: "Operations",
+      answers: mk("InventoryBot — replenishment", "provider"),
+      progress: 1,
+      ageDays: 27,
+    },
+    {
+      name: "SentinelAML — transaction monitoring",
+      description:
+        "Screens payments for money-laundering and fraud signals to flag cases for compliance officers.",
+      owner: "Financial Crime",
+      answers: mk("SentinelAML — transaction monitoring", "provider", {
+        annexIII: ["essential-services"],
+      }),
+      progress: 0.12,
+      ageDays: 4,
     },
   ];
 
   const records = seeds.map((s) => {
     const sys = makeSystem(s.name, s.description, s.owner, s.answers);
-    if (s.progress) {
+    // Stagger timestamps so the "recently updated" ordering reads naturally.
+    const ts = new Date(Date.now() - s.ageDays * 86_400_000).toISOString();
+    sys.createdAt = ts;
+    sys.updatedAt = ts;
+    if (s.progress > 0) {
       const n = Math.round(sys.result.obligations.length * s.progress);
       sys.result.obligations.slice(0, n).forEach((o) => {
         sys.obligationStatus[o.id] = "done";
