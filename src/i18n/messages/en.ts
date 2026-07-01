@@ -30,6 +30,8 @@ const en = {
       other: "{count} days left",
     }),
     deadlinePassed: "deadline passed",
+    cancel: "Cancel",
+    delete: "Delete",
     notLegalAdvice:
       "Decision-support tooling for Regulation (EU) 2024/1689 — not legal advice. Confirm classifications with qualified counsel.",
   },

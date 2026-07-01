@@ -14,6 +14,7 @@ import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
 import { ArrowForward, ArrowBackward } from "@/components/Arrow";
 import { DemoModeBadge } from "@/components/DemoModeBadge";
+import { Spinner } from "@/components/ui/Spinner";
 import { saveSystem, newId, type RegisteredSystem } from "@/lib/store";
 import { useI18n } from "@/i18n/I18nProvider";
 import { renderRationale } from "@/i18n/rationale";
@@ -78,14 +79,14 @@ export default function ClassifyPage() {
           {STEP_KEYS.map((key, i) => (
             <div
               key={key}
-              className={`flex items-center gap-2 ${i <= step ? "text-ink" : "text-ink-3"}`}
+              className={`flex items-center gap-2 transition-colors ${i <= step ? "text-ink" : "text-ink-3"}`}
             >
               <span
-                className={`grid h-6 w-6 place-items-center rounded-full border text-[11px] font-semibold ${
+                className={`grid h-6 w-6 place-items-center rounded-full border text-[11px] font-semibold transition-all duration-300 ${
                   i < step
-                    ? "border-brand-500 bg-brand-600 text-white"
+                    ? "border-transparent text-white [background:linear-gradient(180deg,var(--color-brand-500),var(--color-brand-600))]"
                     : i === step
-                      ? "border-brand-500 bg-brand-500/15 text-brand-200"
+                      ? "scale-110 border-brand-500 bg-brand-500/15 text-brand-300 shadow-[0_0_0_4px_rgba(var(--crimson),0.12)]"
                       : "border-line bg-surface-2 text-ink-3"
                 }`}
               >
@@ -95,10 +96,15 @@ export default function ClassifyPage() {
             </div>
           ))}
         </div>
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10">
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-ink/10">
           <div
-            className="h-full rounded-full bg-brand-500 transition-[width] duration-300"
-            style={{ width: `${((step + 1) / STEP_KEYS.length) * 100}%` }}
+            className="h-full rounded-full transition-[width] duration-500 ease-[var(--ease-out-quint)]"
+            style={{
+              width: `${((step + 1) / STEP_KEYS.length) * 100}%`,
+              background:
+                "linear-gradient(90deg, var(--color-brand-600), var(--color-brand-400))",
+              boxShadow: "0 0 10px rgba(var(--crimson),0.5)",
+            }}
           />
         </div>
       </div>
@@ -206,7 +212,7 @@ export default function ClassifyPage() {
               ))}
             </div>
             {answers.annexIII.length > 0 && (
-              <div className="mt-2 rounded-lg bg-amber-500/10 p-4 ring-1 ring-amber-500/30">
+              <div className="mt-2 rounded-lg bg-warn-500/10 p-4 ring-1 ring-warn-500/30">
                 <YesNo
                   label={t("classify.step3.derogation")}
                   hint={t("classify.step3.derogationHint")}
@@ -308,25 +314,36 @@ function ResultView({
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
-      <div className="animate-in overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-        <div className="border-b border-line bg-paper-2 px-7 py-8">
-          <div className="text-sm text-ink-3">
-            {answers.name || t("classify.result.untitled")}
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <RiskBadge tier={result.tier} />
-            <h1 className="text-2xl font-semibold text-ink">
+      <div className="animate-in relative overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+        <div className="relative border-b border-line bg-paper-2 px-7 py-9 sm:px-8 sm:py-11">
+          {/* verdict is lit by its own risk-tier colour */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -top-20 h-56 w-56 rounded-full"
+            style={{
+              insetInlineEnd: "-2.5rem",
+              background: `radial-gradient(closest-side, color-mix(in srgb, var(--color-risk-${result.tier}) 24%, transparent), transparent 70%)`,
+            }}
+          />
+          <div className="relative">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-3">
+              {answers.name || t("classify.result.untitled")}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2.5">
+              <RiskBadge tier={result.tier} />
+              {result.isGPAI && (
+                <span className="rounded-full border border-line bg-ink/[0.04] px-2.5 py-1 text-xs font-medium text-ink-2">
+                  {t("classify.result.plusGpai")}
+                </span>
+              )}
+            </div>
+            <h1 className="mt-4 text-[2rem] font-semibold leading-[1.04] tracking-tight text-ink sm:text-[2.4rem]">
               {t(`domain.riskTiers.${result.tier}.label`)}
             </h1>
-            {result.isGPAI && (
-              <span className="rounded-full border border-line bg-white/5 px-2.5 py-1 text-xs font-medium text-ink-2">
-                {t("classify.result.plusGpai")}
-              </span>
-            )}
+            <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-2">
+              {t(`domain.riskTiers.${result.tier}.summary`)}
+            </p>
           </div>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-2">
-            {t(`domain.riskTiers.${result.tier}.summary`)}
-          </p>
         </div>
 
         <div className="p-7">
@@ -336,7 +353,7 @@ function ResultView({
           <ul className="mt-3 space-y-2.5">
             {result.rationale.map((r, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
-                <span className="mt-0.5 rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-200 ring-1 ring-brand-500/25">
+                <span className="mt-0.5 rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300 ring-1 ring-brand-500/25">
                   {r.citation}
                 </span>
                 <span className="text-ink-2">{renderRationale(r, t)}</span>
@@ -344,7 +361,7 @@ function ResultView({
             ))}
           </ul>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl bg-white/[0.03] p-4 text-sm ring-1 ring-white/10">
+          <div className="mt-6 flex flex-wrap items-center gap-4 rounded-xl bg-ink/[0.03] p-4 text-sm ring-1 ring-ink/10">
             <div>
               <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
                 {t("classify.result.applicableDeadline")}
@@ -363,7 +380,7 @@ function ResultView({
               </div>
               <Countdown
                 deadline={result.deadline.date}
-                className="text-sm font-semibold text-amber-400"
+                className="text-sm font-semibold text-warn-400"
               />
             </div>
           </div>
@@ -409,19 +426,26 @@ function ResultView({
                   disabled={loadingAI}
                   className="btn btn-secondary disabled:opacity-60"
                 >
-                  {loadingAI ? t("common.thinking") : t("classify.result.explain")}
+                  {loadingAI ? (
+                    <>
+                      <Spinner className="h-4 w-4" label={t("common.thinking")} />
+                      {t("common.thinking")}
+                    </>
+                  ) : (
+                    t("classify.result.explain")
+                  )}
                 </button>
                 <DemoModeBadge />
               </div>
             )}
             {narrative && (
-              <div className="rounded-xl border border-line bg-white/[0.02] p-4">
+              <div className="rounded-xl border border-line bg-ink/[0.02] p-4">
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">
                   {t("classify.result.aiExplanation")}
                   {aiSource === "demo" && (
                     <span
                       title={t("classify.result.demoModeTitle")}
-                      className="inline-flex items-center gap-1 rounded border border-line bg-white/[0.03] px-1.5 py-0.5 text-[10px] font-medium normal-case tracking-normal text-ink-2"
+                      className="inline-flex items-center gap-1 rounded border border-line bg-ink/[0.03] px-1.5 py-0.5 text-[10px] font-medium normal-case tracking-normal text-ink-2"
                     >
                       {t("classify.result.demoModeTag")}
                     </span>
@@ -455,8 +479,9 @@ function ResultView({
 
 /* --------------------------------------------------------------- Primitives */
 
-const INPUT =
-  "w-full rounded-lg border border-line-2 bg-white/[0.03] px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+// Uses the shared `.field` design-system input (see globals.css) so focus rings,
+// radius and surface match every other form in the product.
+const INPUT = "field px-3.5 py-2.5";
 
 function Section({
   title,
@@ -515,19 +540,18 @@ function YesNo({
         <div className="text-sm font-medium text-ink">{label}</div>
         {hint && <div className="mt-0.5 text-xs text-ink-3">{hint}</div>}
       </div>
-      <div className="flex shrink-0 overflow-hidden rounded-lg border border-line">
+      <div className="seg shrink-0" role="group" aria-label={label}>
         {[
           [t("common.no"), false],
           [t("common.yes"), true],
         ].map(([txt, val]) => (
           <button
             key={txt as string}
+            type="button"
             onClick={() => onChange(val as boolean)}
-            className={`px-4 py-1.5 text-sm font-medium transition ${
-              value === val
-                ? "bg-brand-600 text-white"
-                : "bg-white/5 text-ink-3 hover:bg-white/10"
-            }`}
+            data-active={value === val}
+            aria-pressed={value === val}
+            className="seg-item"
           >
             {txt}
           </button>
@@ -553,7 +577,7 @@ function CheckCard({
   danger?: boolean;
 }) {
   const activeRing = danger
-    ? "border-rose-500/50 bg-rose-500/10 ring-1 ring-rose-500/30"
+    ? "border-danger-500/50 bg-danger-500/10 ring-1 ring-danger-500/30"
     : "border-brand-500/60 bg-brand-500/10 ring-1 ring-brand-500/40";
   return (
     <button
@@ -566,9 +590,9 @@ function CheckCard({
         className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border text-xs text-white ${
           checked
             ? danger
-              ? "border-rose-500 bg-rose-500"
+              ? "border-danger-500 bg-danger-500"
               : "border-brand-600 bg-brand-600"
-            : "border-line-2 bg-white/5"
+            : "border-line-2 bg-ink/[0.04]"
         }`}
       >
         {checked && "✓"}

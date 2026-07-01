@@ -25,7 +25,7 @@ export default function SecurityPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-72"
           style={{
             background:
-              "radial-gradient(60% 100% at 50% 0%, rgba(94,102,224,0.08), transparent 72%)",
+              "radial-gradient(60% 100% at 50% 0%, rgba(200,30,40,0.06), transparent 72%)",
           }}
         />
         <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
@@ -42,7 +42,7 @@ export default function SecurityPage() {
             {BADGES.map((b) => (
               <span
                 key={b}
-                className="rounded-full border border-line bg-white/[0.03] px-3 py-1 text-sm font-medium text-ink-2"
+                className="rounded-full border border-line bg-ink/[0.03] px-3 py-1 text-sm font-medium text-ink-2"
               >
                 {t(`security.badges.${b}`)}
               </span>
@@ -57,7 +57,7 @@ export default function SecurityPage() {
           {PRINCIPLES.map((p) => (
             <div
               key={p}
-              className="rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
+              className="lift rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
             >
               <h3 className="text-base font-semibold text-ink">
                 {t(`security.principles.${p}.title`)}
@@ -71,7 +71,7 @@ export default function SecurityPage() {
       </section>
 
       {/* Privacy / data handling */}
-      <section id="privacy" className="scroll-mt-20 border-y border-line bg-white/[0.03]">
+      <section id="privacy" className="scroll-mt-20 border-y border-line bg-ink/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
           <h2 className="text-2xl font-semibold tracking-tight">
             {t("security.privacy.title")}
@@ -102,7 +102,7 @@ export default function SecurityPage() {
         <p className="mt-3 text-ink-2">{t("security.subprocessors.intro")}</p>
         <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
           <table className="w-full text-start text-sm">
-            <thead className="border-b border-line bg-white/[0.03] text-xs uppercase tracking-[0.1em] text-ink-3">
+            <thead className="border-b border-line bg-ink/[0.03] text-xs uppercase tracking-[0.1em] text-ink-3">
               <tr>
                 <th className="px-5 py-3 text-start font-medium">
                   {t("security.subprocessors.table.category")}
@@ -136,7 +136,7 @@ export default function SecurityPage() {
       </section>
 
       {/* Disclosure / CTA */}
-      <section className="border-t border-line bg-white/[0.03]">
+      <section className="border-t border-line bg-ink/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
           <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-line bg-surface p-8 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
             <div>
@@ -151,10 +151,7 @@ export default function SecurityPage() {
                 {t("security.disclosure.bodyAfter")}
               </p>
             </div>
-            <Link
-              href="/demo"
-              className="shrink-0 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-            >
+            <Link href="/demo" className="btn btn-primary shrink-0">
               {t("security.disclosure.cta")}
             </Link>
           </div>

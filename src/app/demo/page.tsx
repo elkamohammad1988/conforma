@@ -23,7 +23,7 @@ export default function DemoPage() {
           <ul className="mt-8 space-y-4">
             {BULLETS.map((key) => (
               <li key={key} className="flex gap-3">
-                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500/20 text-sm font-semibold text-brand-300">
+                <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-500/20 text-sm font-semibold text-brand-400">
                   ✓
                 </span>
                 <div>

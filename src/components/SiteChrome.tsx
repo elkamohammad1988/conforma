@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo, LogoMark } from "@/components/Logo";
-import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { MobileNav } from "@/components/MobileNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useI18n } from "@/i18n/I18nProvider";
 
 /**
- * Marketing chrome (announcement bar · top nav · footer). It wraps every page,
+ * Marketing chrome (top nav · footer). It wraps every page,
  * but hides itself on the in-product app routes, where <AppShell> takes over
  * with its own sidebar + topbar. This keeps the marketing site and the
  * application visually distinct without restructuring the route tree.
@@ -35,7 +34,6 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <AnnouncementBar />
       <TopNav />
       <main id="main" className="flex-1">
         {children}
@@ -62,7 +60,7 @@ function TopNav() {
             <Link
               key={n.href}
               href={n.href}
-              className="rounded-lg px-3 py-2 transition hover:bg-white/5 hover:text-ink"
+              className="rounded-lg px-3 py-2 transition hover:bg-ink/[0.04] hover:text-ink"
             >
               {n.label}
             </Link>
@@ -72,7 +70,7 @@ function TopNav() {
           <LanguageSwitcher className="hidden sm:block" />
           <Link
             href="/demo"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition hover:bg-white/5 sm:inline-block"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04] sm:inline-block"
           >
             {t("nav.bookDemo")}
           </Link>
@@ -143,7 +141,7 @@ function SiteFooter() {
               {FRAMEWORKS.map((f) => (
                 <span
                   key={f}
-                  className="rounded-md border border-line bg-white/5 px-2 py-1 text-[11px] font-medium text-ink-2"
+                  className="rounded-md border border-line bg-ink/[0.04] px-2 py-1 text-[11px] font-medium text-ink-2"
                 >
                   {f}
                 </span>
@@ -151,7 +149,7 @@ function SiteFooter() {
             </div>
             <a
               href="mailto:hello@conforma.eu"
-              className="mt-4 inline-block text-sm font-medium text-brand-300 hover:underline"
+              className="mt-4 inline-block text-sm font-medium text-brand-400 hover:underline"
             >
               hello@conforma.eu
             </a>
@@ -164,7 +162,7 @@ function SiteFooter() {
               <ul className="mt-3 space-y-2 text-sm text-ink-2">
                 {c.links.map((l) => (
                   <li key={l.href + l.label}>
-                    <Link href={l.href} className="hover:text-brand-300">
+                    <Link href={l.href} className="hover:text-brand-400">
                       {l.label}
                     </Link>
                   </li>

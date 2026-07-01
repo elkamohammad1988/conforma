@@ -18,7 +18,7 @@ export function ComplianceTimeline() {
     formatDate(iso, { year: "numeric", month: "short", day: "numeric" });
 
   const InForce = () => (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">
+    <span className="inline-flex items-center gap-1 rounded-full bg-ok-500/10 px-2 py-0.5 text-[11px] font-semibold text-ok-400">
       ● {t("home.timeline.inForce")}
     </span>
   );
@@ -28,7 +28,7 @@ export function ComplianceTimeline() {
       {/* Connecting line */}
       <div
         aria-hidden
-        className="absolute start-[15px] top-2 bottom-2 w-px bg-white/10 sm:hidden"
+        className="absolute start-[15px] top-2 bottom-2 w-px bg-ink/10 sm:hidden"
       />
       <div className="hidden sm:grid sm:grid-cols-5 sm:gap-4">
         {COMPLIANCE_DEADLINES.map((d) => {
@@ -37,12 +37,12 @@ export function ComplianceTimeline() {
             <li key={d.id} className="relative">
               <div
                 aria-hidden
-                className="absolute left-0 right-0 top-[11px] h-px bg-white/10"
+                className="absolute left-0 right-0 top-[11px] h-px bg-ink/10"
               />
               <div className="relative flex justify-center">
                 <span
                   className={`h-3.5 w-3.5 rounded-full ring-4 ring-paper ${
-                    inForce ? "bg-emerald-500" : "bg-brand-600"
+                    inForce ? "bg-ok-500" : "bg-brand-600"
                   }`}
                 />
               </div>
@@ -62,7 +62,7 @@ export function ComplianceTimeline() {
                   ) : (
                     <Countdown
                       deadline={d.date}
-                      className="text-[11px] font-semibold text-amber-400"
+                      className="text-[11px] font-semibold text-warn-400"
                     />
                   )}
                 </div>
@@ -80,7 +80,7 @@ export function ComplianceTimeline() {
             <li key={d.id} className="relative ps-10">
               <span
                 className={`absolute start-2 top-1.5 h-3.5 w-3.5 rounded-full ring-4 ring-paper ${
-                  inForce ? "bg-emerald-500" : "bg-brand-600"
+                  inForce ? "bg-ok-500" : "bg-brand-600"
                 }`}
               />
               <div className="font-mono text-xs font-semibold text-ink">
@@ -98,7 +98,7 @@ export function ComplianceTimeline() {
                 ) : (
                   <Countdown
                     deadline={d.date}
-                    className="text-[11px] font-semibold text-amber-400"
+                    className="text-[11px] font-semibold text-warn-400"
                   />
                 )}
               </div>

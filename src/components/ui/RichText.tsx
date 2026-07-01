@@ -12,7 +12,7 @@ const INLINE = /(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g;
 const LINK = /^\[([^\]]+)\]\(([^)]+)\)$/;
 
 function Anchor({ href, children }: { href: string; children: React.ReactNode }) {
-  const cls = "font-medium text-brand-300 hover:underline";
+  const cls = "font-medium text-brand-400 hover:underline";
   if (href.startsWith("/")) {
     return (
       <Link href={href} className={cls}>

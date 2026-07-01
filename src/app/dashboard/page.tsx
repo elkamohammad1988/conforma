@@ -5,7 +5,7 @@ import Link from "next/link";
 import { RiskBadge } from "@/components/RiskBadge";
 import { Countdown } from "@/components/Countdown";
 import { ArrowForward } from "@/components/Arrow";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { Magnetic } from "@/components/Motion";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { compliancePct, useSystems, type RegisteredSystem } from "@/lib/store";
 import { type RiskTier } from "@/lib/eu-ai-act";
@@ -27,6 +27,8 @@ const RISK_RANK: Record<RiskTier, number> = {
   minimal: 3,
 };
 const TIER_ORDER: RiskTier[] = ["prohibited", "high", "limited", "minimal"];
+// Reuses the marketing "how it works" copy for the first-run onboarding steps.
+const ONBOARD_STEPS = ["register", "classify", "closeGaps", "generate"] as const;
 
 type SortKey = "recent" | "name" | "risk" | "compliance";
 type TierFilter = "all" | RiskTier;
@@ -130,37 +132,49 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl px-5 py-9 sm:px-7 lg:py-11">
       {/* ------------------------------- Header ------------------------------ */}
-      <header className="flex flex-wrap items-end justify-between gap-5">
-        <div className="animate-rise">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
-            {t("dashboard.eyebrow")}
-          </p>
-          <h1 className="mt-2 text-[1.9rem] font-semibold leading-[1.05] text-ink sm:text-[2.15rem]">
-            {t("dashboard.title")}
-          </h1>
-          <p className="mt-2 max-w-md text-[0.95rem] leading-relaxed text-ink-2">
-            {t("dashboard.subtitle")}
-          </p>
-        </div>
+      <header className="animate-rise relative overflow-hidden rounded-3xl border border-line bg-surface px-6 py-7 shadow-[var(--shadow-card)] sm:px-8 sm:py-8">
+        {/* environmental corner light */}
         <div
-          className="flex animate-rise items-center gap-2.5"
-          style={{ animationDelay: "60ms" }}
-        >
-          {systems.length > 0 && (
-            <Link href="/report" className="btn btn-secondary">
-              <DownloadIcon />
-              {t("dashboard.exportReport")}
-            </Link>
-          )}
-          <Link href="/classify" className="btn btn-primary">
-            <PlusIcon />
-            {t("dashboard.classifySystem")}
-          </Link>
+          aria-hidden
+          className="pointer-events-none absolute -top-24 h-64 w-64 rounded-full"
+          style={{
+            insetInlineEnd: "-3rem",
+            background:
+              "radial-gradient(closest-side, rgba(var(--crimson),0.18), transparent 70%)",
+          }}
+        />
+        <div className="relative flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-brand-400/90">
+              {t("dashboard.eyebrow")}
+            </p>
+            <h1 className="mt-2.5 text-[2rem] font-semibold leading-[1.02] tracking-tight text-ink sm:text-[2.4rem]">
+              {t("dashboard.title")}
+            </h1>
+            <p className="mt-2.5 max-w-md text-[0.95rem] leading-relaxed text-ink-2">
+              {t("dashboard.subtitle")}
+            </p>
+          </div>
+          <div className="flex items-center gap-2.5">
+            {systems.length > 0 && (
+              <Link href="/report" className="btn btn-secondary">
+                <DownloadIcon />
+                {t("dashboard.exportReport")}
+              </Link>
+            )}
+            <Magnetic>
+              <Link href="/classify" className="btn btn-primary">
+                <PlusIcon />
+                {t("dashboard.classifySystem")}
+              </Link>
+            </Magnetic>
+          </div>
         </div>
       </header>
 
       {/* ----------------------------- KPI cards ----------------------------- */}
-      <section className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {systems.length > 0 && (
+      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           delay={0}
           label={t("dashboard.kpi.systems")}
@@ -202,15 +216,10 @@ export default function DashboardPage() {
           icon={<ClockGlyph />}
         />
       </section>
+      )}
 
       {systems.length === 0 ? (
-        <EmptyState
-          className="mt-10"
-          icon={<RegistryGlyph />}
-          title={t("dashboard.emptyTitle")}
-          description={t("dashboard.emptyBody")}
-          action={{ href: "/classify", label: t("dashboard.classifySystem") }}
-        />
+        <DashboardEmpty />
       ) : (
         <>
           {/* ----------------------- Charts / overview ---------------------- */}
@@ -339,7 +348,7 @@ export default function DashboardPage() {
                           <td className="px-5 py-3.5">
                             <Link
                               href={`/systems/${s.id}`}
-                              className="font-semibold text-ink transition-colors group-hover:text-brand-200"
+                              className="font-semibold text-ink transition-colors group-hover:text-brand-300"
                             >
                               {s.name}
                             </Link>
@@ -367,7 +376,7 @@ export default function DashboardPage() {
                           <td className="px-5 py-3.5 text-end">
                             <Link
                               href={`/systems/${s.id}`}
-                              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-300 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
+                              className="inline-flex items-center gap-1 text-sm font-semibold text-brand-400 opacity-0 transition group-hover:opacity-100 focus-visible:opacity-100"
                             >
                               {t("dashboard.table.open")}
                               <ArrowIcon />
@@ -444,11 +453,17 @@ function StatCard({
 }) {
   return (
     <div
-      className={`lift group animate-rise rounded-2xl border p-5 shadow-[var(--shadow-card)] ${
-        featured ? "border-brand-500/35 bg-brand-500/[0.06]" : "border-line bg-surface"
+      className={`lift group animate-rise relative overflow-hidden rounded-2xl border p-5 shadow-[var(--shadow-card)] ${
+        featured ? "border-brand-500/40 bg-brand-500/[0.07]" : "border-line bg-surface"
       }`}
       style={{ animationDelay: `${delay}ms` }}
     >
+      {featured && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/70 to-transparent"
+        />
+      )}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3">
           {label}
@@ -464,30 +479,35 @@ function StatCard({
           )}
         </div>
         <span
-          className={`grid h-8 w-8 place-items-center rounded-lg border ${
+          className={`grid h-9 w-9 place-items-center rounded-xl border transition-transform duration-300 group-hover:scale-105 ${
             featured
-              ? "border-brand-500 bg-brand-600 text-white"
+              ? "border-transparent bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_6px_18px_-6px_rgba(var(--crimson),0.7)]"
               : "border-line bg-surface-2 text-ink-2"
           }`}
         >
           {icon}
         </span>
       </div>
-      <div className="mt-3 text-[2rem] font-semibold leading-none tracking-tight text-ink nums">
+      <div className="mt-3.5 text-[2.1rem] font-semibold leading-none tracking-tight text-ink nums">
         {value}
       </div>
       {progress !== undefined ? (
-        <div className="mt-3">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="mt-3.5">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
             <div
-              className="h-full rounded-full transition-[width] duration-700"
-              style={{ width: `${progress}%`, background: "var(--color-brand-500)" }}
+              className="h-full rounded-full transition-[width] duration-1000 ease-[var(--ease-out-quint)]"
+              style={{
+                width: `${progress}%`,
+                background:
+                  "linear-gradient(90deg, var(--color-brand-600), var(--color-brand-400))",
+                boxShadow: "0 0 12px rgba(var(--crimson), 0.5)",
+              }}
             />
           </div>
-          <div className="mt-1.5 text-xs text-ink-2">{sub}</div>
+          <div className="mt-2 text-xs text-ink-2">{sub}</div>
         </div>
       ) : (
-        <div className="mt-1.5 text-xs text-ink-2">{sub}</div>
+        <div className="mt-2 text-xs text-ink-2">{sub}</div>
       )}
     </div>
   );
@@ -535,7 +555,11 @@ function RiskDistribution({
 
       <div className="mt-5 flex items-center gap-6">
         <div className="relative h-[140px] w-[140px] shrink-0">
-          <svg viewBox="0 0 140 140" className="h-full w-full -rotate-90">
+          <svg
+            viewBox="0 0 140 140"
+            className="h-full w-full -rotate-90"
+            style={{ filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.5))" }}
+          >
             <circle
               cx="70"
               cy="70"
@@ -560,9 +584,14 @@ function RiskDistribution({
               />
             ))}
           </svg>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-[20px] rounded-full"
+            style={{ boxShadow: "inset 0 0 22px rgba(0,0,0,0.4)" }}
+          />
           <div className="absolute inset-0 grid place-items-center">
             <div className="text-center">
-              <div className="text-[1.9rem] font-semibold leading-none text-ink nums">
+              <div className="text-[2.1rem] font-semibold leading-none text-ink nums">
                 {formatNumber(total)}
               </div>
               <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-3">
@@ -641,7 +670,7 @@ function AttentionPanel({
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-semibold text-ink group-hover:text-brand-200">
+                    <span className="truncate text-sm font-semibold text-ink group-hover:text-brand-300">
                       {s.name}
                     </span>
                     {s.result.isGPAI && (
@@ -658,7 +687,7 @@ function AttentionPanel({
                 <div className="hidden w-28 sm:block">
                   <ComplianceMeter pct={pct} />
                 </div>
-                <ArrowIcon className="h-4 w-4 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-brand-300 rtl:-scale-x-100" />
+                <ArrowIcon className="h-4 w-4 shrink-0 text-ink-3 transition group-hover:translate-x-0.5 group-hover:text-brand-400 rtl:-scale-x-100" />
               </Link>
             </li>
           );
@@ -672,7 +701,7 @@ function AttentionPanel({
         </span>
         <Link
           href="/report"
-          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-300 hover:text-brand-200"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-brand-400 hover:text-brand-300"
         >
           {t("dashboard.viewFullReport")}
           <ArrowIcon />
@@ -694,7 +723,7 @@ function ComplianceMeter({ pct }: { pct: number }) {
         : "var(--color-risk-prohibited)";
   return (
     <div className="flex items-center gap-2">
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/10">
         <div
           className="h-full rounded-full transition-[width] duration-700"
           style={{ width: `${pct}%`, background: color }}
@@ -702,6 +731,68 @@ function ComplianceMeter({ pct }: { pct: number }) {
       </div>
       <span className="w-9 text-end text-xs font-medium text-ink-2 nums">{pct}%</span>
     </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* First-run onboarding — the moment a new workspace first opens              */
+/* -------------------------------------------------------------------------- */
+function DashboardEmpty() {
+  const { t } = useI18n();
+  return (
+    <section className="animate-fade-in relative mt-8 overflow-hidden rounded-3xl border border-line bg-surface px-6 py-14 text-center shadow-[var(--shadow-card)] sm:px-10 sm:py-20">
+      {/* environmental light from above */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-28 h-72"
+        style={{
+          background:
+            "radial-gradient(55% 100% at 50% 0%, rgba(var(--crimson),0.18), transparent 72%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-3xl">
+        <div
+          className="animate-float mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-brand-500/30 bg-brand-500/10 text-brand-400"
+          style={{ boxShadow: "var(--glow-brand)" }}
+        >
+          <RegistryGlyph className="h-7 w-7" />
+        </div>
+        <h2 className="mt-7 text-[1.7rem] font-semibold tracking-tight text-ink">
+          {t("dashboard.emptyTitle")}
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-[0.95rem] leading-relaxed text-ink-2">
+          {t("dashboard.emptyBody")}
+        </p>
+
+        <ol className="mx-auto mt-11 grid max-w-2xl gap-3 text-start sm:grid-cols-2 lg:grid-cols-4">
+          {ONBOARD_STEPS.map((s, i) => (
+            <li
+              key={s}
+              className="relative rounded-2xl border border-line bg-paper-2 p-4"
+              style={{ animation: "enter 0.5s var(--ease-out-quint) both", animationDelay: `${i * 90}ms` }}
+            >
+              <div className="grid h-8 w-8 place-items-center rounded-lg border border-line bg-surface text-sm font-semibold text-brand-400 nums">
+                {i + 1}
+              </div>
+              <div className="mt-3 text-sm font-semibold text-ink">
+                {t(`home.how.steps.${s}.title`)}
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-ink-3">
+                {t(`home.how.steps.${s}.desc`)}
+              </p>
+            </li>
+          ))}
+        </ol>
+
+        <div className="mt-10 flex justify-center">
+          <Magnetic>
+            <Link href="/classify" className="btn btn-primary px-5 py-3 text-[0.95rem]">
+              <PlusIcon /> {t("dashboard.classifySystem")}
+            </Link>
+          </Magnetic>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -777,8 +868,11 @@ const DownloadIcon = () =>
   stroke("M12 4v11|M7.5 10.5 12 15l4.5-4.5|M5 19h14", "h-4 w-4");
 const InfoIcon = () =>
   stroke("M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z|M12 11v5|M12 7.5h.01", "h-3.5 w-3.5");
-const RegistryGlyph = () =>
-  stroke("M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z|M4 9h16|M8 13h8|M8 16.5h5");
+const RegistryGlyph = ({ className = "h-[18px] w-[18px]" }: { className?: string }) =>
+  stroke(
+    "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z|M4 9h16|M8 13h8|M8 16.5h5",
+    className,
+  );
 const CheckGlyph = () =>
   stroke("M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z|M8 12.5l2.5 2.5L16 9.5");
 const ShieldGlyph = () =>

@@ -81,7 +81,7 @@ export function LanguageSwitcher({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={t("languageSwitcher.change")}
-        className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-ink-2 transition hover:bg-white/5 hover:text-ink"
+        className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04] hover:text-ink"
       >
         <GlobeIcon />
         <span className="hidden sm:inline">{locale.toUpperCase()}</span>
@@ -119,8 +119,8 @@ export function LanguageSwitcher({
                 dir={meta.dir}
                 className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-start text-sm transition ${
                   active
-                    ? "bg-white/[0.06] text-ink"
-                    : "text-ink-2 hover:bg-white/5 hover:text-ink"
+                    ? "bg-ink/[0.05] text-ink"
+                    : "text-ink-2 hover:bg-ink/[0.04] hover:text-ink"
                 }`}
               >
                 <span className="text-base leading-none" aria-hidden>
@@ -133,7 +133,7 @@ export function LanguageSwitcher({
                   </span>
                 </span>
                 {active && (
-                  <span className="text-brand-300">
+                  <span className="text-brand-400">
                     <CheckIcon />
                   </span>
                 )}

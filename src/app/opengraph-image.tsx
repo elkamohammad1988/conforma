@@ -6,7 +6,7 @@ export const alt = "Conforma — EU AI Act compliance, automated";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="0" y1="0" x2="32" y2="32"><stop offset="0" stop-color="#6a72e6"/><stop offset="1" stop-color="#4f57d4"/></linearGradient></defs><rect width="32" height="32" rx="7" fill="url(#g)"/><path d="M9.5 16.4 14 20.6l8.5-8.8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="g" x1="5" y1="4" x2="27" y2="28" gradientUnits="userSpaceOnUse"><stop stop-color="#ff6b74"/><stop offset="1" stop-color="#cf1622"/></linearGradient></defs><path d="M22 5.6 L10 5.6 L4 16 L10 26.4 L22 26.4" fill="none" stroke="url(#g)" stroke-width="3.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 11.7 L20.3 16 L16 20.3 L11.7 16 Z" fill="url(#g)"/></svg>`;
 const markUri = `data:image/svg+xml;utf8,${encodeURIComponent(markSvg)}`;
 
 export default async function OpengraphImage() {
@@ -26,9 +26,9 @@ export default async function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#0c0c0f",
+          background: "#0a0a0e",
           backgroundImage:
-            "radial-gradient(800px 420px at 70% -15%, rgba(94,102,224,0.22), transparent 70%)",
+            "radial-gradient(820px 460px at 76% -14%, rgba(225,29,42,0.3), transparent 66%), radial-gradient(680px 520px at 4% 112%, rgba(120,8,16,0.24), transparent 64%)",
           padding: "72px",
           fontFamily: "sans-serif",
         }}
@@ -40,7 +40,7 @@ export default async function OpengraphImage() {
           <div
             style={{
               marginInlineStart: 20,
-              color: "white",
+              color: "#ffffff",
               fontSize: 40,
               fontWeight: 700,
               letterSpacing: -1,
@@ -53,7 +53,7 @@ export default async function OpengraphImage() {
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div
             style={{
-              color: "white",
+              color: "#f5f4f8",
               fontSize: 76,
               fontWeight: 800,
               lineHeight: 1.05,
@@ -66,7 +66,7 @@ export default async function OpengraphImage() {
           <div
             style={{
               marginTop: 28,
-              color: "#cbd5e1",
+              color: "#aeadb8",
               fontSize: 30,
               maxWidth: 880,
               lineHeight: 1.3,
@@ -81,18 +81,18 @@ export default async function OpengraphImage() {
             style={{
               display: "flex",
               alignItems: "center",
-              background: "rgba(255,255,255,0.08)",
-              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(225,29,42,0.15)",
+              border: "1px solid rgba(225,29,42,0.42)",
               borderRadius: 999,
               padding: "10px 22px",
-              color: "#fcd34d",
+              color: "#ff9aa0",
               fontSize: 26,
               fontWeight: 600,
             }}
           >
             {m.badge}
           </div>
-          <div style={{ marginInlineStart: "auto", color: "#94a3b8", fontSize: 24 }}>
+          <div style={{ marginInlineStart: "auto", color: "#8a8993", fontSize: 24 }}>
             {m.regulation}
           </div>
         </div>

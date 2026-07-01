@@ -166,7 +166,7 @@ function parseBlocks(src: string): React.ReactNode[] {
                     aria-hidden
                     className={
                       task[1].toLowerCase() === "x"
-                        ? "text-emerald-400"
+                        ? "text-ok-400"
                         : "text-ink-3"
                     }
                   >

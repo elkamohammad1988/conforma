@@ -31,10 +31,22 @@ export function DemoForm() {
       email: EMAIL_SLOT,
     }).split(EMAIL_SLOT);
     return (
-      <div className="rounded-2xl border border-line bg-surface p-10 text-center shadow-[var(--shadow-card)]">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-500/10 text-2xl text-emerald-400">
-          ✓
-        </div>
+      <div className="relative overflow-hidden rounded-2xl border border-line bg-surface p-10 text-center shadow-[var(--shadow-card)]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-24 h-56"
+          style={{
+            background:
+              "radial-gradient(55% 100% at 50% 0%, color-mix(in srgb, var(--color-ok-500) 18%, transparent), transparent 72%)",
+          }}
+        />
+        <div className="relative">
+          <div
+            className="animate-scale-in mx-auto grid h-14 w-14 place-items-center rounded-2xl border border-ok-500/30 bg-ok-500/10 text-2xl text-ok-400"
+            style={{ boxShadow: "0 10px 30px -10px rgba(35,184,119,0.55)" }}
+          >
+            ✓
+          </div>
         <h2 className="mt-5 text-2xl font-semibold">
           {t("demoForm.success.title", {
             name: form.name || t("demoForm.success.nameFallback"),
@@ -49,11 +61,12 @@ export function DemoForm() {
         </p>
         <p className="mt-2 text-sm text-ink-3">
           {t("demoForm.success.impatient")}
-          <Link href="/classify" className="font-medium text-brand-300 hover:underline">
+          <Link href="/classify" className="font-medium text-brand-400 hover:underline">
             {t("demoForm.success.impatientLink")}
           </Link>
           .
         </p>
+        </div>
       </div>
     );
   }
@@ -140,8 +153,9 @@ export function DemoForm() {
   );
 }
 
-const input =
-  "w-full rounded-lg border border-line-2 bg-white/[0.03] px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30";
+// Shared `.field` design-system input (globals.css) — consistent focus ring,
+// radius and surface with the rest of the product's forms.
+const input = "field px-3.5 py-2.5";
 
 function L({
   label,

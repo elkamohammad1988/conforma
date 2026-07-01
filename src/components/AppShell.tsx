@@ -137,7 +137,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Deadline widget — the regulatory clock, always in view. */}
         <div className="mt-auto rounded-2xl border border-line bg-surface p-4 shadow-[var(--shadow-card)]">
           <div className="flex items-center gap-2">
-            <span className="grid h-7 w-7 place-items-center rounded-lg border border-line bg-surface-2 text-brass-400">
+            <span className="grid h-7 w-7 place-items-center rounded-lg border border-line bg-surface-2 text-brass-600">
               <I
                 d="M8 2v3|M16 2v3|M4 8h16|M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
                 className="h-4 w-4"
@@ -167,7 +167,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <a
             href="#settings"
-            className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-white/5 hover:text-ink"
+            className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
             data-tip={t("app.accountSettings")}
             aria-label={t("app.accountSettings")}
           >
@@ -199,7 +199,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href="#help"
               data-tip={t("app.helpDocs")}
               aria-label={t("app.helpAria")}
-              className="tip rounded-lg p-2 text-ink-3 transition hover:bg-white/5 hover:text-ink"
+              className="tip rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
             >
               <HelpIcon />
             </a>
@@ -207,7 +207,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               type="button"
               data-tip={t("app.notifications")}
               aria-label={t("app.notifications")}
-              className="tip rounded-lg p-2 text-ink-3 transition hover:bg-white/5 hover:text-ink"
+              className="tip rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
             >
               <BellIcon />
             </button>
@@ -232,7 +232,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </div>
 
-        <div className="flex-1">{children}</div>
+        <div key={pathname} className="flex-1 animate-fade-in">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -240,7 +242,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
 function Avatar() {
   return (
-    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-line-2 bg-surface-2 text-[11px] font-semibold text-ink-2">
+    <span
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white shadow-[0_4px_12px_-4px_rgba(var(--crimson),0.7)] ring-1 ring-white/10"
+      style={{
+        background: "linear-gradient(140deg, var(--color-brand-500), var(--color-brand-700))",
+      }}
+    >
       ME
     </span>
   );

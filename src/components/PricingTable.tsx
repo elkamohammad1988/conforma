@@ -56,7 +56,7 @@ export function PricingTable() {
           aria-label={t("pricingTable.annual")}
           onClick={() => setAnnual((a) => !a)}
           className={`relative h-6 w-11 rounded-full transition ${
-            annual ? "bg-brand-600" : "bg-white/10"
+            annual ? "bg-brand-600" : "bg-ink/10"
           }`}
         >
           <span
@@ -68,7 +68,7 @@ export function PricingTable() {
         <span className={`text-sm font-medium ${annual ? "text-ink" : "text-ink-3"}`}>
           {t("pricingTable.annual")}
         </span>
-        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+        <span className="rounded-full bg-ok-500/10 px-2 py-0.5 text-xs font-semibold text-ok-400">
           {t("pricingTable.save")}
         </span>
       </div>
@@ -80,14 +80,24 @@ export function PricingTable() {
           return (
             <div
               key={tier.key}
-              className={`flex flex-col rounded-2xl border bg-surface p-7 ${
+              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-surface p-7 transition-transform duration-300 ${
                 tier.highlight
-                  ? "border-brand-500/40 shadow-[var(--shadow-card)] ring-1 ring-brand-500/30"
+                  ? "border-brand-500/50 shadow-[var(--shadow-raised)] ring-1 ring-brand-500/40 lg:-translate-y-2"
                   : "border-line shadow-[var(--shadow-card)]"
               }`}
             >
               {tier.highlight && (
-                <div className="mb-3 inline-flex w-fit rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-300">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 -top-20 h-40"
+                  style={{
+                    background:
+                      "radial-gradient(60% 100% at 50% 0%, rgba(var(--crimson),0.16), transparent 72%)",
+                  }}
+                />
+              )}
+              {tier.highlight && (
+                <div className="relative mb-3 inline-flex w-fit rounded-full bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-400">
                   {t("pricingTable.mostPopular")}
                 </div>
               )}
@@ -134,11 +144,11 @@ export function PricingTable() {
       </div>
 
       {/* Enterprise band */}
-      <div className="mt-6 flex flex-col items-start justify-between gap-5 rounded-2xl border border-line bg-surface p-7 text-white sm:flex-row sm:items-center">
+      <div className="mt-6 flex flex-col items-start justify-between gap-5 rounded-2xl border border-line bg-surface p-7 text-ink sm:flex-row sm:items-center">
         <div>
           <div className="flex items-center gap-2">
             <h3 className="text-lg font-semibold">{t("pricingTable.enterprise.name")}</h3>
-            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-brand-200">
+            <span className="rounded-full bg-ink/10 px-2 py-0.5 text-[11px] font-medium text-brand-300">
               {t("pricingTable.enterprise.badge")}
             </span>
           </div>
@@ -148,7 +158,7 @@ export function PricingTable() {
         </div>
         <Link
           href="/demo"
-          className="btn shrink-0 bg-white text-paper hover:bg-white/90"
+          className="btn btn-primary shrink-0"
         >
           {t("pricingTable.enterprise.cta")} <ArrowForward />
         </Link>

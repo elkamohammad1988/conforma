@@ -11,6 +11,7 @@ import { Markdown } from "@/components/ui/Markdown";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import {
   compliancePct,
   deleteSystem,
@@ -37,6 +38,7 @@ export default function SystemDetailPage({
   const { t, formatDate } = useI18n();
   const router = useRouter();
   const system = useSystem(id);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (system === undefined) {
     return (
@@ -64,6 +66,9 @@ export default function SystemDetailPage({
   }
 
   const pct = compliancePct(system);
+  const obligationsDone = system.result.obligations.filter(
+    (o) => system.obligationStatus[o.id] === "done",
+  ).length;
 
   const cycle = (obId: string) => {
     const order: ObligationState[] = ["todo", "in-progress", "done"];
@@ -88,13 +93,22 @@ export default function SystemDetailPage({
       </Link>
 
       {/* Header */}
-      <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface text-white shadow-[var(--shadow-card)]">
-        <div className="px-7 py-7">
+      <div className="relative mt-4 overflow-hidden rounded-2xl border border-line bg-surface text-ink shadow-[var(--shadow-card)]">
+        {/* lit by the system's own risk-tier colour */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-20 h-56 w-56 rounded-full"
+          style={{
+            insetInlineEnd: "-2.5rem",
+            background: `radial-gradient(closest-side, color-mix(in srgb, var(--color-risk-${system.result.tier}) 20%, transparent), transparent 70%)`,
+          }}
+        />
+        <div className="relative px-7 py-7">
           <div className="flex flex-wrap items-center gap-3">
             <RiskBadge tier={system.result.tier} />
-            <h1 className="text-2xl font-semibold">{system.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">{system.name}</h1>
             {system.result.isGPAI && (
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-brand-200">
+              <span className="rounded-full bg-ink/10 px-2.5 py-1 text-xs font-medium text-brand-300">
                 {t("system.plusGpai")}
               </span>
             )}
@@ -128,7 +142,7 @@ export default function SystemDetailPage({
                   })}
                   <Countdown
                     deadline={system.result.deadline.date}
-                    className="text-brass-300"
+                    className="text-brass-700"
                   />
                 </span>
               }
@@ -136,15 +150,15 @@ export default function SystemDetailPage({
           </div>
         </div>
         {/* Compliance bar */}
-        <div className="border-t border-white/10 bg-white/5 px-7 py-4">
+        <div className="border-t border-line bg-ink/[0.04] px-7 py-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-ink-2">{t("system.compliance")}</span>
             <span className="font-semibold">{pct}%</span>
           </div>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-ink/10">
             <div
               className={`h-full rounded-full transition-all ${
-                pct === 100 ? "bg-emerald-400" : "bg-brand-400"
+                pct === 100 ? "bg-ok-400" : "bg-brand-400"
               }`}
               style={{ width: `${pct}%` }}
             />
@@ -160,7 +174,7 @@ export default function SystemDetailPage({
         <ul className="mt-3 space-y-2">
           {system.result.rationale.map((r, i) => (
             <li key={i} className="flex items-start gap-3 text-sm">
-              <span className="mt-0.5 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300">
+              <span className="mt-0.5 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-400">
                 {r.citation}
               </span>
               <span className="text-ink-2">{renderRationale(r, t)}</span>
@@ -172,27 +186,59 @@ export default function SystemDetailPage({
       {/* Obligations checklist */}
       {system.result.obligations.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
-            {t("system.obligationsTitle")}
-          </h2>
-          <p className="mt-1 text-xs text-ink-3">{t("system.obligationsHint")}</p>
-          <div className="mt-3 space-y-2">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
+                {t("system.obligationsTitle")}
+              </h2>
+              <p className="mt-1 text-xs text-ink-3">{t("system.obligationsHint")}</p>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="text-xs font-medium text-ink-2 nums">
+                {obligationsDone}/{system.result.obligations.length}
+              </span>
+              <div className="h-1.5 w-24 overflow-hidden rounded-full bg-ink/10">
+                <div
+                  className="h-full rounded-full transition-[width] duration-700 ease-[var(--ease-out-quint)]"
+                  style={{
+                    width: `${(obligationsDone / system.result.obligations.length) * 100}%`,
+                    background:
+                      "linear-gradient(90deg, var(--color-ok-500), var(--color-ok-400))",
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
             {system.result.obligations.map((o) => {
               const state = system.obligationStatus[o.id] ?? "todo";
+              const dot =
+                state === "done"
+                  ? "bg-ok-400"
+                  : state === "in-progress"
+                    ? "bg-warn-400"
+                    : "bg-ink-3/50";
               return (
                 <div
                   key={o.id}
-                  className="flex items-start justify-between gap-4 rounded-lg border border-line bg-surface px-4 py-3"
+                  className={`group flex items-start justify-between gap-4 rounded-xl border bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2/40 ${
+                    state === "done"
+                      ? "border-ok-500/25"
+                      : state === "in-progress"
+                        ? "border-warn-500/25"
+                        : "border-line"
+                  }`}
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
                       <span className="text-sm font-medium text-ink">
                         {t(`domain.obligations.${o.id}.title`)}
                       </span>
                       <span className="font-mono text-[11px] text-ink-3">
                         {o.citation}
                       </span>
-                      <span className="rounded bg-white/5 px-1.5 py-0.5 text-[10px] font-medium uppercase text-ink-3">
+                      <span className="rounded bg-ink/[0.04] px-1.5 py-0.5 text-[10px] font-medium uppercase text-ink-3">
                         {t(`domain.roles.${o.role}`)}
                       </span>
                     </div>
@@ -202,14 +248,16 @@ export default function SystemDetailPage({
                   </div>
                   <button
                     onClick={() => cycle(o.id)}
-                    className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                    aria-label={`${t(`domain.obligations.${o.id}.title`)} — ${stateLabel[state]}`}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                       state === "done"
-                        ? "bg-emerald-500/20 text-emerald-300"
+                        ? "border-ok-500/30 bg-ok-500/15 text-ok-400"
                         : state === "in-progress"
-                          ? "bg-amber-500/20 text-amber-300"
-                          : "bg-white/5 text-ink-3"
+                          ? "border-warn-500/30 bg-warn-500/15 text-warn-400"
+                          : "border-line-2 bg-ink/[0.04] text-ink-2 hover:text-ink"
                     }`}
                   >
+                    <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
                     {stateLabel[state]}
                   </button>
                 </div>
@@ -231,17 +279,26 @@ export default function SystemDetailPage({
           + {t("system.classifyAnother")}
         </Link>
         <button
-          onClick={() => {
-            if (confirm(t("system.deleteConfirm", { name: system.name }))) {
-              deleteSystem(system.id);
-              router.push("/dashboard");
-            }
-          }}
-          className="rounded-lg px-4 py-2 text-sm font-medium text-rose-400 hover:bg-rose-500/10"
+          onClick={() => setConfirmDelete(true)}
+          className="rounded-lg border border-transparent px-4 py-2 text-sm font-medium text-danger-400 transition hover:border-danger-500/30 hover:bg-danger-500/10"
         >
           {t("system.deleteSystem")}
         </button>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        tone="danger"
+        title={t("system.deleteSystem")}
+        description={t("system.deleteConfirm", { name: system.name })}
+        confirmLabel={t("common.delete")}
+        cancelLabel={t("common.cancel")}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={() => {
+          deleteSystem(system.id);
+          router.push("/dashboard");
+        }}
+      />
     </div>
   );
 }
@@ -390,7 +447,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
 
       {loading && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
-          <div className="flex items-center gap-2 border-b border-line bg-white/[0.03] px-4 py-2.5 text-xs text-ink-3">
+          <div className="flex items-center gap-2 border-b border-line bg-ink/[0.03] px-4 py-2.5 text-xs text-ink-3">
             <Spinner className="h-3.5 w-3.5 text-brand-500" />
             {t("system.docs.drafting", { label: labelFor(loading) })}
           </div>
@@ -407,46 +464,45 @@ function DocSection({ system }: { system: RegisteredSystem }) {
 
       {activeDoc && !loading && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-white/[0.03] px-4 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-ink/[0.03] px-4 py-2.5">
             <div className="flex items-center gap-2 text-xs">
               <AiSourceTag source={activeDoc.source} />
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {/* View toggle */}
-              <div className="flex items-center rounded-lg border border-line bg-surface p-0.5 text-xs">
+              <div className="seg">
                 {(["preview", "raw"] as const).map((v) => (
                   <button
                     key={v}
                     onClick={() => setView(v)}
+                    data-active={view === v}
                     aria-pressed={view === v}
-                    className={`rounded-md px-2.5 py-1 font-medium transition ${
-                      view === v ? "bg-brand-600 text-white" : "text-ink-3 hover:bg-white/5"
-                    }`}
+                    className="seg-item"
                   >
                     {v === "raw" ? t("system.docs.markdown") : t("system.docs.preview")}
                   </button>
                 ))}
               </div>
-              <span className="h-4 w-px bg-white/10" aria-hidden />
+              <span className="h-4 w-px bg-ink/10" aria-hidden />
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(activeDoc.markdown);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 1500);
                 }}
-                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-ink/[0.04]"
               >
                 {copied ? t("system.docs.copied") : t("system.docs.copy")}
               </button>
               <button
                 onClick={() => download(activeDoc.markdown, "text/markdown", "md")}
-                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-ink/[0.04]"
               >
                 .md
               </button>
               <button
                 onClick={exportWord}
-                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-white/5"
+                className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-ink/[0.04]"
               >
                 Word
               </button>

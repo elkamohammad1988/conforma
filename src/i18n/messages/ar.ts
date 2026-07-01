@@ -28,6 +28,8 @@ const ar: Messages = {
       other: "{count} يوم متبقٍ",
     }),
     deadlinePassed: "انقضى الموعد النهائي",
+    cancel: "إلغاء",
+    delete: "حذف",
     notLegalAdvice:
       "أداة لدعم اتخاذ القرار بشأن Regulation (EU) 2024/1689 — وليست استشارة قانونية. تحقق من التصنيفات مع مستشار قانوني مؤهل.",
   },

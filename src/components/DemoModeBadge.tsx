@@ -32,7 +32,7 @@ export function DemoModeBadge({ className = "" }: { className?: string }) {
   return (
     <span
       title={t("ai.demoBadgeTitle")}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-ink-2 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-line bg-ink/[0.03] px-2.5 py-1 text-[11px] font-medium text-ink-2 ${className}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
       {t("ai.demoBadge")}
@@ -50,7 +50,7 @@ export function AiSourceTag({ source }: { source: string }) {
   const t = useT();
   if (source === "claude") {
     return (
-      <span className="rounded border border-brand-500/30 bg-brand-500/10 px-1.5 py-0.5 font-medium text-brand-300">
+      <span className="rounded border border-brand-500/30 bg-brand-500/10 px-1.5 py-0.5 font-medium text-brand-400">
         {t("ai.draftedByClaude")}
       </span>
     );
@@ -59,11 +59,11 @@ export function AiSourceTag({ source }: { source: string }) {
     return (
       <span
         title={t("ai.aiDraftDemoTitle")}
-        className="inline-flex items-center gap-1 rounded border border-line bg-white/[0.03] px-1.5 py-0.5 font-medium text-ink-2"
+        className="inline-flex items-center gap-1 rounded border border-line bg-ink/[0.03] px-1.5 py-0.5 font-medium text-ink-2"
       >
         {t("ai.aiDraftDemo")}
       </span>
     );
   }
-  return <span className="text-rose-400">{t("ai.couldNotGenerate")}</span>;
+  return <span className="text-danger-400">{t("ai.couldNotGenerate")}</span>;
 }

@@ -7,6 +7,8 @@ import { LandingDemo } from "@/components/LandingDemo";
 import { ComplianceTimeline } from "@/components/ComplianceTimeline";
 import { Reveal } from "@/components/Reveal";
 import { RiskBadge } from "@/components/RiskBadge";
+import { LogoMark } from "@/components/Logo";
+import { Spotlight, TiltCard, Magnetic } from "@/components/Motion";
 import {
   ANNEX_III_AREAS,
   PENALTIES,
@@ -22,6 +24,28 @@ function ArrowRight() {
         fillRule="evenodd"
         d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z"
         clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+/** Compact progress ring for the hero compliance card. */
+function Ring({ pct }: { pct: number }) {
+  const r = 17;
+  const c = 2 * Math.PI * r;
+  return (
+    <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90" aria-hidden>
+      <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3.5" />
+      <circle
+        cx="22"
+        cy="22"
+        r={r}
+        fill="none"
+        stroke="var(--color-risk-minimal)"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={c * (1 - pct / 100)}
       />
     </svg>
   );
@@ -75,56 +99,151 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       {/* ---------------------------------------------------------------- Hero */}
-      <section className="relative overflow-hidden border-b border-line bg-paper text-white">
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-[440px]"
-          style={{
-            background:
-              "radial-gradient(58% 100% at 50% 0%, rgba(94,102,224,0.10), transparent 72%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl px-5 py-16 sm:py-28">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3.5 py-1.5 text-xs font-medium text-ink-2">
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brass-400" />
-              {t("home.hero.badge")} {heroDate}
-              <span className="text-ink-3">·</span>
-              <Countdown
-                deadline={PRIMARY_DEADLINE.date}
-                className="font-medium text-brass-300"
-              />
+      <section className="relative overflow-hidden border-b border-line">
+        <Spotlight className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_0.96fr]">
+            {/* Message */}
+            <div className="max-w-xl">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-ink-2 backdrop-blur">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
+                </span>
+                {t("home.hero.badge")} {heroDate}
+                <span className="text-ink-3">·</span>
+                <Countdown
+                  deadline={PRIMARY_DEADLINE.date}
+                  className="font-medium text-brass-300"
+                />
+              </div>
+              <h1 className="text-balance text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-[3.5rem]">
+                {t("home.hero.titleLine1")}{" "}
+                <span className="text-crimson">{t("home.hero.titleAccent")}</span>
+              </h1>
+              <p className="mt-6 max-w-lg text-pretty text-lg leading-relaxed text-ink-2">
+                {t("home.hero.subtitle")}
+              </p>
+              <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <Magnetic>
+                  <Link href="/classify" className="btn btn-primary px-5 py-3 text-[0.95rem]">
+                    {t("common.startFree")} <ArrowRight />
+                  </Link>
+                </Magnetic>
+                <Link href="/demo" className="btn btn-secondary px-5 py-3 text-[0.95rem]">
+                  {t("common.bookDemo")}
+                </Link>
+              </div>
+              <p className="mt-5 text-xs text-ink-3">{t("home.hero.fineprint")}</p>
             </div>
-            <h1 className="text-balance text-[2.5rem] font-semibold leading-[1.08] sm:text-[3.25rem]">
-              {t("home.hero.titleLine1")}
-              <br className="hidden sm:block" />{" "}
-              <span className="text-brand-300">{t("home.hero.titleAccent")}</span>
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-pretty text-lg leading-relaxed text-ink-2">
-              {t("home.hero.subtitle")}
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Link href="/classify" className="btn btn-primary px-5 py-3 text-[0.95rem]">
-                {t("common.startFree")} <ArrowRight />
-              </Link>
-              <Link href="/demo" className="btn btn-secondary px-5 py-3 text-[0.95rem]">
-                {t("common.bookDemo")}
-              </Link>
+
+            {/* Floating intelligence cluster (lg+) */}
+            <div className="relative hidden h-[30rem] lg:block" aria-hidden>
+              {/* platform light */}
+              <div className="absolute bottom-10 left-1/2 h-24 w-[78%] -translate-x-1/2 rounded-[50%] bg-[rgba(225,29,42,0.28)] blur-3xl" />
+
+              {/* central plinth */}
+              <TiltCard
+                className="absolute left-1/2 top-1/2 z-10 w-48 -translate-x-1/2 -translate-y-1/2"
+                max={6}
+              >
+                <div className="glass sweep relative overflow-hidden rounded-2xl p-6 text-center">
+                  <LogoMark className="mx-auto h-16 w-16 drop-shadow-[0_0_20px_rgba(225,29,42,0.6)]" />
+                  <div className="mt-3 text-base font-semibold tracking-tight text-ink">
+                    Conforma
+                  </div>
+                  <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-ink-3">
+                    EU AI ACT
+                  </div>
+                </div>
+              </TiltCard>
+
+              {/* compliance ring — top right */}
+              <div
+                className="animate-float absolute right-0 top-1 w-44"
+                style={{ animationDelay: "0.4s" }}
+              >
+                <TiltCard max={12}>
+                  <div className="glass rounded-2xl p-4">
+                    <div className="text-xs text-ink-3">
+                      {t("home.showcase.stats.compliance")}
+                    </div>
+                    <div className="mt-2 flex items-center gap-3">
+                      <Ring pct={94} />
+                      <div>
+                        <div className="text-xl font-semibold text-ink nums">94%</div>
+                        <div className="text-[11px] font-medium text-risk-minimal">
+                          ▲ +6
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TiltCard>
+              </div>
+
+              {/* risk — left */}
+              <div
+                className="animate-float absolute left-0 top-[30%] w-40"
+                style={{ animationDelay: "1.6s" }}
+              >
+                <TiltCard max={12}>
+                  <div className="glass rounded-2xl p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-ink-3">Risk</span>
+                      <RiskBadge tier="high" size="sm" />
+                    </div>
+                    <div className="mt-2 text-2xl font-semibold text-ink nums">23</div>
+                    <svg viewBox="0 0 120 28" className="mt-1 h-7 w-full" preserveAspectRatio="none" aria-hidden>
+                      <polyline
+                        points="0,22 18,18 36,20 54,12 72,15 90,7 108,10 120,4"
+                        fill="none"
+                        stroke="var(--color-brand-500)"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </TiltCard>
+              </div>
+
+              {/* systems monitored — bottom right */}
+              <div
+                className="animate-float absolute bottom-6 right-8 w-44"
+                style={{ animationDelay: "1s" }}
+              >
+                <TiltCard max={12}>
+                  <div className="glass rounded-2xl p-4">
+                    <div className="text-xs text-ink-3">
+                      {t("home.showcase.stats.systems")}
+                    </div>
+                    <div className="mt-1 text-2xl font-semibold text-ink nums">128</div>
+                    <div className="mt-2 flex items-end gap-1">
+                      {[0.4, 0.6, 0.45, 0.8, 0.55, 1, 0.7].map((h, i) => (
+                        <span
+                          key={i}
+                          className="w-1.5 rounded-full bg-brand-500/70"
+                          style={{ height: `${0.55 + h * 1.2}rem` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </TiltCard>
+              </div>
             </div>
-            <p className="mt-5 text-xs text-ink-3">{t("home.hero.fineprint")}</p>
           </div>
 
           {/* Framework trust strip */}
-          <div className="mx-auto mt-16 max-w-3xl">
+          <div className="mt-20">
             <p className="text-center text-xs font-medium uppercase tracking-[0.13em] text-ink-3">
               {t("home.hero.trustEyebrow")}
             </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-semibold text-ink-2">
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-semibold text-ink-2">
               {FRAMEWORKS.map((f) => (
                 <span key={f}>{f}</span>
               ))}
             </div>
           </div>
-        </div>
+        </Spotlight>
       </section>
 
       {/* ------------------------------------------------------- Product showcase */}
@@ -190,19 +309,19 @@ export default function Home() {
             <div className="rounded-xl bg-paper-2 p-6 font-mono text-sm text-ink-2" dir="ltr">
               <div className="text-ink-3">{t("home.problem.code.comment")}</div>
               <div className="mt-2">
-                <span className="text-brand-300">system</span> = &quot;CV screening
+                <span className="text-brand-400">system</span> = &quot;CV screening
                 model&quot;
               </div>
               <div>
-                <span className="text-brand-300">use_case</span> = Annex III(4)
+                <span className="text-brand-400">use_case</span> = Annex III(4)
                 employment
               </div>
-              <div className="mt-3 text-amber-300">{t("home.problem.code.result")}</div>
+              <div className="mt-3 text-warn-400">{t("home.problem.code.result")}</div>
               <div className="mt-2 text-ink-3">{t("home.problem.code.obligations")}</div>
               <div className="text-ink-3">
                 {t("home.problem.code.deadlineLabel")} {PRIMARY_DEADLINE.date}
               </div>
-              <div className="mt-3 text-emerald-300">{t("home.problem.code.drafted")}</div>
+              <div className="mt-3 text-ok-400">{t("home.problem.code.drafted")}</div>
             </div>
           </div>
         </div>
@@ -287,7 +406,7 @@ export default function Home() {
           <div className="mt-12 grid gap-8 md:grid-cols-4">
             {STEP_KEYS.map((s, idx) => (
               <div key={s}>
-                <div className="grid h-9 w-9 place-items-center rounded-lg border border-line bg-surface text-sm font-semibold text-brand-300">
+                <div className="grid h-9 w-9 place-items-center rounded-lg border border-line bg-surface text-sm font-semibold text-brand-400">
                   {idx + 1}
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-ink">
@@ -372,7 +491,7 @@ export default function Home() {
               key={k}
               className="lift flex flex-col rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
             >
-              <div className="text-brass-400" aria-hidden>
+              <div className="text-brass-600" aria-hidden>
                 ★★★★★
               </div>
               <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-ink-2">
@@ -398,7 +517,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 py-10">
         <div className="rounded-2xl border border-line bg-surface p-10 text-center shadow-[var(--shadow-card)] sm:p-14">
           <div>
-            <h2 className="text-2xl font-semibold sm:text-3xl">
+            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
               {t("home.penalty.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-ink-2">
@@ -447,7 +566,7 @@ export default function Home() {
             </p>
             <Link
               href="/security"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-300 hover:underline"
+              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-brand-400 hover:underline"
             >
               {t("home.security.cta")} <ArrowRight />
             </Link>
@@ -456,7 +575,7 @@ export default function Home() {
             {SECURITY_BADGES.map((b) => (
               <div
                 key={b}
-                className="flex items-center gap-2 rounded-lg border border-line bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-ink-2"
+                className="flex items-center gap-2 rounded-lg border border-line bg-ink/[0.03] px-3 py-2.5 text-sm font-medium text-ink-2"
               >
                 <span className="text-brand-400">✓</span>
                 {t(`home.security.badges.${b}`)}
@@ -506,7 +625,7 @@ export default function Home() {
       {/* ----------------------------------------------------------- Final CTA */}
       <section className="border-t border-line bg-paper-2">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-          <h2 className="text-2xl font-semibold sm:text-3xl">
+          <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
             {t("home.finalCta.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-ink-2">
@@ -553,10 +672,10 @@ function ProductShowcase() {
     <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-raised)]">
       {/* Browser chrome */}
       <div className="flex items-center gap-2 border-b border-line bg-paper-2 px-4 py-3">
-        <span className="h-3 w-3 rounded-full bg-white/10" />
-        <span className="h-3 w-3 rounded-full bg-white/10" />
-        <span className="h-3 w-3 rounded-full bg-white/10" />
-        <div className="ms-3 hidden flex-1 rounded-md border border-line bg-white/5 px-3 py-1 text-xs text-ink-3 sm:block">
+        <span className="h-3 w-3 rounded-full bg-ink/10" />
+        <span className="h-3 w-3 rounded-full bg-ink/10" />
+        <span className="h-3 w-3 rounded-full bg-ink/10" />
+        <div className="ms-3 hidden flex-1 rounded-md border border-line bg-ink/[0.04] px-3 py-1 text-xs text-ink-3 sm:block">
           {t("home.showcase.url")}
         </div>
       </div>
@@ -575,7 +694,7 @@ function ProductShowcase() {
         </div>
         <div className="mt-5 grid grid-cols-3 gap-3">
           {stats.map(([l, v]) => (
-            <div key={l} className="rounded-xl border border-line bg-white/[0.03] p-3">
+            <div key={l} className="rounded-xl border border-line bg-ink/[0.03] p-3">
               <div className="text-[10px] uppercase tracking-[0.1em] text-ink-3">{l}</div>
               <div className="mt-0.5 text-lg font-semibold text-ink">{v}</div>
             </div>
@@ -583,7 +702,7 @@ function ProductShowcase() {
         </div>
         <div className="mt-4 overflow-hidden rounded-xl border border-line">
           <table className="w-full text-start text-xs sm:text-sm">
-            <thead className="border-b border-line bg-white/[0.03] text-[10px] uppercase tracking-[0.1em] text-ink-3">
+            <thead className="border-b border-line bg-ink/[0.03] text-[10px] uppercase tracking-[0.1em] text-ink-3">
               <tr>
                 <th className="px-4 py-2.5 text-start font-medium">
                   {t("home.showcase.table.system")}
@@ -611,14 +730,14 @@ function ProductShowcase() {
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-1.5 w-16 overflow-hidden rounded-full bg-ink/10">
                         <div
                           className={`h-full rounded-full ${
                             r.pct === 100
-                              ? "bg-emerald-500"
+                              ? "bg-ok-500"
                               : r.pct >= 50
                                 ? "bg-brand-500"
-                                : "bg-amber-500"
+                                : "bg-warn-500"
                           }`}
                           style={{ width: `${r.pct}%` }}
                         />
@@ -658,9 +777,9 @@ function ComparisonTable() {
     <div className="mt-12 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
       <table className="w-full text-start text-sm">
         <thead>
-          <tr className="border-b border-line bg-white/[0.03] text-ink-3">
+          <tr className="border-b border-line bg-ink/[0.03] text-ink-3">
             <th className="px-5 py-3.5 font-medium" />
-            <th className="px-5 py-3.5 text-center font-semibold text-brand-300">
+            <th className="px-5 py-3.5 text-center font-semibold text-brand-400">
               {t("home.comparison.conforma")}
             </th>
             <th className="px-5 py-3.5 text-center font-medium">
@@ -690,7 +809,7 @@ function ComparisonTable() {
 
 function Cell({ v, highlight }: { v: boolean | string; highlight?: boolean }) {
   let content: React.ReactNode;
-  if (v === true) content = <span className="text-emerald-400">✓</span>;
+  if (v === true) content = <span className="text-ok-400">✓</span>;
   else if (v === false) content = <span className="text-ink-3">—</span>;
   else content = <span className="text-ink-2">{v}</span>;
   return (

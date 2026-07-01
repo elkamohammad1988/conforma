@@ -83,7 +83,7 @@ export function LandingDemo() {
             aria-label={t("landingDemo.builtOnGpai")}
             onClick={() => setGpai((g) => !g)}
             className={`relative h-6 w-11 shrink-0 rounded-full transition ${
-              gpai ? "bg-brand-600" : "bg-white/10"
+              gpai ? "bg-brand-600" : "bg-ink/10"
             }`}
           >
             <span
@@ -97,7 +97,7 @@ export function LandingDemo() {
 
       {/* Live result */}
       <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-        <div className="border-b border-line bg-white/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
+        <div className="border-b border-line bg-ink/[0.03] px-6 py-3 text-xs font-semibold uppercase tracking-[0.1em] text-ink-3">
           {t("landingDemo.liveClassification")}
         </div>
         <div key={`${active}-${gpai}`} className="animate-in flex flex-1 flex-col p-6">
@@ -107,7 +107,7 @@ export function LandingDemo() {
               {t(`domain.riskTiers.${result.tier}.label`)}
             </span>
             {result.isGPAI && (
-              <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[11px] font-semibold text-brand-300 ring-1 ring-brand-500/30">
+              <span className="rounded-full bg-brand-500/10 px-2 py-0.5 text-[11px] font-semibold text-brand-400 ring-1 ring-brand-500/30">
                 {t("landingDemo.plusGpai")}
               </span>
             )}
@@ -116,7 +116,7 @@ export function LandingDemo() {
           <ul className="mt-4 space-y-2">
             {result.rationale.slice(0, 3).map((r, i) => (
               <li key={i} className="flex items-start gap-2.5 text-sm">
-                <span className="mt-0.5 shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300">
+                <span className="mt-0.5 shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-400">
                   {r.citation}
                 </span>
                 <span className="text-ink-2">{renderRationale(r, t)}</span>
@@ -125,7 +125,7 @@ export function LandingDemo() {
           </ul>
 
           <div className="mt-auto grid grid-cols-2 gap-3 pt-5">
-            <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+            <div className="rounded-xl bg-ink/[0.03] p-3 ring-1 ring-ink/10">
               <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
                 {t("landingDemo.obligations")}
               </div>
@@ -133,7 +133,7 @@ export function LandingDemo() {
                 {result.obligations.length}
               </div>
             </div>
-            <div className="rounded-xl bg-white/[0.03] p-3 ring-1 ring-white/10">
+            <div className="rounded-xl bg-ink/[0.03] p-3 ring-1 ring-ink/10">
               <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
                 {t("landingDemo.deadline")}
               </div>
@@ -146,7 +146,7 @@ export function LandingDemo() {
               </div>
               <Countdown
                 deadline={result.deadline.date}
-                className="text-xs font-medium text-brass-300"
+                className="text-xs font-medium text-brass-700"
               />
             </div>
           </div>

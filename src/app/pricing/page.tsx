@@ -29,7 +29,7 @@ export default function PricingPage() {
 
   return (
     <div>
-      <section className="border-b border-line bg-white/[0.03]">
+      <section className="border-b border-line bg-ink/[0.03]">
         <div className="mx-auto max-w-3xl px-5 py-16 text-center">
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
             {t("pricing.hero.title")}
@@ -45,7 +45,7 @@ export default function PricingPage() {
       </section>
 
       {/* Feature comparison */}
-      <section className="border-t border-line bg-white/[0.03]">
+      <section className="border-t border-line bg-ink/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
           <h2 className="text-center text-2xl font-semibold tracking-tight">
             {t("pricing.comparePlans")}
@@ -53,7 +53,7 @@ export default function PricingPage() {
           <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
             <table className="w-full text-start text-sm">
               <thead>
-                <tr className="border-b border-line bg-white/[0.03] text-ink-3">
+                <tr className="border-b border-line bg-ink/[0.03] text-ink-3">
                   <th className="px-5 py-3 text-start font-medium">
                     {t("pricing.table.feature")}
                   </th>
@@ -82,7 +82,7 @@ export default function PricingPage() {
                         key={i}
                         className={`px-4 py-3 text-center ${
                           v === CHECK
-                            ? "text-emerald-400"
+                            ? "text-ok-400"
                             : v === DASH
                               ? "text-ink-3"
                               : "text-ink-2"
@@ -98,7 +98,7 @@ export default function PricingPage() {
           </div>
           <p className="mt-8 text-center text-ink-2">
             {t("pricing.custom.text")}{" "}
-            <Link href="/demo" className="font-semibold text-brand-300 hover:underline">
+            <Link href="/demo" className="font-semibold text-brand-400 hover:underline">
               {t("pricing.custom.cta")} <ArrowForward />
             </Link>
           </p>

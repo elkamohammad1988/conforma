@@ -21,6 +21,8 @@ const zhCN: Messages = {
       other: "剩余 {count} 天",
     }),
     deadlinePassed: "截止日期已过",
+    cancel: "取消",
+    delete: "删除",
     notLegalAdvice:
       "面向 Regulation (EU) 2024/1689 的决策支持工具——不构成法律意见。请与具备资质的法律顾问确认分类结果。",
   },

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
 import { SiteChrome } from "@/components/SiteChrome";
+import { Backdrop } from "@/components/Backdrop";
 import { I18nProvider } from "@/i18n/I18nProvider";
 import { getServerI18n } from "@/i18n/server";
 import { LOCALE_META, LOCALES } from "@/i18n/config";
@@ -85,7 +86,8 @@ export default async function RootLayout({
       dir={dir}
       className={`${geistSans.variable} ${geistMono.variable} ${notoArabic.variable} h-full`}
     >
-      <body className="flex min-h-full flex-col bg-paper text-ink antialiased">
+      <body className="flex min-h-full flex-col text-ink antialiased">
+        <Backdrop />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}

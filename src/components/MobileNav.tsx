@@ -23,7 +23,7 @@ export function MobileNav() {
         aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 hover:bg-white/5"
+        className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 hover:bg-ink/[0.04]"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
           {open ? (
@@ -37,7 +37,7 @@ export function MobileNav() {
       {open && (
         <>
           <div
-            className="fixed inset-0 top-16 z-30 bg-black/20"
+            className="fixed inset-0 top-16 z-30 bg-ink/20"
             onClick={() => setOpen(false)}
           />
           <div className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl">
@@ -47,7 +47,7 @@ export function MobileNav() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-2 hover:bg-white/5"
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-2 hover:bg-ink/[0.04]"
                 >
                   {l.label}
                 </Link>

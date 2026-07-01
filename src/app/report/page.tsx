@@ -178,7 +178,7 @@ function RiskDistribution({
   };
   return (
     <div>
-      <div className="flex h-3 overflow-hidden rounded-full bg-white/10">
+      <div className="flex h-3 overflow-hidden rounded-full bg-ink/10">
         {total > 0 &&
           order.map((tier) =>
             counts[tier] ? (

@@ -1,62 +1,75 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   CONFORMA — design system
-   A calm, engineered dark interface. One restrained indigo accent. One amber
-   reserved for the regulatory deadline. A semantic risk scale. Hairline
-   borders, soft layered shadows, and motion you barely notice.
-   Reference register: Linear / Vercel — quiet, not flashy.
+   CONFORMA — "Crimson Protocol"
+   A cinematic, dark, intelligence-grade identity for AI compliance & security.
+   Deep atmospheric canvas · a single signature crimson · glass surfaces with
+   real depth · environmental red lighting · motion that feels engineered.
+   Not a Linear/Stripe clone. Authored, not generated.
    ========================================================================== */
 
 @theme {
-  /* — Accent · a single restrained indigo (actions, focus, active state) —
-     Both `brand-*` and `accent-*` resolve to the same family, on purpose:
-     the product has exactly one accent. */
-  --color-brand-50: #eceefb;
-  --color-brand-100: #daddf6;
-  --color-brand-200: #b9bdef;
-  --color-brand-300: #969ce6;
-  --color-brand-400: #7c82e0;
-  --color-brand-500: #5e66e0; /* accent */
-  --color-brand-600: #4f57d4; /* primary action */
-  --color-brand-700: #4149b8;
-  --color-brand-800: #343a90;
-  --color-brand-900: #262a66;
+  /* — Signature crimson. One accent, engineered to glow on a dark canvas.
+     `brand-*` and `accent-*` resolve to the same family on purpose. — */
+  --color-brand-50: #fff1f2;
+  --color-brand-100: #ffdfe1;
+  --color-brand-200: #ffc0c4;
+  --color-brand-300: #ff929a; /* accent text on dark */
+  --color-brand-400: #ff5d68; /* highlights / links on dark */
+  --color-brand-500: #f5333f; /* signature */
+  --color-brand-600: #e11d2a; /* primary action */
+  --color-brand-700: #b9141f;
+  --color-brand-800: #8f0f18;
+  --color-brand-900: #5f0a10;
 
-  --color-accent-300: #969ce6;
-  --color-accent-400: #7c82e0;
-  --color-accent-500: #5e66e0;
-  --color-accent-600: #4f57d4;
+  --color-accent-300: #ff929a;
+  --color-accent-400: #ff5d68;
+  --color-accent-500: #f5333f;
+  --color-accent-600: #e11d2a;
 
-  /* — Graphite foundation — */
-  --color-paper: #0c0c0f; /* app canvas / body */
-  --color-paper-2: #0f0f13; /* alternating sections */
-  --color-surface: #151519; /* card / panel */
-  --color-surface-2: #1b1b21; /* table head, inset, hover */
-  --color-raised: #202027; /* popover / elevated control */
-  --color-ink: #ececef; /* primary text (≈ 92% white, calmer than pure) */
-  --color-ink-soft: #cacace; /* dimmed heading */
-  --color-ink-2: #a2a2ac; /* secondary text */
-  --color-ink-3: #7e7e8a; /* muted text — lifted to clear AA on the dark canvas */
-  --color-line: rgba(255, 255, 255, 0.07); /* hairline */
-  --color-line-2: rgba(255, 255, 255, 0.12); /* stronger hairline */
+  /* — Atmospheric foundation. `paper` is transparent so sections reveal the
+     body's environmental lighting; surfaces are translucent glass. — */
+  --color-paper: transparent; /* sections show the atmosphere through */
+  --color-paper-2: rgba(255, 255, 255, 0.022); /* faint alternating band */
+  --color-surface: rgba(21, 22, 29, 0.82); /* glass card / panel */
+  --color-surface-2: rgba(255, 255, 255, 0.035); /* inset / table head / hover */
+  --color-raised: rgba(28, 29, 38, 0.92); /* popover / elevated (legible) */
+  --color-ink: #f3f2f6; /* primary text */
+  --color-ink-soft: #d2d1da; /* dimmed heading */
+  --color-ink-2: #a6a5b2; /* secondary text — AA on the dark canvas */
+  --color-ink-3: #77767f; /* muted text — clears AA at small sizes */
+  --color-line: rgba(255, 255, 255, 0.08); /* hairline */
+  --color-line-2: rgba(255, 255, 255, 0.15); /* stronger hairline */
 
-  /* — Amber · reserved for the regulatory deadline / urgency only — */
-  --color-brass-300: #e6cd86;
-  --color-brass-400: #d9b65f;
-  --color-brass-500: #c79a3c;
-  --color-brass-600: #a67e2d;
+  /* — Amber · reserved for the regulatory deadline / urgency (legible on dark) — */
+  --color-brass-300: #ffd98a;
+  --color-brass-400: #f5c46a;
+  --color-brass-500: #e0a945;
+  --color-brass-600: #f0c067; /* used as accent text — kept light for dark bg */
+  --color-brass-700: #ffd98a;
 
-  /* — Risk scale · semantic, calm, mutually distinct — */
-  --color-risk-prohibited: #e0565b; /* refined red */
-  --color-risk-high: #d6a03a; /* amber */
-  --color-risk-limited: #5a93b8; /* slate blue */
-  --color-risk-minimal: #5ba078; /* sage green */
+  /* — Risk scale · semantic, vivid, mutually distinct on dark — */
+  --color-risk-prohibited: #ff5663; /* hot red */
+  --color-risk-high: #f5a524; /* amber */
+  --color-risk-limited: #3ec6d6; /* cyan */
+  --color-risk-minimal: #3ed68f; /* green */
+
+  /* — Status semantics · success · warning · danger. Deliberately ONE green,
+     ONE amber and ONE hot red — aligned to the risk scale so the whole product
+     speaks a single palette instead of stray Tailwind hues. Prefer these over
+     emerald/amber/rose everywhere. — */
+  --color-ok-300: #7fe3b0;
+  --color-ok-400: #3ed68f; /* success text on dark (== risk-minimal) */
+  --color-ok-500: #23b877; /* success fills / dots / bars */
+  --color-warn-300: #ffd98a;
+  --color-warn-400: #f6b73e; /* warning / in-progress text on dark */
+  --color-warn-500: #e19a2b; /* warning fills */
+  --color-danger-400: #ff7078; /* destructive text on dark */
+  --color-danger-500: #ff5663; /* destructive / prohibited (== risk-prohibited) */
+  --color-danger-600: #f5333f; /* destructive fill */
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-  /* One typeface, used with discipline. `display` is the same sans, tuned
-     tighter at large sizes by the type scale below. */
   --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
@@ -64,28 +77,50 @@
 }
 
 :root {
-  --background: #0c0c0f;
-  --foreground: #ececef;
+  --background: #07070b;
+  --foreground: #f3f2f6;
 
-  /* Soft, layered, realistic elevation — no glow. */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  /* Crimson-tinted RGB for glows/rings. */
+  --crimson: 225, 29, 42;
+
+  /* Layered elevation for glass on a dark canvas: inner top highlight + ambient
+     occlusion + a deep drop. Elevated levels add a breath of red environment. */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.55), 0 1px 1px rgba(0, 0, 0, 0.4);
   --shadow-card:
-    inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 1px 3px rgba(0, 0, 0, 0.4),
-    0 12px 28px -18px rgba(0, 0, 0, 0.65);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.015),
+    0 2px 4px rgba(0, 0, 0, 0.5),
+    0 20px 44px -24px rgba(0, 0, 0, 0.9);
   --shadow-raised:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 2px 6px rgba(0, 0, 0, 0.45),
-    0 24px 50px -26px rgba(0, 0, 0, 0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 4px 10px rgba(0, 0, 0, 0.55),
+    0 34px 70px -30px rgba(0, 0, 0, 0.92),
+    0 24px 60px -34px rgba(var(--crimson), 0.22);
   --shadow-pop:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 44px -14px rgba(0, 0, 0, 0.85);
+
+  /* Reusable signature glows. */
+  --glow-brand: 0 0 0 1px rgba(var(--crimson), 0.4), 0 10px 40px -10px rgba(var(--crimson), 0.55);
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+/* ----------------------------------------------------------------------------
+   The cinematic canvas. A deep base lit by volumetric crimson light pools and
+   a fine film grain — fixed, so it reads as an environment, not a background.
+   -------------------------------------------------------------------------- */
 body {
-  background: var(--background);
+  background-color: #07070b;
+  background-image:
+    radial-gradient(70% 55% at 82% 4%, rgba(var(--crimson), 0.2), transparent 62%),
+    radial-gradient(55% 50% at 6% 72%, rgba(var(--crimson), 0.1), transparent 60%),
+    radial-gradient(120% 80% at 50% 128%, rgba(120, 8, 16, 0.22), transparent 60%),
+    linear-gradient(180deg, #08080c 0%, #060609 50%, #08070b 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -96,17 +131,15 @@ body {
   font-feature-settings: "cv11", "ss01";
 }
 
-/* Display headings: tighter tracking, calm weight. Used via `font-display`. */
+/* Display headings: tight optical tracking. */
 h1,
 h2,
 h3 {
-  letter-spacing: -0.022em;
+  letter-spacing: -0.024em;
 }
 
 /* ----------------------------------------------------------------------------
-   Localised typography. The active language is reflected on `<html lang dir>`,
-   so these selectors swap the body font the instant the language is switched.
-   Arabic uses a self-hosted face; Simplified Chinese a robust system CJK stack.
+   Localised typography (KEEP). Language is reflected on <html lang dir>.
    -------------------------------------------------------------------------- */
 :root[lang="ar"] body,
 :root[dir="rtl"] body {
@@ -117,35 +150,37 @@ h3 {
     "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
     "Heiti SC", var(--font-sans);
 }
-
-/* Latin tracking (incl. negative and wide-uppercase) breaks Arabic letter
-   joining and reads poorly in CJK — neutralise it for those scripts. */
 :root[dir="rtl"] *,
 :root[lang="zh-CN"] * {
   letter-spacing: normal !important;
 }
 
 ::selection {
-  background: rgba(94, 102, 224, 0.3);
+  background: rgba(var(--crimson), 0.32);
   color: #ffffff;
 }
 
-/* Tabular numerals helper for metrics. */
 .nums {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
+/* Crimson gradient text — for one signature word, used sparingly. */
+.text-crimson {
+  background: linear-gradient(180deg, #ff6b74 0%, #f5333f 55%, #c81620 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 36px rgba(var(--crimson), 0.35);
+}
+
 /* ----------------------------------------------------------------------------
-   App canvas — a single, almost-imperceptible cool vignette. No grid, no orbs.
+   App canvas (in-product routes) — calmer atmosphere for data density.
    -------------------------------------------------------------------------- */
 .app-canvas {
-  background-color: var(--color-paper);
-  background-image: radial-gradient(
-    120% 80% at 50% -20%,
-    rgba(255, 255, 255, 0.022),
-    transparent 60%
-  );
+  background-color: transparent;
+  background-image:
+    radial-gradient(60% 40% at 100% 0%, rgba(var(--crimson), 0.08), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -153,85 +188,193 @@ h3 {
   border-color: var(--color-line);
 }
 
+/* A hairline that fades at both ends — a custom, designed divider. */
+.divider-x {
+  height: 1px;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.12) 18%,
+    rgba(255, 255, 255, 0.12) 82%,
+    transparent
+  );
+}
+
 /* ----------------------------------------------------------------------------
-   Surfaces / panels
+   Surfaces / panels — glass with physical depth
    -------------------------------------------------------------------------- */
 .panel {
+  position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 0.875rem;
+  border-radius: 1rem;
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
 }
 .panel-raised {
   background: var(--color-raised);
   border: 1px solid var(--color-line);
-  border-radius: 1rem;
+  border-radius: 1.1rem;
   box-shadow: var(--shadow-raised);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
 }
 
-/* Interactive card — quiet. Border brightens, a hair of light lifts the
-   surface. No movement, no glow. */
+/* `.glass` — opt-in frosted card with a crisp top-edge light and a hover that
+   lifts, brightens its rim, and warms with red environment light. */
+.glass {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.012) 40%
+  ), var(--color-surface);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+/* Interactive card — depth movement + ambient red rim on hover. */
 .lift {
   transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease,
-    box-shadow 0.18s ease;
+    transform 0.4s var(--ease-out-quint),
+    border-color 0.3s ease,
+    box-shadow 0.4s var(--ease-out-quint);
+  will-change: transform;
 }
 .lift:hover {
-  border-color: var(--color-line-2);
-  background-color: color-mix(in oklab, var(--color-surface) 92%, white);
+  transform: translateY(-3px);
+  border-color: rgba(var(--crimson), 0.45);
+  box-shadow:
+    var(--shadow-raised),
+    0 0 0 1px rgba(var(--crimson), 0.2);
+}
+
+/* Light sweep — a slow diagonal sheen that crosses on hover. Pair on any
+   `position: relative; overflow: hidden` element. */
+.sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.08) 47%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.9s var(--ease-out-quint);
+  pointer-events: none;
+}
+.sweep:hover::after {
+  transform: translateX(130%);
 }
 
 /* ----------------------------------------------------------------------------
    Buttons
    -------------------------------------------------------------------------- */
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   padding: 0.6rem 1rem;
   font-size: 0.875rem;
-  font-weight: 550;
+  font-weight: 560;
   letter-spacing: -0.012em;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
+  overflow: hidden;
   transition:
-    background-color 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease,
-    box-shadow 0.16s ease;
+    transform 0.18s var(--ease-out-quint),
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+.btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 65%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.8s var(--ease-out-quint);
+  pointer-events: none;
+}
+.btn:hover::after {
+  transform: translateX(130%);
 }
 .btn:active {
-  transform: translateY(0.5px);
+  transform: translateY(0.5px) scale(0.99);
 }
 
-/* Primary — the one accent. Subtle monochrome depth (a single hue, lighter
-   at the top) plus a 1px highlight: material, not a trendy gradient. */
+/* Primary — signature crimson with depth, a top highlight and a live glow. */
 .btn-primary {
-  color: #ffffff;
-  background: linear-gradient(180deg, #626add, var(--color-brand-600));
-  border: 1px solid var(--color-brand-700);
+  color: #fff;
+  background:
+    linear-gradient(180deg, #f5414b, var(--color-brand-600)) padding-box,
+    linear-gradient(180deg, #ff7079, var(--color-brand-700)) border-box;
+  border: 1px solid transparent;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    var(--shadow-xs);
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 26px -8px rgba(var(--crimson), 0.6);
 }
 .btn-primary:hover {
-  background: linear-gradient(180deg, #6c73e2, var(--color-brand-500));
-  border-color: var(--color-brand-600);
+  background:
+    linear-gradient(180deg, #ff5660, #cf1722) padding-box,
+    linear-gradient(180deg, #ff8a92, var(--color-brand-600)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 12px 34px -8px rgba(var(--crimson), 0.75);
 }
 
-/* Secondary — quiet surface with a hairline. */
+/* Secondary — dark glass with a hairline that warms on hover. */
 .btn-secondary {
   color: var(--color-ink);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--color-line-2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(var(--crimson), 0.5);
+}
+
+/* Destructive — hot red, reserved for confirmed-destructive actions only. */
+.btn-danger {
+  color: #fff;
+  background:
+    linear-gradient(180deg, #ff6771, var(--color-danger-600)) padding-box,
+    linear-gradient(180deg, #ff9aa0, var(--color-danger-600)) border-box;
+  border: 1px solid transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 8px 26px -8px rgba(255, 86, 99, 0.5);
+}
+.btn-danger:hover {
+  background:
+    linear-gradient(180deg, #ff7a83, #e5384a) padding-box,
+    linear-gradient(180deg, #ffb0b5, var(--color-danger-600)) border-box;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 12px 34px -8px rgba(255, 86, 99, 0.66);
 }
 
 /* Ghost — tertiary. */
@@ -240,8 +383,11 @@ h3 {
   background: transparent;
 }
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   color: var(--color-ink);
+}
+.btn-ghost::after {
+  display: none;
 }
 
 .btn-sm {
@@ -255,57 +401,56 @@ h3 {
    -------------------------------------------------------------------------- */
 .field {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--color-line-2);
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
   color: var(--color-ink);
   font-size: 0.875rem;
   outline: none;
   transition:
     border-color 0.16s ease,
-    box-shadow 0.16s ease;
+    box-shadow 0.16s ease,
+    background-color 0.16s ease;
 }
 .field::placeholder {
   color: var(--color-ink-3);
 }
 .field:focus {
   border-color: var(--color-brand-500);
-  box-shadow: 0 0 0 3px rgba(94, 102, 224, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(var(--crimson), 0.25);
 }
-/* Native options render in the OS palette — keep them dark. */
 .field option,
 select option {
-  background: #16161b;
+  background: #14141a;
   color: var(--color-ink);
 }
 
-/* Segmented control — inset rail, a quiet raised pill for the active item. */
+/* Segmented control — inset rail, glowing crimson active pill. */
 .seg {
   display: inline-flex;
   align-items: center;
   gap: 2px;
   padding: 3px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--color-line);
-  border-radius: 0.5rem;
+  border-radius: 0.6rem;
 }
 .seg-item {
-  border-radius: 0.4rem;
+  border-radius: 0.45rem;
   padding: 0.32rem 0.7rem;
   font-size: 0.78rem;
-  font-weight: 550;
+  font-weight: 560;
   color: var(--color-ink-3);
-  transition:
-    color 0.16s ease,
-    background-color 0.16s ease;
+  transition: color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 .seg-item:hover {
   color: var(--color-ink);
 }
 .seg-item[data-active="true"] {
-  color: var(--color-ink);
-  background: var(--color-raised);
-  box-shadow: var(--shadow-xs), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: #fff;
+  background: linear-gradient(180deg, #f5414b, var(--color-brand-600));
+  box-shadow: 0 6px 18px -6px rgba(var(--crimson), 0.7);
 }
 
 /* ----------------------------------------------------------------------------
@@ -316,39 +461,41 @@ select option {
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  border-radius: 0.5rem;
+  border-radius: 0.55rem;
   padding: 0.5rem 0.7rem;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-ink-2);
-  transition:
-    color 0.16s ease,
-    background-color 0.16s ease;
+  transition: color 0.16s ease, background-color 0.16s ease;
 }
 .navlink:hover {
   color: var(--color-ink);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.05);
 }
 .navlink[data-active="true"] {
-  color: var(--color-ink);
-  background: rgba(255, 255, 255, 0.06);
-  font-weight: 550;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(var(--crimson), 0.18),
+    rgba(var(--crimson), 0.04)
+  );
+  font-weight: 560;
 }
-/* A thin accent bar pins the active item — no glow. */
 .navlink[data-active="true"]::before {
   content: "";
   position: absolute;
   inset-inline-start: -0.7rem;
   top: 50%;
-  height: 1rem;
+  height: 1.1rem;
   width: 2px;
   transform: translateY(-50%);
   border-radius: 9999px;
   background: var(--color-brand-500);
+  box-shadow: 0 0 10px rgba(var(--crimson), 0.9);
 }
 
 /* ----------------------------------------------------------------------------
-   Tooltip — quiet dark popover via data-tip.
+   Tooltip
    -------------------------------------------------------------------------- */
 .tip {
   position: relative;
@@ -359,9 +506,7 @@ select option {
   left: 50%;
   opacity: 0;
   pointer-events: none;
-  transition:
-    opacity 0.14s ease,
-    transform 0.14s var(--ease-out-quint);
+  transition: opacity 0.14s ease, transform 0.14s var(--ease-out-quint);
   z-index: 50;
 }
 .tip::after {
@@ -369,8 +514,8 @@ select option {
   bottom: calc(100% + 9px);
   transform: translate(-50%, 4px);
   white-space: nowrap;
-  background: var(--color-raised);
-  color: var(--color-ink);
+  background: #16161d;
+  color: #f3f2f6;
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.005em;
@@ -385,7 +530,7 @@ select option {
   transform: translate(-50%, 4px) rotate(45deg);
   height: 7px;
   width: 7px;
-  background: var(--color-raised);
+  background: #16161d;
   border-left: 1px solid var(--color-line);
   border-top: 1px solid var(--color-line);
 }
@@ -400,21 +545,20 @@ select option {
   transform: translate(-50%, 0) rotate(45deg);
 }
 
-/* Thin scrollbar for scrollable panels. */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-line-2) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: var(--color-line-2);
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 9999px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(255, 255, 255, 0.32);
 }
 
 .prose-doc {
@@ -424,70 +568,92 @@ select option {
 }
 
 /* ----------------------------------------------------------------------------
-   Motion — kept deliberately small. A single quiet entrance; nothing loops.
+   Motion
    -------------------------------------------------------------------------- */
 @keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Modal / popover entrance — a subtle rise + scale, inside the 180–250ms band. */
+@keyframes pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -22px, 0); }
 }
 
 .animate-in,
 .animate-rise,
 .animate-slide-up {
-  animation: enter 0.28s var(--ease-out-quint) both;
+  animation: enter 0.5s var(--ease-out-quint) both;
 }
 .animate-fade-in,
 .animate-scale-in {
-  animation: fade 0.3s ease-out both;
+  animation: fade 0.45s ease-out both;
+}
+.animate-pop {
+  animation: pop 0.22s var(--ease-out-quint) both;
+}
+.animate-float {
+  animation: float-y 6s var(--ease-soft) infinite;
+}
+.animate-drift {
+  animation: drift 18s var(--ease-soft) infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
 }
 
 @keyframes ring-draw {
-  from {
-    stroke-dashoffset: var(--dash);
-  }
-  to {
-    stroke-dashoffset: var(--offset);
-  }
+  from { stroke-dashoffset: var(--dash); }
+  to { stroke-dashoffset: var(--offset); }
 }
 
-/* Skeleton — a calm pulse, no sweeping shimmer. */
-@keyframes skeleton-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.55;
-  }
+/* Skeleton — a moving sheen over a dark base. */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }
 .skeleton {
+  position: relative;
+  overflow: hidden;
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 0.5rem;
-  animation: skeleton-pulse 1.8s ease-in-out infinite;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(255, 255, 255, 0.07) 44%,
+    rgba(var(--crimson), 0.06) 56%,
+    transparent 100%
+  );
+  animation: shimmer 1.6s infinite;
 }
 
-/* Legacy hook — quiet, matches .lift. */
 .card-hover {
-  transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease;
+  transition: transform 0.3s var(--ease-out-quint), border-color 0.2s ease;
 }
 .card-hover:hover {
-  border-color: var(--color-line-2);
+  transform: translateY(-2px);
+  border-color: rgba(var(--crimson), 0.4);
 }
 
 /* ----------------------------------------------------------------------------
@@ -551,7 +717,7 @@ select option {
 .prose-rendered code {
   font-family: var(--font-mono);
   font-size: 0.82em;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
   padding: 0.1rem 0.35rem;
   border-radius: 0.3rem;
 }
@@ -584,12 +750,12 @@ select option {
   vertical-align: top;
 }
 .prose-rendered th {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   font-weight: 600;
   color: var(--color-ink);
 }
 
-/* Visible keyboard focus (mouse users unaffected). */
+/* Visible keyboard focus. */
 a:focus-visible,
 button:focus-visible,
 summary:focus-visible,

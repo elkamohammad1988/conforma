@@ -30,6 +30,8 @@ const fr: Messages = {
       other: "{count} jours restants",
     }),
     deadlinePassed: "échéance dépassée",
+    cancel: "Annuler",
+    delete: "Supprimer",
     notLegalAdvice:
       "Outil d’aide à la décision pour le Regulation (EU) 2024/1689 — ne constitue pas un avis juridique. Confirmez les classifications auprès d’un conseil qualifié.",
   },

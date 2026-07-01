@@ -28,6 +28,8 @@ const es: Messages = {
       other: "Quedan {count} días",
     }),
     deadlinePassed: "plazo vencido",
+    cancel: "Cancelar",
+    delete: "Eliminar",
     notLegalAdvice:
       "Herramienta de apoyo a la decisión para el Regulation (EU) 2024/1689 — no constituye asesoramiento jurídico. Confirme las clasificaciones con asesores cualificados.",
   },

@@ -41,7 +41,7 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      <p className="mt-12 rounded-lg border border-line bg-white/[0.03] p-4 text-xs leading-relaxed text-ink-3">
+      <p className="mt-12 rounded-lg border border-line bg-ink/[0.03] p-4 text-xs leading-relaxed text-ink-3">
         {t("privacy.footnote")}
       </p>
     </article>
