@@ -22,7 +22,7 @@ import path from "node:path";
 
 const BASE = process.env.SCREENSHOT_BASE_URL || "http://localhost:3000";
 const OUT = path.resolve("docs/screenshots");
-const DESKTOP = { width: 1440, height: 900 };
+const DESKTOP = { width: 1920, height: 1080 };
 
 /** Desktop pages — captured in one shared context so the seed + banner persist. */
 const DESKTOP_SHOTS = [
@@ -79,6 +79,7 @@ async function main() {
     deviceScaleFactor: 2,
     reducedMotion: "reduce",
     colorScheme: "light",
+    locale: "en-US",
   });
   const page = await ctx.newPage();
 
@@ -89,7 +90,7 @@ async function main() {
   for (const shot of DESKTOP_SHOTS) {
     await page.goto(`${BASE}${shot.path}`, { waitUntil: "networkidle" });
     await settle(page, shot.wait);
-    if (shot.prep) await shot.prep(page);
+    if (shot.prep) await shot.prep(page).catch(() => {});
     const file = path.join(OUT, `${shot.name}.png`);
     await page.screenshot({ path: file });
     console.log(`  ✓ ${shot.name}.png`);
@@ -98,7 +99,7 @@ async function main() {
   // ---- System detail: resolve the high-risk seed id from localStorage ----
   const detailId = await page.evaluate(() => {
     try {
-      const raw = localStorage.getItem("conforma.systems.v1");
+      const raw = localStorage.getItem("conforma.systems.v2");
       if (!raw) return null;
       const list = JSON.parse(raw);
       const high = list.find((s) => s?.result?.tier === "high");
@@ -118,21 +119,87 @@ async function main() {
 
   await ctx.close();
 
-  // ---- Mobile: landing hero on a retina phone viewport ----
+  // ---- Aspect-ratio hero crops (16:9 · 4:3 · 1:1) for portfolio covers ----
+  // Each fresh context re-seeds the registry on its first dashboard paint.
+  const ratioShots = [
+    { name: "dashboard-16x9", path: "/dashboard", wait: "System Registry", width: 1920, height: 1080 },
+    { name: "dashboard-4x3", path: "/dashboard", wait: "System Registry", width: 1600, height: 1200 },
+    { name: "dashboard-1x1", path: "/dashboard", wait: "System Registry", width: 1200, height: 1200 },
+    { name: "landing-16x9", path: "/", wait: "EU AI Act compliance", width: 1920, height: 1080 },
+    { name: "landing-1x1", path: "/", wait: "EU AI Act compliance", width: 1200, height: 1200 },
+  ];
+  for (const shot of ratioShots) {
+    const rctx = await browser.newContext({
+      viewport: { width: shot.width, height: shot.height },
+      deviceScaleFactor: 2,
+      reducedMotion: "reduce",
+      colorScheme: "light",
+      locale: "en-US",
+    });
+    const rpage = await rctx.newPage();
+    await rpage.goto(`${BASE}${shot.path}`, { waitUntil: "networkidle" });
+    await settle(rpage, shot.wait);
+    await rpage.screenshot({ path: path.join(OUT, `${shot.name}.png`) });
+    console.log(`  ✓ ${shot.name}.png`);
+    await rctx.close();
+  }
+
+  // ---- Tablet (landscape, iPad-Pro-11 class viewport) ----
+  const tablet = await browser.newContext({
+    viewport: { width: 1194, height: 834 },
+    deviceScaleFactor: 2,
+    reducedMotion: "reduce",
+    colorScheme: "light",
+    locale: "en-US",
+  });
+  const tpage = await tablet.newPage();
+  for (const shot of [
+    { name: "tablet-dashboard", path: "/dashboard", wait: "System Registry" },
+    { name: "tablet-landing", path: "/", wait: "EU AI Act compliance" },
+  ]) {
+    await tpage.goto(`${BASE}${shot.path}`, { waitUntil: "networkidle" });
+    await settle(tpage, shot.wait);
+    await tpage.screenshot({ path: path.join(OUT, `${shot.name}.png`) });
+    console.log(`  ✓ ${shot.name}.png`);
+  }
+  await tablet.close();
+
+  // ---- Mobile: landing + dashboard on a retina phone viewport ----
   const mobile = await browser.newContext({
     ...devices["iPhone 13 Pro"],
     reducedMotion: "reduce",
     colorScheme: "light",
+    locale: "en-US",
   });
   const mpage = await mobile.newPage();
-  await mpage.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  await settle(mpage, "EU AI Act compliance");
-  await mpage.screenshot({ path: path.join(OUT, "mobile.png") });
-  console.log("  ✓ mobile.png");
+  for (const shot of [
+    { name: "mobile", path: "/", wait: "EU AI Act compliance" },
+    { name: "mobile-dashboard", path: "/dashboard", wait: "System Registry" },
+  ]) {
+    await mpage.goto(`${BASE}${shot.path}`, { waitUntil: "networkidle" });
+    await settle(mpage, shot.wait);
+    await mpage.screenshot({ path: path.join(OUT, `${shot.name}.png`) });
+    console.log(`  ✓ ${shot.name}.png`);
+  }
   await mobile.close();
 
+  // ---- i18n showcase: the same dashboard in Arabic (full RTL mirror) ----
+  const rtl = await browser.newContext({
+    viewport: DESKTOP,
+    deviceScaleFactor: 2,
+    reducedMotion: "reduce",
+    colorScheme: "light",
+    locale: "ar",
+  });
+  const rtlPage = await rtl.newPage();
+  await rtlPage.goto(`${BASE}/dashboard`, { waitUntil: "networkidle" });
+  await settle(rtlPage);
+  await rtlPage.screenshot({ path: path.join(OUT, "dashboard-ar-rtl.png") });
+  console.log("  ✓ dashboard-ar-rtl.png");
+  await rtl.close();
+
   await browser.close();
-  console.log("✔ Done — 8 screenshots written to docs/screenshots/");
+  console.log(`✔ Done — screenshots written to ${OUT}`);
 }
 
 main().catch((err) => {
