@@ -10,7 +10,7 @@ on top of it.
 | **Type** | Portfolio / flagship project (production-shaped MVP) |
 | **Stack** | Next.js 16 · React 19 · TypeScript (strict) · Tailwind CSS v4 |
 | **AI** | Claude (`@anthropic-ai/sdk`), server-only, with a first-class Demo Mode |
-| **Live demo** | `<!-- add your Vercel URL -->` |
+| **Live demo** | https://conforma-ten.vercel.app |
 | **Source** | https://github.com/elkamohammad1988/conforma |
 
 ---

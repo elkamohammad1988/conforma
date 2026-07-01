@@ -20,9 +20,9 @@ obligations that apply, and generate the documentation regulators expect.
 
 <br/>
 
-**▶ [Live demo](#)** &nbsp;·&nbsp; runs in **Demo Mode** — no sign-up, no API key, no backend
+**▶ [Live demo](https://conforma-ten.vercel.app)** &nbsp;·&nbsp; runs in **Demo Mode** — no sign-up, no API key, no backend
 <br/>
-<sub>Deploying your own? Replace the link above with your Vercel/Netlify URL.</sub>
+<sub>Deployed on Vercel · <a href="https://conforma-ten.vercel.app">conforma-ten.vercel.app</a></sub>
 
 <br/>
 

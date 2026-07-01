@@ -34,7 +34,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "covers": "node scripts/covers.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
