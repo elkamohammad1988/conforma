@@ -9,23 +9,11 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { slugifyOrgName } from "@/lib/validation";
 import { ACTIVE_ORG_COOKIE, ACTIVE_ORG_COOKIE_MAX_AGE } from "./types";
 
 export interface OrgActionState {
   error?: string;
-}
-
-/** Derive a URL-safe slug from a display name (matches the DB slug CHECK). */
-function slugify(name: string): string {
-  const base = name
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "") // strip combining diacritical marks
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40)
-    .replace(/-+$/g, "");
-  return base.length >= 1 ? base : "org";
 }
 
 function setActiveOrgCookie(
@@ -49,7 +37,7 @@ export async function createOrganizationAction(
   const name = String(formData.get("name") ?? "").trim().slice(0, 120);
   if (name.length < 2) return { error: "errors.generic" };
 
-  const baseSlug = slugify(name);
+  const baseSlug = slugifyOrgName(name);
   let orgId: string | null = null;
 
   // Retry with a random suffix on slug collision (unique_violation = 23505).

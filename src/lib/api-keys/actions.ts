@@ -8,7 +8,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getActiveContext } from "@/lib/auth/context";
+import { requireManager } from "@/lib/auth/guards";
 import { logAudit } from "@/lib/audit";
 import { generateApiKey, hashApiKey, keyPrefix } from "./keys";
 
@@ -17,12 +17,6 @@ export interface ApiKeyActionState {
   ok?: boolean;
   /** The plaintext key — returned exactly once, on successful creation. */
   plaintextKey?: string;
-}
-
-async function requireManager() {
-  const ctx = await getActiveContext();
-  if (!ctx?.activeOrg || ctx.activeOrg.role === "member") return null;
-  return ctx;
 }
 
 export async function createApiKeyAction(

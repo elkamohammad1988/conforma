@@ -11,9 +11,10 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { getActiveContext } from "@/lib/auth/context";
+import { requireManager } from "@/lib/auth/guards";
 import { logAudit } from "@/lib/audit";
 import { requestOrigin } from "@/lib/request-origin";
+import { isEmail } from "@/lib/validation";
 import {
   ACTIVE_ORG_COOKIE,
   ACTIVE_ORG_COOKIE_MAX_AGE,
@@ -27,15 +28,6 @@ export interface TeamActionState {
   inviteUrl?: string;
 }
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-/** Require an active org where the caller is owner or admin. */
-async function requireManager() {
-  const ctx = await getActiveContext();
-  if (!ctx?.activeOrg || ctx.activeOrg.role === "member") return null;
-  return ctx;
-}
-
 export async function inviteMemberAction(
   _prev: TeamActionState,
   formData: FormData,
@@ -47,7 +39,7 @@ export async function inviteMemberAction(
 
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role: OrgRole = formData.get("role") === "admin" ? "admin" : "member";
-  if (!EMAIL_RE.test(email)) return { error: "invalidEmail" };
+  if (!isEmail(email)) return { error: "invalidEmail" };
 
   const { data, error } = await supabase.rpc("create_invitation", {
     p_org: ctx.activeOrg.id,

@@ -17,6 +17,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
+import { isEmail, sanitizeNextPath } from "@/lib/validation";
 
 export interface AuthActionState {
   /** i18n subpath under `auth.` (e.g. `errors.generic`), rendered by the client. */
@@ -27,17 +28,11 @@ export interface AuthActionState {
   email?: string;
 }
 
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const MIN_PASSWORD = 8;
 
 function parseEmail(value: FormDataEntryValue | null): string | null {
   const s = typeof value === "string" ? value.trim().toLowerCase() : "";
-  return EMAIL_RE.test(s) ? s : null;
-}
-
-/** Only allow internal, single-slash paths as a post-login destination. */
-function sanitizeNext(next: string): string {
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  return isEmail(s) ? s : null;
 }
 
 /** Prefer the live request origin (works in dev/preview) over the static URL. */
@@ -106,7 +101,7 @@ export async function signInAction(
 
   const email = parseEmail(formData.get("email"));
   const password = String(formData.get("password") ?? "");
-  const next = sanitizeNext(String(formData.get("next") ?? ""));
+  const next = sanitizeNextPath(String(formData.get("next") ?? ""));
   if (!email || !password) return { error: "errors.invalidCredentials" };
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });

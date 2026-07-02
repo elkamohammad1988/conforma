@@ -13,18 +13,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-/** Only allow internal, single-slash redirect targets. */
-function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-}
+import { sanitizeNextPath } from "@/lib/validation";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = safeNext(searchParams.get("next"));
+  const next = sanitizeNextPath(searchParams.get("next"));
 
   const supabase = await createSupabaseServerClient();
   if (!supabase) return NextResponse.redirect(`${origin}/login`);
