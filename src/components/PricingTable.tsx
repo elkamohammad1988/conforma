@@ -80,10 +80,10 @@ export function PricingTable() {
           return (
             <div
               key={tier.key}
-              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-surface p-7 transition-transform duration-300 ${
+              className={`relative flex flex-col overflow-hidden rounded-2xl border bg-surface p-7 ${
                 tier.highlight
                   ? "border-brand-500/50 shadow-[var(--shadow-raised)] ring-1 ring-brand-500/40 lg:-translate-y-2"
-                  : "border-line shadow-[var(--shadow-card)]"
+                  : "lift border-line shadow-[var(--shadow-card)]"
               }`}
             >
               {tier.highlight && (
@@ -108,7 +108,7 @@ export function PricingTable() {
                 {t(`pricingTable.tiers.${tier.key}.tagline`)}
               </p>
               <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-semibold tracking-tight">
+                <span className="text-4xl font-semibold tracking-tight nums">
                   {formatCurrency(price)}
                 </span>
                 {price !== 0 && (

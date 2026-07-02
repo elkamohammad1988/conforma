@@ -29,9 +29,15 @@ export default function PricingPage() {
 
   return (
     <div>
-      <section className="border-b border-line bg-ink/[0.03]">
-        <div className="mx-auto max-w-3xl px-5 py-16 text-center">
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+      <section className="relative overflow-hidden border-b border-line bg-ink/[0.03]">
+        {/* Ambient crimson light behind the hero — centered, so it stays
+            symmetric in RTL (no start/end bias needed). */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-2 h-72 w-[36rem] max-w-full -translate-x-1/2 rounded-[50%] bg-[rgba(var(--accent),0.10)] blur-[120px]"
+        />
+        <div className="relative mx-auto max-w-3xl px-5 py-16 text-center">
+          <h1 className="text-balance text-[2.75rem] font-semibold tracking-[-0.022em] sm:text-[3.5rem]">
             {t("pricing.hero.title")}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -47,7 +53,7 @@ export default function PricingPage() {
       {/* Feature comparison */}
       <section className="border-t border-line bg-ink/[0.03]">
         <div className="mx-auto max-w-4xl px-5 py-16">
-          <h2 className="text-center text-2xl font-semibold tracking-tight">
+          <h2 className="text-center text-[1.9rem] font-semibold tracking-tight sm:text-[2.35rem]">
             {t("pricing.comparePlans")}
           </h2>
           <div className="mt-8 overflow-x-auto scrollbar-thin rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">

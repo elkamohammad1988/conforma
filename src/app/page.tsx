@@ -285,7 +285,7 @@ export default function Home() {
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
             {t("home.interactiveDemo.eyebrow")}
           </p>
-          <h2 className="mt-3 text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.interactiveDemo.title")}
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -304,7 +304,7 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
               {t("home.problem.eyebrow")}
             </p>
-            <h2 className="mt-3 text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.problem.title")}
             </h2>
             <p className="mt-5 text-lg leading-relaxed text-ink-2">
@@ -340,7 +340,7 @@ export default function Home() {
       <section className="border-y border-line bg-paper-2">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.personas.title")}
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -351,9 +351,9 @@ export default function Home() {
             {PERSONA_KEYS.map((p) => (
               <div
                 key={p}
-                className="lift rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
+                className="lift sweep relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
               >
-                <div className="text-base font-semibold text-ink">
+                <div className="text-lg font-semibold tracking-tight text-ink">
                   {t(`home.personas.items.${p}.role`)}
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-ink-2">
@@ -368,7 +368,7 @@ export default function Home() {
       {/* ----------------------------------------------------------- Risk tiers */}
       <section className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.tiers.title")}
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -408,17 +408,22 @@ export default function Home() {
       <section id="how" className="border-y border-line bg-paper-2 scroll-mt-20">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.how.title")}
             </h2>
           </div>
           <div className="mt-12 grid gap-8 md:grid-cols-4">
             {STEP_KEYS.map((s, idx) => (
-              <div key={s}>
-                <div className="grid h-9 w-9 place-items-center rounded-lg border border-line bg-surface text-sm font-semibold text-brand-400">
+              <div key={s} className="group">
+                <div className="relative grid h-12 w-12 place-items-center rounded-xl border border-line bg-surface text-[1.05rem] font-semibold text-brand-400 shadow-[var(--shadow-card)] transition-[transform,box-shadow] duration-300 ease-[var(--ease-out-quint)] nums group-hover:-translate-y-0.5 group-hover:shadow-[var(--shadow-raised)]">
                   {idx + 1}
+                  {/* 1px top-edge highlight, tinted with the accent — catches the light. */}
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent"
+                  />
                 </div>
-                <h3 className="mt-4 text-lg font-semibold text-ink">
+                <h3 className="mt-4 text-lg font-semibold tracking-tight text-ink">
                   {t(`home.how.steps.${s}.title`)}
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-ink-2">
@@ -436,7 +441,7 @@ export default function Home() {
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
             {t("home.timeline.eyebrow")}
           </p>
-          <h2 className="mt-3 text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.timeline.title")}
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -451,7 +456,7 @@ export default function Home() {
       {/* ------------------------------------------------------------- Features */}
       <section className="mx-auto max-w-6xl px-5 py-20">
         <Reveal className="mx-auto mb-12 max-w-2xl text-center">
-          <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.features.title")}
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -462,9 +467,9 @@ export default function Home() {
           {FEATURE_KEYS.map((f) => (
             <div
               key={f}
-              className="lift rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
+              className="lift sweep relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
             >
-              <h3 className="text-base font-semibold text-ink">
+              <h3 className="text-lg font-semibold tracking-tight text-ink">
                 {t(`home.features.items.${f}.title`)}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-ink-2">
@@ -479,7 +484,7 @@ export default function Home() {
       <section className="border-y border-line bg-paper-2">
         <div className="mx-auto max-w-5xl px-5 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.comparison.title")}
             </h2>
           </div>
@@ -490,7 +495,7 @@ export default function Home() {
       {/* ---------------------------------------------------------- Testimonials */}
       <section className="mx-auto max-w-6xl px-5 py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.testimonials.title")}
           </h2>
         </div>
@@ -526,7 +531,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-5 py-10">
         <div className="rounded-2xl border border-line bg-surface p-10 text-center shadow-[var(--shadow-card)] sm:p-14">
           <div>
-            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.penalty.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-ink-2">
@@ -542,9 +547,9 @@ export default function Home() {
               ).map(([key, pen]) => (
                 <div
                   key={key}
-                  className="rounded-xl border border-line bg-paper-2 p-6"
+                  className="lift rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
                 >
-                  <div className="text-3xl font-semibold text-ink nums">
+                  <div className="text-[2.5rem] font-semibold leading-none tracking-tight text-ink nums sm:text-[2.75rem]">
                     {formatCurrency(pen.amountEur / 1_000_000)}M
                   </div>
                   <div className="mt-1 text-sm text-ink-2">
@@ -567,7 +572,7 @@ export default function Home() {
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
               {t("home.security.eyebrow")}
             </p>
-            <h2 className="mt-3 text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.security.title")}
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -598,7 +603,7 @@ export default function Home() {
       <section id="pricing" className="border-t border-line bg-paper-2 scroll-mt-20">
         <div className="mx-auto max-w-6xl px-5 py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
               {t("home.pricing.title")}
             </h2>
             <p className="mt-4 text-lg leading-relaxed text-ink-2">
@@ -613,7 +618,7 @@ export default function Home() {
 
       {/* ----------------------------------------------------------------- FAQ */}
       <section id="faq" className="mx-auto max-w-3xl px-5 py-20 scroll-mt-20">
-        <h2 className="text-center text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+        <h2 className="text-center text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
           {t("home.faq.title")}
         </h2>
         <div className="mt-10 divide-y divide-line rounded-2xl border border-line bg-surface">
@@ -634,7 +639,7 @@ export default function Home() {
       {/* ----------------------------------------------------------- Final CTA */}
       <section className="border-t border-line bg-paper-2">
         <div className="mx-auto max-w-3xl px-5 py-24 text-center">
-          <h2 className="text-[1.75rem] font-semibold text-ink sm:text-[2rem]">
+          <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
             {t("home.finalCta.title")}
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-ink-2">
