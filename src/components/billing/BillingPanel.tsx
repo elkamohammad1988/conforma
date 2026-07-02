@@ -41,7 +41,7 @@ function CardIcon({ d }: { d: string }) {
 }
 
 export function BillingPanel() {
-  const { t } = useI18n();
+  const { t, formatDate } = useI18n();
   const { toast } = useToast();
   const session = useSession();
   const systems = useSystems();
@@ -50,7 +50,20 @@ export function BillingPanel() {
   // Demo Mode: no billing surface.
   if (!session) return null;
 
-  const { plan, activeOrg, billingEnabled } = session;
+  const { plan, activeOrg, billingEnabled, subscription } = session;
+  const periodDate = subscription?.currentPeriodEnd
+    ? formatDate(subscription.currentPeriodEnd, {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null;
+  const alert =
+    subscription?.status === "past_due"
+      ? t("billing.pastDue")
+      : subscription?.status === "canceled"
+        ? t("billing.canceled")
+        : null;
   const canManage = activeOrg ? activeOrg.role !== "member" : false;
   const systemLimit = PLAN_LIMITS[plan].systems;
   const used = systems?.length ?? 0;
@@ -83,7 +96,20 @@ export function BillingPanel() {
       <div className="mt-4 space-y-4">
         {/* Current plan */}
         <div className="flex items-center justify-between gap-4">
-          <span className="text-sm text-ink-2">{t("billing.currentPlan")}</span>
+          <div className="min-w-0">
+            <span className="text-sm text-ink-2">{t("billing.currentPlan")}</span>
+            {alert ? (
+              <p className="text-xs font-medium text-danger-500">{alert}</p>
+            ) : (
+              periodDate && (
+                <p className="text-xs text-ink-3">
+                  {t(subscription?.cancelAtPeriodEnd ? "billing.cancels" : "billing.renews", {
+                    date: periodDate,
+                  })}
+                </p>
+              )
+            )}
+          </div>
           <span className="inline-flex items-center gap-2">
             <span className="rounded-full border border-brand-500/40 bg-brand-500/10 px-2.5 py-0.5 text-xs font-semibold text-brand-400">
               {t(`billing.plan.${plan}`)}

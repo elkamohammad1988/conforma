@@ -4,10 +4,17 @@
  * free of `server-only` so both sides can import it.
  */
 
-import type { OrgRole } from "@/lib/supabase/types";
+import type { OrgRole, SubscriptionStatus } from "@/lib/supabase/types";
 import type { PlanTier } from "@/lib/billing/plans";
 
 export type { OrgRole };
+
+/** The active org's billing status, or `null` when there's no subscription row. */
+export interface SubscriptionSummary {
+  status: SubscriptionStatus;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
 
 export interface OrgSummary {
   id: string;
@@ -26,6 +33,8 @@ export interface ActiveContext {
   activeOrg: OrgSummary | null;
   /** The active org's billing plan (defaults to `free`). */
   plan: PlanTier;
+  /** The active org's subscription details, or `null`. */
+  subscription: SubscriptionSummary | null;
   /** Whether Stripe is configured (upgrade/portal available). */
   billingEnabled: boolean;
 }

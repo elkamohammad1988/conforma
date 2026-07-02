@@ -16,6 +16,7 @@ function mockClient(opts: {
   memberships?: Membership[];
   orgs?: Org[];
   plan?: string | null;
+  sub?: Record<string, unknown> | null;
 }) {
   return {
     auth: { getUser: () => Promise.resolve({ data: { user: opts.user } }) },
@@ -27,12 +28,10 @@ function mockClient(opts: {
         return { select: () => ({ in: () => Promise.resolve({ data: opts.orgs ?? [] }) }) };
       }
       if (table === "subscriptions") {
+        const data = opts.sub ?? (opts.plan ? { plan: opts.plan } : null);
         return {
           select: () => ({
-            eq: () => ({
-              maybeSingle: () =>
-                Promise.resolve({ data: opts.plan ? { plan: opts.plan } : null }),
-            }),
+            eq: () => ({ maybeSingle: () => Promise.resolve({ data }) }),
           }),
         };
       }
@@ -127,5 +126,40 @@ describe("getActiveContext", () => {
     );
     const ctx = await getActiveContext();
     expect(ctx?.plan).toBe("pro");
+  });
+
+  it("exposes subscription status, period end and cancel flag", async () => {
+    setClient(
+      mockClient({
+        user: { id: "u1" },
+        memberships: [{ org_id: "a", role: "owner" }],
+        orgs: [{ id: "a", name: "Alpha", slug: "alpha" }],
+        sub: {
+          plan: "team",
+          status: "active",
+          current_period_end: "2026-08-01T00:00:00Z",
+          cancel_at_period_end: true,
+        },
+      }),
+    );
+    const ctx = await getActiveContext();
+    expect(ctx?.plan).toBe("team");
+    expect(ctx?.subscription).toEqual({
+      status: "active",
+      currentPeriodEnd: "2026-08-01T00:00:00Z",
+      cancelAtPeriodEnd: true,
+    });
+  });
+
+  it("has a null subscription when there is no subscription row", async () => {
+    setClient(
+      mockClient({
+        user: { id: "u1" },
+        memberships: [{ org_id: "a", role: "owner" }],
+        orgs: [{ id: "a", name: "Alpha", slug: "alpha" }],
+      }),
+    );
+    const ctx = await getActiveContext();
+    expect(ctx?.subscription).toBeNull();
   });
 });

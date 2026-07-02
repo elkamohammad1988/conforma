@@ -13,7 +13,12 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ACTIVE_ORG_COOKIE, type ActiveContext, type OrgSummary } from "./types";
+import {
+  ACTIVE_ORG_COOKIE,
+  type ActiveContext,
+  type OrgSummary,
+  type SubscriptionSummary,
+} from "./types";
 import type { PlanTier } from "@/lib/billing/plans";
 import { isStripeConfigured } from "@/lib/billing/stripe";
 
@@ -44,7 +49,14 @@ export async function getActiveContext(): Promise<ActiveContext | null> {
 
   const rows = memberships ?? [];
   if (rows.length === 0) {
-    return { ...base, orgs: [], activeOrg: null, plan: "free", billingEnabled };
+    return {
+      ...base,
+      orgs: [],
+      activeOrg: null,
+      plan: "free",
+      subscription: null,
+      billingEnabled,
+    };
   }
 
   const roleById = new Map(rows.map((r) => [r.org_id, r.role]));
@@ -69,14 +81,22 @@ export async function getActiveContext(): Promise<ActiveContext | null> {
   const activeOrg = orgs.find((o) => o.id === activeId) ?? orgs[0] ?? null;
 
   let plan: PlanTier = "free";
+  let subscription: SubscriptionSummary | null = null;
   if (activeOrg) {
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("plan")
+      .select("plan, status, current_period_end, cancel_at_period_end")
       .eq("org_id", activeOrg.id)
       .maybeSingle();
-    if (sub?.plan) plan = sub.plan;
+    if (sub) {
+      if (sub.plan) plan = sub.plan;
+      subscription = {
+        status: sub.status,
+        currentPeriodEnd: sub.current_period_end,
+        cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+      };
+    }
   }
 
-  return { ...base, orgs, activeOrg, plan, billingEnabled };
+  return { ...base, orgs, activeOrg, plan, subscription, billingEnabled };
 }
