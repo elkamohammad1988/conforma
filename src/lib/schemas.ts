@@ -112,6 +112,8 @@ export const generateDocBodySchema = z.object({
   organisation: z.string().max(INPUT_LIMITS.organisation).optional(),
   result: classificationResultSchema,
   locale: localeField,
+  /** Optional: links a persisted document to its system (Production Mode). */
+  systemId: shortStr.optional(),
 });
 
 export type ExplainBody = z.infer<typeof explainBodySchema>;
