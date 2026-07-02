@@ -14,9 +14,8 @@
  */
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { SITE_URL } from "@/lib/site";
+import { requestOrigin } from "@/lib/request-origin";
 import { isEmail, sanitizeNextPath } from "@/lib/validation";
 
 export interface AuthActionState {
@@ -33,14 +32,6 @@ const MIN_PASSWORD = 8;
 function parseEmail(value: FormDataEntryValue | null): string | null {
   const s = typeof value === "string" ? value.trim().toLowerCase() : "";
   return isEmail(s) ? s : null;
-}
-
-/** Prefer the live request origin (works in dev/preview) over the static URL. */
-async function siteOrigin(): Promise<string> {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  const proto = h.get("x-forwarded-proto") ?? "https";
-  return host ? `${proto}://${host}` : SITE_URL;
 }
 
 /** Map a Supabase auth error to an i18n subpath under `auth.`. */
@@ -76,7 +67,7 @@ export async function signUpAction(
   if (!email) return { error: "errors.generic" };
   if (password.length < MIN_PASSWORD) return { error: "errors.weakPassword" };
 
-  const origin = await siteOrigin();
+  const origin = await requestOrigin();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -125,7 +116,7 @@ export async function requestPasswordResetAction(
   // Always report success — never reveal whether an account exists.
   if (!supabase || !email) return { ok: true, email: email ?? "" };
 
-  const origin = await siteOrigin();
+  const origin = await requestOrigin();
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/confirm?next=${encodeURIComponent("/reset-password")}`,
   });
@@ -140,7 +131,7 @@ export async function resendVerificationAction(
   const email = parseEmail(formData.get("email"));
   if (!supabase || !email) return { ok: true, email: email ?? "" };
 
-  const origin = await siteOrigin();
+  const origin = await requestOrigin();
   await supabase.auth.resend({
     type: "signup",
     email,
