@@ -1531,6 +1531,7 @@ const zhCN: Messages = {
     members: "成员",
     you: "你",
     remove: "移除",
+    role: "角色",
     roles: { owner: "所有者", admin: "管理员", member: "成员" },
     invite: "通过邮箱邀请",
     emailPlaceholder: "tongshi@company.com",

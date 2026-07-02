@@ -1545,6 +1545,7 @@ const es: Messages = {
     members: "Miembros",
     you: "Tú",
     remove: "Quitar",
+    role: "Rol",
     roles: { owner: "Propietario", admin: "Administrador", member: "Miembro" },
     invite: "Invitar por correo",
     emailPlaceholder: "companero@empresa.com",

@@ -58,6 +58,7 @@ export function ApiKeysCard({ apiKeys }: { apiKeys: ApiKeySummary[] }) {
           required
           maxLength={100}
           placeholder={t("apiKeys.namePlaceholder")}
+          aria-label={t("apiKeys.nameLabel")}
           className="field min-w-[14rem] flex-1 px-3.5 py-2.5"
         />
         <button type="submit" className="btn btn-primary btn-sm">

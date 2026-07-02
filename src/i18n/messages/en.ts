@@ -1547,6 +1547,7 @@ const en = {
     members: "Members",
     you: "You",
     remove: "Remove",
+    role: "Role",
     roles: { owner: "Owner", admin: "Admin", member: "Member" },
     invite: "Invite by email",
     emailPlaceholder: "teammate@company.com",

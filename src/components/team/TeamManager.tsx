@@ -178,6 +178,7 @@ function WorkspaceName({ name, canManage }: { name: string; canManage: boolean }
           defaultValue={name}
           disabled={!canManage}
           maxLength={120}
+          aria-label={t("team.orgName")}
           className="field max-w-xs px-3.5 py-2.5"
         />
         {canManage && (
@@ -217,9 +218,15 @@ function InviteForm() {
           type="email"
           required
           placeholder={t("team.emailPlaceholder")}
+          aria-label={t("auth.emailLabel")}
           className="field min-w-[14rem] flex-1 px-3.5 py-2.5"
         />
-        <select name="role" className="field px-3.5 py-2.5" defaultValue="member">
+        <select
+          name="role"
+          aria-label={t("team.role")}
+          className="field px-3.5 py-2.5"
+          defaultValue="member"
+        >
           <option value="member">{t("team.roles.member")}</option>
           <option value="admin">{t("team.roles.admin")}</option>
         </select>
@@ -291,6 +298,7 @@ function MembersCard({
                 <select
                   defaultValue={m.role}
                   disabled={pending}
+                  aria-label={`${t("team.role")} — ${m.fullName || m.email || m.userId}`}
                   onChange={(e) =>
                     run(() => changeMemberRoleAction(m.userId, e.target.value as OrgRole))
                   }

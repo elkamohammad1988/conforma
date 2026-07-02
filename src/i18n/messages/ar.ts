@@ -1561,6 +1561,7 @@ const ar: Messages = {
     members: "الأعضاء",
     you: "أنت",
     remove: "إزالة",
+    role: "الدور",
     roles: { owner: "المالك", admin: "مسؤول", member: "عضو" },
     invite: "دعوة عبر البريد الإلكتروني",
     emailPlaceholder: "zameel@company.com",

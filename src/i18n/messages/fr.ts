@@ -1547,6 +1547,7 @@ const fr: Messages = {
     members: "Membres",
     you: "Vous",
     remove: "Retirer",
+    role: "Rôle",
     roles: { owner: "Propriétaire", admin: "Administrateur", member: "Membre" },
     invite: "Inviter par e-mail",
     emailPlaceholder: "collegue@entreprise.com",
