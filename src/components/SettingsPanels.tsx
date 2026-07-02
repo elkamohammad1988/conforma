@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { useAiMode } from "@/components/AiModeProvider";
+import { BillingPanel } from "@/components/billing/BillingPanel";
 import { REPO_URL, DOCS_URL } from "@/lib/site";
 
 /* Compact 1.6-stroke icons, consistent with the app chrome's hand-drawn set. */
@@ -98,7 +99,7 @@ export function SettingsPanels({ version }: { version: string }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
           {t("settings.title")}
         </h1>
         <p className="mt-1 text-sm text-ink-2">{t("settings.subtitle")}</p>
@@ -145,6 +146,9 @@ export function SettingsPanels({ version }: { version: string }) {
             <LanguageSwitcher align="start" />
           </div>
         </Section>
+
+        {/* Billing & plan — renders only in Production Mode (signed-in session) */}
+        <BillingPanel />
 
         {/* Registry data */}
         <Section
