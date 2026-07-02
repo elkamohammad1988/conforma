@@ -10,6 +10,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { aiMode } from "@/lib/claude";
+import { validateEnv } from "@/lib/env";
 import pkg from "../../../../package.json";
 
 export const dynamic = "force-dynamic";
@@ -35,17 +36,21 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const healthy = database !== "error";
+  const env = validateEnv();
+  const healthy = database !== "error" && env.ok;
   return NextResponse.json(
     {
       status: healthy ? "ok" : "degraded",
       version: pkg.version,
       time: new Date().toISOString(),
+      mode: env.mode,
       services: {
         database,
         billing: process.env.STRIPE_SECRET_KEY ? "configured" : "disabled",
         ai: aiMode(),
       },
+      // Only surface the specific misconfiguration details on the deep probe.
+      ...(deep ? { config: env } : { configOk: env.ok }),
     },
     { status: healthy ? 200 : 503 },
   );
