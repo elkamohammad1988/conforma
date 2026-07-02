@@ -69,19 +69,20 @@ demo-able with zero credentials and never breaks on a transient API error. The A
 never recomputes the risk tier — it only explains or documents the tier the engine
 already produced.
 
-### 4. Persistence — `src/lib/store.ts`
+### 4. Persistence — `src/lib/store.ts` (dual backend)
 
-For a zero-credential demo, the registry lives in the browser's `localStorage`,
-exposed through a small **external store** consumed with React's
-`useSyncExternalStore`:
+The registry is exposed through a small **external store** consumed with React's
+`useSyncExternalStore`, with two interchangeable backends selected at runtime:
 
-- `useSystems()` / `useSystem(id)` are SSR-safe reactive reads (server snapshot is
-  `null`, so there is no hydration mismatch and no `setState`-in-effect).
-- Mutations (`saveSystem`, `deleteSystem`, `setObligationState`) persist and notify
-  subscribers, so the UI updates without any manual refetching.
+- **Demo Mode** — the browser's `localStorage`, seeded with realistic demo data.
+- **Production Mode** — the RLS-scoped **Supabase browser client**, with an
+  optimistic cache, tenant-bounded by the active organization.
 
-The store interface is deliberately isolated: replacing it with a Postgres/Supabase
-+ RLS backend is a localised change.
+`useSystems()` / `useSystem(id)` are SSR-safe reactive reads (server snapshot is
+`null` → no hydration mismatch); mutations persist and notify subscribers so the
+UI updates without manual refetching. `SessionProvider` calls
+`configureRegistryBackend` to flip the backend when a session resolves — consumers
+never branch on mode.
 
 ### 5. The UI — `src/app/` and `src/components/`
 
@@ -99,6 +100,27 @@ Open Graph image, JSON-LD, `robots.ts` and `sitemap.ts`.
 | Server-only AI module | The API key stays out of the client bundle entirely. |
 | External-store persistence | SSR-safe client state today; a clean seam for a real database tomorrow. |
 | Graceful Demo Mode fallback | The product works — and demos — with no credentials and survives API errors, returning realistic pre-generated drafts instead of errors. |
+
+## Production Mode: backend, auth, tenancy, billing
+
+Everything above works with zero credentials (Demo Mode). Supplying environment
+variables activates a full multi-tenant SaaS on the **same codebase** — the switch
+is centralized in `isSupabaseConfigured()` / `isStripeConfigured()`.
+
+- **Database + RLS** — Supabase Postgres. Every table has Row Level Security;
+  tenant isolation is enforced *in the database*, verified by `npm run verify:rls`.
+  See [DATABASE.md](./DATABASE.md).
+- **Auth** — Supabase Auth (email/password, verification, reset). Sessions are
+  refreshed in `proxy.ts`; routes are guarded by the proxy + `AppGuard`.
+- **Tenancy** — `organizations` + `org_members` (owner/admin/member). All data is
+  scoped by `org_id`; the active org lives in a cookie and `getActiveContext`.
+- **Billing** — Stripe (Free/Pro/Team). Subscriptions are Stripe-owned and
+  projected into the DB by a signature-verified webhook; plan limits are enforced
+  by a DB trigger. See the Billing section of [DATABASE.md](./DATABASE.md).
+- **Team** — token-based invitations + member management, with an append-only
+  audit log surfaced as an activity timeline.
+- **Ops** — structured logging, `captureError`, `/api/health`, provider-agnostic
+  analytics. See [OPERATIONS.md](./OPERATIONS.md).
 
 ## Request flow: generating a document
 

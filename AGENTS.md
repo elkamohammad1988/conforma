@@ -26,9 +26,23 @@ Router app.
 | Encoded regulation (source of truth) | `src/lib/eu-ai-act.ts` |
 | Deterministic classifier | `src/lib/classifier.ts` |
 | Optional, server-only AI layer | `src/lib/claude.ts` |
-| Registry persistence (external store) | `src/lib/store.ts` |
+| Domain model / dual-backend store | `src/lib/registry.ts`, `src/lib/store.ts` |
+| Supabase clients + typed schema | `src/lib/supabase/` |
+| Data access (repository) | `src/lib/data/` |
+| Auth (session, route policy, actions) | `src/lib/auth/` |
+| Billing (plans, Stripe, webhook) | `src/lib/billing/`, `src/app/api/stripe/` |
+| Team (invitations, member mgmt) | `src/lib/team/` |
+| Observability + analytics | `src/lib/observability.ts`, `src/lib/analytics.ts` |
+| Database schema + RLS (source of truth) | `supabase/migrations/` |
 | Pages, layouts, API routes, SEO | `src/app/` |
 | Reusable UI | `src/components/` |
+
+## Dual-mode (important)
+
+The app runs with **zero credentials** (Demo Mode: localStorage, no auth) and
+becomes a full multi-tenant SaaS when env vars are set (Production Mode: Supabase
++ auth + RLS + Stripe). Never break Demo Mode — gate backend behaviour on
+`isSupabaseConfigured()` / `isStripeConfigured()`. See [docs/architecture.md](docs/architecture.md).
 
 ## Non-negotiables
 

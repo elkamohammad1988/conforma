@@ -1,8 +1,9 @@
 # API reference
 
-Conforma exposes three server-only route handlers. Two draft AI content and one
-reports the generation mode. The deterministic classifier and the registry run
-entirely client-side and have no HTTP surface.
+Conforma exposes server-only route handlers: two draft AI content, one reports the
+generation mode, one is a health check, and one receives Stripe webhooks. The
+deterministic classifier runs client-side and has no HTTP surface; tenant data is
+read/written directly via the RLS-scoped Supabase client, not a bespoke API.
 
 All routes run on the Node.js runtime with a 60-second `maxDuration`. The two
 `POST` routes are unauthenticated and therefore guarded: an in-memory,
@@ -117,9 +118,72 @@ endpoint is handy for health checks and external monitoring.
 
 ---
 
+## `GET /api/health`
+
+Health check for uptime monitors and load balancers. Shallow by default; pass
+`?deep=1` for a readiness probe that also pings the database (returns `503` if it
+is unreachable).
+
+**`200` response**
+
+```json
+{
+  "status": "ok",
+  "version": "1.1.0",
+  "time": "2026-07-02T12:00:00.000Z",
+  "services": { "database": "ok", "billing": "configured", "ai": "live" }
+}
+```
+
+---
+
+## `POST /api/stripe/webhook`
+
+Receives Stripe events and is the **only** writer of subscription state. Verifies
+the `stripe-signature` header against the raw body; returns `400` on a bad
+signature and `503` if billing is not configured. Handles
+`checkout.session.completed` and `customer.subscription.*`. Not called directly —
+Stripe delivers to it. See [OPERATIONS.md](./OPERATIONS.md) and the Billing setup
+in [DATABASE.md](./DATABASE.md).
+
+---
+
+## Authenticated API (v1)
+
+Available in Production Mode. Create an **API key** in *Team → API keys* (owner/
+admin). The plaintext key (`cfm_…`) is shown once; only its hash is stored. Send
+it as a bearer token; the key resolves to exactly one organization and all data
+is scoped to it.
+
+### `GET /api/v1/systems`
+
+Lists the AI systems in the key's organization.
+
+```bash
+curl -s https://your-app.com/api/v1/systems \
+  -H "Authorization: Bearer cfm_your_key_here"
+```
+
+```json
+{
+  "systems": [
+    { "id": "…", "name": "TalentRank — CV screening", "tier": "high",
+      "isGPAI": false, "compliance": 45, "owner": "People Operations",
+      "createdAt": "…", "updatedAt": "…" }
+  ]
+}
+```
+
+Returns `401` for a missing/invalid/revoked key.
+
+---
+
 ## Example
 
 ```bash
+curl -s https://conforma-ten.vercel.app/api/health
+# {"status":"ok","version":"1.1.0",...}
+
 curl -s https://conforma-ten.vercel.app/api/ai-status
 # {"mode":"demo","demo":true}
 ```

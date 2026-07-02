@@ -58,13 +58,22 @@ CMD ["npm", "run", "start"]
 
 ## Environment variables
 
-| Variable | Required | Purpose |
-| --- | :---: | --- |
-| `ANTHROPIC_API_KEY` | No | Live Claude drafting; Demo Mode (realistic pre-generated drafts) is used when unset. |
-| `NEXT_PUBLIC_APP_URL` | No | Absolute base URL for SEO/OG (defaults to `http://localhost:3000`). |
+All optional — with none set the app runs in Demo Mode. Add them to switch on
+Production Mode. Full annotated list in [`.env.example`](../.env.example).
 
-> Set `NEXT_PUBLIC_APP_URL` in production so `sitemap.xml`, canonical tags and Open
-> Graph images point at your real domain.
+| Variable | Group | Purpose |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | AI | Live Claude drafting; Demo Mode when unset. |
+| `NEXT_PUBLIC_APP_URL` | App | Absolute base URL for SEO/OG + auth redirects. |
+| `NEXT_PUBLIC_SUPABASE_URL` | DB | Supabase project URL (public). |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | DB | Supabase anon key (public; RLS protects data). |
+| `SUPABASE_SERVICE_ROLE_KEY` | DB | **Server-only.** Bypasses RLS (webhooks, admin). |
+| `STRIPE_SECRET_KEY` | Billing | **Server-only.** Enables subscriptions. |
+| `STRIPE_WEBHOOK_SECRET` | Billing | **Server-only.** Verifies webhook signatures. |
+| `STRIPE_PRICE_*` | Billing | Price IDs for Pro/Team monthly/annual. |
+
+> Public `NEXT_PUBLIC_*` values are safe in the browser. `service_role` and Stripe
+> secrets must never be exposed client-side.
 
 ## Pre-deploy checklist
 
@@ -78,14 +87,26 @@ npm run build       # clean production build
 CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) runs all four on
 every push and pull request.
 
-## Scaling beyond the demo
+## Production Mode setup (database, auth, billing)
 
-The demo persists the registry in the browser. A multi-user production deployment
-would add:
+The multi-tenant backend is built in — provisioning it is configuration, not code.
 
-- **Database** — swap `src/lib/store.ts` for Postgres/Supabase with row-level
-  security. The store interface is isolated to make this a localised change.
-- **Auth & tenancy** — organisations, SSO/SAML, role-based access.
-- **Background jobs** — for long-running document generation and exports.
+1. **Supabase** — create a project, then from the repo:
+   ```bash
+   supabase link --project-ref <ref>
+   supabase db push          # applies supabase/migrations/*
+   ```
+   Put the URL + anon key + service-role key in your environment. Configure Auth
+   redirect URLs. Full steps: [DATABASE.md](DATABASE.md).
+2. **Verify tenant isolation** against the live DB:
+   ```bash
+   npm run verify:rls        # 12 isolation checks, self-cleaning
+   ```
+3. **Stripe** (optional) — create Pro/Team products + prices, set the secret key,
+   price IDs and a webhook (`/api/stripe/webhook`) signing secret. Steps in the
+   Billing section of [DATABASE.md](DATABASE.md).
+4. **Deploy** and set all env vars. Post-deploy, check `GET /api/health?deep=1`.
 
-See [architecture.md](architecture.md) for the seams these would plug into.
+Operational detail (logging, monitoring, backups, rate limiting) is in
+[OPERATIONS.md](OPERATIONS.md); the system design is in
+[architecture.md](architecture.md).
