@@ -31,9 +31,13 @@ unchanged; setting them activates a full backend on the same codebase.
   append-only audit log with an activity timeline, hashed API keys with an
   authenticated `GET /api/v1/systems` endpoint, a usage overview, and org settings.
 - **Operations** — structured JSON logging, an error-capture seam, a
-  provider-agnostic analytics abstraction, and a `GET /api/health` check.
+  provider-agnostic analytics abstraction, an environment validator
+  (`validateEnv` + `npm run check:env`) surfaced in `GET /api/health`, a local-dev
+  seed (`npm run seed`), and document persistence (`documents` repository +
+  `/api/v1/documents`; generated docs are saved to the org).
 - **Documentation** — architecture, database, deployment, operations, API,
-  developer onboarding, and a consolidated `GO-LIVE.md` runbook.
+  developer onboarding, a consolidated `GO-LIVE.md` runbook with a production
+  checklist, and `ROLLBACK.md` (per-layer rollback procedures).
 
 ### Changed
 
