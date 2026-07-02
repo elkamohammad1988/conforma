@@ -47,7 +47,7 @@ export function DemoForm() {
           >
             ✓
           </div>
-        <h2 className="mt-5 text-2xl font-semibold">
+        <h2 className="mt-5 text-2xl font-semibold text-ink">
           {t("demoForm.success.title", {
             name: form.name || t("demoForm.success.nameFallback"),
           })}

@@ -108,7 +108,7 @@ export default function SystemDetailPage({
         <div className="relative px-7 py-7">
           <div className="flex flex-wrap items-center gap-3">
             <RiskBadge tier={system.result.tier} />
-            <h1 className="text-2xl font-semibold tracking-tight">{system.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{system.name}</h1>
             {system.result.isGPAI && (
               <span className="rounded-full bg-ink/10 px-2.5 py-1 text-xs font-medium text-brand-300">
                 {t("system.plusGpai")}
@@ -155,7 +155,7 @@ export default function SystemDetailPage({
         <div className="border-t border-line bg-ink/[0.04] px-7 py-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-ink-2">{t("system.compliance")}</span>
-            <span className="font-semibold">{pct}%</span>
+            <span className="font-semibold nums">{pct}%</span>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-ink/10">
             <div

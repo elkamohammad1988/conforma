@@ -147,7 +147,7 @@ export function AlertsMenu() {
           role="dialog"
           aria-label={t("alerts.title")}
           tabIndex={-1}
-          className="absolute end-0 top-full z-50 mt-2 w-[20rem] overflow-hidden rounded-xl border border-line bg-raised shadow-[var(--shadow-pop)] focus:outline-none"
+          className="animate-pop absolute end-0 top-full z-50 mt-2 w-[20rem] overflow-hidden rounded-xl border border-line bg-raised shadow-[var(--shadow-pop)] focus:outline-none"
         >
           <div className="border-b border-line px-4 py-3">
             <p className="text-sm font-semibold text-ink">{t("alerts.title")}</p>

@@ -1604,6 +1604,17 @@ const es: Messages = {
     lastUsed: "Último uso el {date}",
     neverUsed: "Nunca usada",
   },
+
+  /* -------------------------------------------------------------- documents */
+  documents: {
+    title: "Documentos",
+    subtitle: "Documentos de cumplimiento generados para tu organización.",
+    nav: "Documentos",
+    empty: "Aún no hay documentos: genera uno desde el informe de un sistema.",
+    view: "Ver",
+    close: "Cerrar",
+    generated: "Generado el {date}",
+  },
 };
 
 export default es;

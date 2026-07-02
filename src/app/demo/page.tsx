@@ -14,7 +14,7 @@ export default function DemoPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
             {t("demo.eyebrow")}
           </p>
-          <h1 className="mt-3 text-[2.25rem] font-semibold leading-[1.1] text-ink">
+          <h1 className="mt-3 text-[2.25rem] font-semibold leading-[1.1] text-ink sm:text-[2.75rem]">
             {t("demo.title")}
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-ink-2">

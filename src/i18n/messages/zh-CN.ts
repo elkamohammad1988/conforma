@@ -1590,6 +1590,17 @@ const zhCN: Messages = {
     lastUsed: "上次使用 {date}",
     neverUsed: "从未使用",
   },
+
+  /* -------------------------------------------------------------- documents */
+  documents: {
+    title: "文档",
+    subtitle: "为你的组织生成的合规文档。",
+    nav: "文档",
+    empty: "暂无文档——从系统报告中生成一个。",
+    view: "查看",
+    close: "关闭",
+    generated: "生成于 {date}",
+  },
 };
 
 export default zhCN;

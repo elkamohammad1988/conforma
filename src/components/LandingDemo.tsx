@@ -129,7 +129,7 @@ export function LandingDemo() {
               <div className="text-xs uppercase tracking-[0.1em] text-ink-3">
                 {t("landingDemo.obligations")}
               </div>
-              <div className="mt-0.5 text-xl font-semibold text-ink tabular-nums">
+              <div className="mt-0.5 text-xl font-semibold text-ink nums">
                 {result.obligations.length}
               </div>
             </div>

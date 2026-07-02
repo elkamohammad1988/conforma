@@ -18,8 +18,9 @@ export function ComplianceTimeline() {
     formatDate(iso, { year: "numeric", month: "short", day: "numeric" });
 
   const InForce = () => (
-    <span className="inline-flex items-center gap-1 rounded-full bg-ok-500/10 px-2 py-0.5 text-[11px] font-semibold text-ok-400">
-      ● {t("home.timeline.inForce")}
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-ok-500/10 px-2 py-0.5 text-[11px] font-semibold text-ok-400 ring-1 ring-inset ring-ok-500/25">
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-ok-500" />
+      {t("home.timeline.inForce")}
     </span>
   );
 
@@ -37,11 +38,11 @@ export function ComplianceTimeline() {
             <li key={d.id} className="relative">
               <div
                 aria-hidden
-                className="absolute left-0 right-0 top-[11px] h-px bg-ink/10"
+                className="absolute start-0 end-0 top-[11px] h-px bg-ink/10"
               />
               <div className="relative flex justify-center">
                 <span
-                  className={`h-3.5 w-3.5 rounded-full ring-4 ring-paper ${
+                  className={`h-3.5 w-3.5 rounded-full ring-4 ring-[var(--background)] ${
                     inForce ? "bg-ok-500" : "bg-brand-600"
                   }`}
                 />
@@ -62,7 +63,7 @@ export function ComplianceTimeline() {
                   ) : (
                     <Countdown
                       deadline={d.date}
-                      className="text-[11px] font-semibold text-warn-400"
+                      className="text-[11px] font-semibold text-brass-700"
                     />
                   )}
                 </div>
@@ -79,7 +80,7 @@ export function ComplianceTimeline() {
           return (
             <li key={d.id} className="relative ps-10">
               <span
-                className={`absolute start-2 top-1.5 h-3.5 w-3.5 rounded-full ring-4 ring-paper ${
+                className={`absolute start-2 top-1.5 h-3.5 w-3.5 rounded-full ring-4 ring-[var(--background)] ${
                   inForce ? "bg-ok-500" : "bg-brand-600"
                 }`}
               />
@@ -98,7 +99,7 @@ export function ComplianceTimeline() {
                 ) : (
                   <Countdown
                     deadline={d.date}
-                    className="text-[11px] font-semibold text-warn-400"
+                    className="text-[11px] font-semibold text-brass-700"
                   />
                 )}
               </div>

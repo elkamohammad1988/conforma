@@ -1606,6 +1606,17 @@ const en = {
     lastUsed: "Last used {date}",
     neverUsed: "Never used",
   },
+
+  /* -------------------------------------------------------------- documents */
+  documents: {
+    title: "Documents",
+    subtitle: "Compliance documents generated for your organization.",
+    nav: "Documents",
+    empty: "No documents yet — generate one from a system's report.",
+    view: "View",
+    close: "Close",
+    generated: "Generated {date}",
+  },
 };
 
 export default en;

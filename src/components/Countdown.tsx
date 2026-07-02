@@ -22,7 +22,7 @@ export function Countdown({
     null,
   );
 
-  if (days === null) return <span className={className}>—</span>;
-  if (days < 0) return <span className={className}>{t("common.deadlinePassed")}</span>;
-  return <span className={className}>{t("common.daysLeft", { count: days })}</span>;
+  if (days === null) return <span className={`${className} nums`}>—</span>;
+  if (days < 0) return <span className={`${className} nums`}>{t("common.deadlinePassed")}</span>;
+  return <span className={`${className} nums`}>{t("common.daysLeft", { count: days })}</span>;
 }

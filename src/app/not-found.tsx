@@ -8,7 +8,9 @@ export default function NotFound() {
   const t = useT();
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center px-5 py-28 text-center">
-      <LogoMark className="h-12 w-12" />
+      <span className="grid h-14 w-14 place-items-center rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+        <LogoMark className="h-7 w-7" />
+      </span>
       <div className="mt-6 text-5xl font-semibold tracking-tight text-ink-3 nums">
         {t("notFound.code")}
       </div>

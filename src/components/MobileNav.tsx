@@ -67,7 +67,7 @@ export function MobileNav() {
         aria-expanded={open}
         aria-controls="mobile-nav-panel"
         onClick={() => setOpen((o) => !o)}
-        className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 hover:bg-ink/[0.04]"
+        className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 transition hover:bg-ink/[0.04]"
       >
         <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
           {open ? (
@@ -81,7 +81,7 @@ export function MobileNav() {
       {open && (
         <>
           <div
-            className="fixed inset-0 top-16 z-30 bg-ink/20"
+            className="animate-fade-in fixed inset-0 top-16 z-30 bg-ink/20"
             onClick={close}
           />
           <div
@@ -90,7 +90,7 @@ export function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label={t("nav.menu")}
-            className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl"
+            className="animate-pop absolute inset-x-0 top-full z-40 border-b border-line bg-raised p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl"
           >
             <nav className="flex flex-col">
               {links.map((l) => (
@@ -98,7 +98,7 @@ export function MobileNav() {
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-2 hover:bg-ink/[0.04]"
+                  className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04]"
                 >
                   {l.label}
                 </Link>

@@ -87,7 +87,7 @@ export default function ReportPage() {
             ].map(([l, v]) => (
               <div key={l} className="rounded-lg border border-line p-4">
                 <div className="text-xs uppercase tracking-[0.1em] text-ink-3">{l}</div>
-                <div className="mt-1 text-2xl font-semibold text-ink">{v}</div>
+                <div className="mt-1 text-2xl font-semibold text-ink nums">{v}</div>
               </div>
             ))}
           </div>
@@ -134,10 +134,10 @@ export default function ReportPage() {
                       <RiskBadge tier={s.result.tier} size="sm" />
                     </td>
                     <td className="py-2.5 text-ink-3">{s.owner || "—"}</td>
-                    <td className="py-2.5 text-end tabular-nums text-ink-2">
+                    <td className="py-2.5 text-end nums text-ink-2">
                       {outstanding}
                     </td>
-                    <td className="py-2.5 text-end font-medium tabular-nums">
+                    <td className="py-2.5 text-end font-medium nums">
                       {compliancePct(s)}%
                     </td>
                   </tr>

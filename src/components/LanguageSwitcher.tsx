@@ -51,6 +51,8 @@ export function LanguageSwitcher({
   const { locale, setLocale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -68,6 +70,17 @@ export function LanguageSwitcher({
     };
   }, [open]);
 
+  // Move focus into the menu on open (the active language first) and restore it
+  // to the trigger on close — matches AlertsMenu's popover focus behaviour.
+  useEffect(() => {
+    if (!open) return;
+    const trigger = triggerRef.current;
+    const panel = panelRef.current;
+    const active = panel?.querySelector<HTMLElement>('[aria-checked="true"]');
+    (active ?? panel?.querySelector<HTMLElement>("button"))?.focus();
+    return () => trigger?.focus();
+  }, [open]);
+
   const choose = (next: Locale) => {
     setLocale(next);
     setOpen(false);
@@ -76,6 +89,7 @@ export function LanguageSwitcher({
   return (
     <div ref={ref} className={`relative ${className}`}>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
@@ -101,9 +115,10 @@ export function LanguageSwitcher({
 
       {open && (
         <div
+          ref={panelRef}
           role="menu"
           aria-label={t("languageSwitcher.label")}
-          className={`absolute top-full z-50 mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-line bg-raised p-1 shadow-[var(--shadow-pop)] ${
+          className={`animate-pop absolute top-full z-50 mt-2 min-w-[12rem] overflow-hidden rounded-xl border border-line bg-raised p-1 shadow-[var(--shadow-pop)] ${
             align === "end" ? "end-0" : "start-0"
           }`}
         >

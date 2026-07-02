@@ -167,7 +167,7 @@ function parseBlocks(src: string): React.ReactNode[] {
             const task = /^\[([ xX])\]\s+(.*)$/.exec(raw);
             if (task) {
               return (
-                <li key={ii} className="list-none -ml-5 flex items-start gap-2">
+                <li key={ii} className="list-none -ms-5 flex items-start gap-2">
                   <span
                     aria-hidden
                     className={

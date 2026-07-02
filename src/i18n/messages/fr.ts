@@ -1606,6 +1606,17 @@ const fr: Messages = {
     lastUsed: "Dernière utilisation le {date}",
     neverUsed: "Jamais utilisée",
   },
+
+  /* -------------------------------------------------------------- documents */
+  documents: {
+    title: "Documents",
+    subtitle: "Documents de conformité générés pour votre organisation.",
+    nav: "Documents",
+    empty: "Aucun document — générez-en un depuis le rapport d'un système.",
+    view: "Voir",
+    close: "Fermer",
+    generated: "Généré le {date}",
+  },
 };
 
 export default fr;
