@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Transforms the localStorage demo into a production-ready, multi-tenant SaaS —
+**dual-mode**: with no environment variables the zero-credential Demo Mode is
+unchanged; setting them activates a full backend on the same codebase.
+
+### Added
+
+- **Database layer (Supabase/Postgres)** — production schema with Row Level
+  Security on every table (`supabase/migrations/`): organizations, memberships +
+  roles, systems, obligation tracking, documents, audit logs, subscriptions,
+  invitations, API keys. Typed clients (browser/server/service-role) and a
+  repository; the registry store now persists to Postgres in Production Mode.
+- **Authentication** — sign up, sign in, sign out, email verification, password
+  reset, session management (via the proxy), and protected routes. Organizations
+  with owner/admin/member roles and a first-run onboarding flow.
+- **Multi-tenancy** — every query is org-scoped and enforced by RLS; a live
+  isolation test suite (`npm run verify:rls`, 12 checks) proves cross-tenant
+  access is impossible.
+- **Billing (Stripe)** — Free/Pro/Team plans, checkout, customer portal
+  (upgrade/downgrade/cancel), a signature-verified webhook as the sole writer of
+  subscription state, and database-enforced usage limits.
+- **Team & enterprise** — token-based invitations, member management, an
+  append-only audit log with an activity timeline, hashed API keys with an
+  authenticated `GET /api/v1/systems` endpoint, a usage overview, and org settings.
+- **Operations** — structured JSON logging, an error-capture seam, a
+  provider-agnostic analytics abstraction, and a `GET /api/health` check.
+- **Documentation** — architecture, database, deployment, operations, API,
+  developer onboarding, and a consolidated `GO-LIVE.md` runbook.
+
+### Changed
+
+- The registry store is now dual-backend (localStorage ⇆ Supabase), selected by
+  the session; system ids are UUIDs. i18n extended (auth, billing, team, API keys)
+  across all five locales including RTL.
+
+### Security
+
+- Tenant isolation enforced in the database (RLS + `SECURITY DEFINER` helpers,
+  owner-authority and last-owner triggers). Service-role and Stripe secrets are
+  server-only. Stripe webhooks are signature-verified; redirect targets are
+  sanitized against open redirects; the CSP `connect-src` is scoped to the
+  Supabase origin.
+
 ## [1.1.0] — 2026-07-02
 
 ### Added
