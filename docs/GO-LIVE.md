@@ -11,6 +11,7 @@ its zero-credential fallback (Free plan / no auth / demo data).
 
 ```bash
 npm install
+npm run check:env                                                # config sanity
 npm run lint && npm run typecheck && npm test && npm run build   # must be green
 ```
 
@@ -78,3 +79,16 @@ Walk the 10 acceptance criteria once, live:
 - Consider durable **rate limiting** (Vercel Firewall / Upstash) in front of the API routes.
 
 See [OPERATIONS.md](OPERATIONS.md) for detail on each.
+
+## Production readiness checklist
+
+- [ ] `npm run check:env` clean (no partial groups)
+- [ ] `npm run lint && npm run typecheck && npm test && npm run build` green
+- [ ] Migrations applied (`supabase db push`); `GET /api/health?deep=1` → `database: ok`
+- [ ] `npm run verify:rls` → 12× PASS
+- [ ] Supabase Auth redirect URLs allow-listed; email confirmation on
+- [ ] Stripe products/prices created, webhook endpoint + signing secret set, portal enabled (if billing)
+- [ ] Supabase **PITR/backups** enabled
+- [ ] Secrets set server-side only; `NEXT_PUBLIC_APP_URL` = production origin
+- [ ] The 10 customer-journey checks (§4) pass live
+- [ ] Rollback plan understood — [ROLLBACK.md](ROLLBACK.md)

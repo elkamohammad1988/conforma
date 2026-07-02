@@ -11,7 +11,8 @@ multi-tenant SaaS once configured.
 | [GO-LIVE.md](GO-LIVE.md) | **Start here to launch** — one sequential runbook |
 | [architecture.md](architecture.md) | System design, layers, dual-mode, request flow |
 | [DATABASE.md](DATABASE.md) | Schema, RLS, auth setup, billing setup, isolation proof |
-| [OPERATIONS.md](OPERATIONS.md) | Health, logging, monitoring, rate limiting, backups |
+| [OPERATIONS.md](OPERATIONS.md) | Local dev, health, logging, monitoring, rate limiting, backups |
+| [ROLLBACK.md](ROLLBACK.md) | Rollback procedures for every layer (deploy, migration, data) |
 | [deployment.md](deployment.md) | Deploy + Production Mode provisioning + env vars |
 | [api.md](api.md) | HTTP endpoints |
 | [security.md](security.md) | Security posture |

@@ -69,8 +69,37 @@ Supabase provides managed Postgres backups:
   a database backup is a complete data backup. Generated documents and audit
   logs are included.
 
+## Local development
+
+```bash
+npm install
+cp .env.example .env.local          # blank = Demo Mode (no backend needed)
+npm run dev                          # http://localhost:3000
+```
+
+Run against a real backend locally by filling `.env.local` (Supabase, optionally
+Stripe), then:
+
+```bash
+npm run check:env                    # validate config (flags partial groups)
+supabase db push                     # apply migrations to your project
+npm run seed                         # demo user + org + systems (needs service role)
+npm run verify:rls                   # prove tenant isolation (12 checks)
+stripe listen --forward-to localhost:3000/api/stripe/webhook   # if testing billing
+```
+
+Sign in with the seeded credentials printed by `npm run seed`.
+
 ## Deploy
 
-`npm run lint && npm run typecheck && npm test && npm run build` must pass (CI
-gate). Deploy target: Vercel (or any Node host). Set all environment variables
-from `.env.example`; apply DB migrations with `supabase db push` before cutover.
+Preflight (all must pass — this is the CI gate):
+
+```bash
+npm run check:env                    # no partial/mis-configured env groups
+npm run lint && npm run typecheck && npm test && npm run build
+```
+
+Deploy target: Vercel (or any Node host). Set every variable from `.env.example`
+in the host; apply DB migrations with `supabase db push` before cutover; verify
+`GET /api/health?deep=1` after. Rollback procedures for every layer are in
+[ROLLBACK.md](ROLLBACK.md).
