@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "coverage/**",
     "next-env.d.ts",
     // Dev-only tooling: runs in Node and evaluates code inside the browser, so it
     // legitimately mixes Node and DOM globals — not part of the app lint surface.

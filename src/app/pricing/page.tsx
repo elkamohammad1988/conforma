@@ -50,8 +50,8 @@ export default function PricingPage() {
           <h2 className="text-center text-2xl font-semibold tracking-tight">
             {t("pricing.comparePlans")}
           </h2>
-          <div className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-            <table className="w-full text-start text-sm">
+          <div className="mt-8 overflow-x-auto scrollbar-thin rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+            <table className="w-full min-w-[44rem] text-start text-sm">
               <thead>
                 <tr className="border-b border-line bg-ink/[0.03] text-ink-3">
                   <th className="px-5 py-3 text-start font-medium">

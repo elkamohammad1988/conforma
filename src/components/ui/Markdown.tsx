@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 
 /**
  * Minimal, dependency-free Markdown renderer for Conforma's own generated
@@ -53,6 +53,14 @@ function parseBlocks(src: string): React.ReactNode[] {
   let i = 0;
   let key = 0;
 
+  // A *genuine* table starts a header row immediately followed by a divider.
+  // Only this halts paragraph accumulation — a lone pipe-shaped line (which
+  // Claude can emit) is then treated as prose, guaranteeing `i` always advances.
+  const isTableStart = (idx: number) =>
+    idx + 1 < lines.length &&
+    isTableRow(lines[idx]) &&
+    isTableDivider(lines[idx + 1]);
+
   while (i < lines.length) {
     const line = lines[i];
 
@@ -96,11 +104,7 @@ function parseBlocks(src: string): React.ReactNode[] {
     }
 
     // Table (header row, divider, body rows).
-    if (
-      isTableRow(line) &&
-      i + 1 < lines.length &&
-      isTableDivider(lines[i + 1])
-    ) {
+    if (isTableStart(i)) {
       const header = splitCells(line);
       i += 2; // skip header + divider
       const rows: string[][] = [];
@@ -109,8 +113,9 @@ function parseBlocks(src: string): React.ReactNode[] {
         i++;
       }
       blocks.push(
-        <table key={`t${key++}`}>
-          <thead>
+        <div key={`t${key++}`} className="overflow-x-auto scrollbar-thin">
+          <table>
+            <thead>
             <tr>
               {header.map((c, ci) => (
                 <th key={ci}>{renderInline(c, `th${key}-${ci}`)}</th>
@@ -126,7 +131,8 @@ function parseBlocks(src: string): React.ReactNode[] {
               </tr>
             ))}
           </tbody>
-        </table>,
+          </table>
+        </div>,
       );
       continue;
     }
@@ -183,14 +189,17 @@ function parseBlocks(src: string): React.ReactNode[] {
       continue;
     }
 
-    // Paragraph (consecutive plain lines).
+    // Paragraph (consecutive plain lines). Because the current line reached this
+    // branch it is neither blank nor the start of any other block (incl. a real
+    // table), so the loop always consumes at least this line — `i` advances and
+    // the outer `while` can never spin.
     const para: string[] = [];
     while (
       i < lines.length &&
       lines[i].trim() !== "" &&
       !/^(#{1,4}\s|>\s?|\s*[-*]\s|\s*\d+\.\s)/.test(lines[i]) &&
       !/^\s*([-*_])\1{2,}\s*$/.test(lines[i]) &&
-      !isTableRow(lines[i])
+      !isTableStart(i)
     ) {
       para.push(lines[i]);
       i++;
@@ -212,5 +221,8 @@ export function Markdown({
   source: string;
   className?: string;
 }) {
-  return <div className={`prose-rendered ${className}`}>{parseBlocks(source)}</div>;
+  // Parsing is pure in `source`; memoize so the preview/raw view toggle doesn't
+  // re-parse a multi-hundred-line document on every render.
+  const blocks = useMemo(() => parseBlocks(source), [source]);
+  return <div className={`prose-rendered ${className}`}>{blocks}</div>;
 }

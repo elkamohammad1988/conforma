@@ -12,7 +12,9 @@
  * deployment fully functional — and premium — with zero paid credentials.
  */
 
-// NOTE: server-only module — imported exclusively from Route Handlers.
+// Enforced server-only: importing this from a Client Component is a build error,
+// so the Anthropic SDK and the API key can never reach the browser bundle.
+import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ClassificationResult } from "./classifier";
 import { RISK_TIERS, PENALTIES } from "./eu-ai-act";
@@ -116,7 +118,7 @@ export async function generateDocument(
   locale: Locale = DEFAULT_LOCALE,
 ): Promise<{ markdown: string; source: AiSource }> {
   if (!isClaudeConfigured()) {
-    return { markdown: demoDocument(docType, ctx), source: "demo" };
+    return { markdown: demoDocument(docType, ctx, locale), source: "demo" };
   }
 
   try {
@@ -131,10 +133,18 @@ export async function generateDocument(
       .map((b) => b.text)
       .join("\n")
       .trim();
-    return { markdown: markdown || demoDocument(docType, ctx), source: "claude" };
-  } catch {
-    // Never let a transient API error break the workflow — fall back to a draft.
-    return { markdown: demoDocument(docType, ctx), source: "demo" };
+    return {
+      markdown: markdown || demoDocument(docType, ctx, locale),
+      source: "claude",
+    };
+  } catch (err) {
+    // Never let a transient API error break the workflow — fall back to a draft,
+    // but log server-side so a mis-configured live key isn't silently masked.
+    console.error(
+      "[conforma] generateDocument: Claude call failed, using demo fallback.",
+      err,
+    );
+    return { markdown: demoDocument(docType, ctx, locale), source: "demo" };
   }
 }
 
@@ -170,7 +180,11 @@ Engine reasoning: ${reasoning}`;
       .join("\n")
       .trim();
     return { narrative: narrative || demoNarrative(ctx, tr), source: "claude" };
-  } catch {
+  } catch (err) {
+    console.error(
+      "[conforma] explainClassification: Claude call failed, using demo fallback.",
+      err,
+    );
     return { narrative: demoNarrative(ctx, tr), source: "demo" };
   }
 }
@@ -185,12 +199,6 @@ Engine reasoning: ${reasoning}`;
  * and [BRACKETED PLACEHOLDERS] only where an organisation must supply its own
  * facts. They are decision-support, not legal advice.
  */
-
-const DEMO_HEADER =
-  `> **AI-drafted by Conforma · Demo Mode.** This is a realistic, system-specific ` +
-  `first draft generated without any external AI service — so the public demo works ` +
-  `with zero credentials. Replace every \`[BRACKETED PLACEHOLDER]\` with your own ` +
-  `details before use. Decision-support, not legal advice.\n\n`;
 
 function demoNarrative(ctx: DocContext, tr: Translator): string {
   const tierId = ctx.result.tier;
@@ -223,14 +231,22 @@ function demoNarrative(ctx: DocContext, tr: Translator): string {
   return `${intro}\n\n${next}\n\n${closing}`;
 }
 
-function demoDocument(docType: DocType, ctx: DocContext): string {
+function demoDocument(
+  docType: DocType,
+  ctx: DocContext,
+  locale: Locale,
+): string {
+  // The document body is a formal English regulatory sample; the localized note
+  // tells the reader (in their language) that a configured key drafts natively.
+  const tr = createTranslator(locale, getMessages(locale));
+  const note = `${tr.t("ai.demoDocNote")}\n\n`;
   switch (docType) {
     case "technical-documentation":
-      return technicalDocumentation(ctx);
+      return note + technicalDocumentation(ctx);
     case "transparency-notice":
-      return transparencyNotice(ctx);
+      return note + transparencyNotice(ctx);
     case "conformity-declaration":
-      return conformityDeclaration(ctx);
+      return note + conformityDeclaration(ctx);
   }
 }
 
@@ -254,7 +270,7 @@ function technicalDocumentation(ctx: DocContext): string {
           .join("\n")
       : "| — | — | — | No system-level obligations identified for this tier. | — | — |";
 
-  return `${DEMO_HEADER}# Technical Documentation — ${systemName}
+  return `# Technical Documentation — ${systemName}
 *Drawn up under Article 11 and Annex IV of Regulation (EU) 2024/1689 (the EU AI Act)*
 
 | | |
@@ -365,7 +381,7 @@ function transparencyNotice(ctx: DocContext): string {
     description ||
     "[Describe in one or two plain sentences what this AI system does for the user.]";
 
-  return `${DEMO_HEADER}# Transparency Notice — ${systemName}
+  return `# Transparency Notice — ${systemName}
 *Provided under Article 50 of Regulation (EU) 2024/1689 (the EU AI Act)*
 
 ### You are interacting with an AI system
@@ -397,7 +413,7 @@ function conformityDeclaration(ctx: DocContext): string {
   const org = organisation || "[PROVIDER LEGAL NAME]";
   const ref = `EU-DOC-${systemName.replace(/[^A-Za-z0-9]+/g, "-").toUpperCase()}-001`;
 
-  return `${DEMO_HEADER}# EU Declaration of Conformity
+  return `# EU Declaration of Conformity
 *Drawn up in accordance with Article 47 and Annex V of Regulation (EU) 2024/1689*
 
 **1. Declaration reference (unique identifier):** ${ref}

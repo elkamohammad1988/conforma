@@ -29,11 +29,12 @@ copy `.env.example` to `.env.local` and set `ANTHROPIC_API_KEY` (see the
 
 ## Quality gates
 
-Every change must pass all three checks — CI enforces them on each PR:
+Every change must pass all four checks — CI enforces them on each PR:
 
 ```bash
 npm run lint        # ESLint — zero warnings, zero errors
 npm run typecheck   # tsc --noEmit — zero errors
+npm test            # Vitest unit suite — all green
 npm run build       # production build must succeed cleanly
 ```
 

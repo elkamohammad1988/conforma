@@ -24,6 +24,7 @@ const fr: Messages = {
     yes: "Oui",
     no: "Non",
     thinking: "Analyse en cours…",
+    loading: "Chargement…",
     dash: "—",
     daysLeft: plural({
       one: "{count} jour restant",
@@ -43,6 +44,13 @@ const fr: Messages = {
     selected: "Langue sélectionnée : {language}",
   },
 
+  /* -------------------------------------------------------------- themeToggle */
+  themeToggle: {
+    label: "Changer de thème",
+    toLight: "Passer en mode clair",
+    toDark: "Passer en mode sombre",
+  },
+
   /* --------------------------------------------------------------------- nav */
   nav: {
     howItWorks: "Comment ça marche",
@@ -51,6 +59,7 @@ const fr: Messages = {
     dashboard: "Tableau de bord",
     bookDemo: "Réserver une démo",
     startFree: "Commencer gratuitement",
+    menu: "Menu",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
     skipToContent: "Aller au contenu",
@@ -711,6 +720,105 @@ const fr: Messages = {
     },
   },
 
+  /* ---------------------------------------------------------------- settings */
+  settings: {
+    title: "Paramètres",
+    subtitle: "Gérez l'apparence et le comportement de Conforma sur cet appareil.",
+    appearance: {
+      title: "Apparence",
+      desc: "Choisissez le thème de l'interface. Votre préférence est enregistrée sur cet appareil.",
+      theme: "Thème",
+      light: "Clair",
+      dark: "Sombre",
+    },
+    language: {
+      title: "Langue",
+      desc: "Langue de l'interface et sens de lecture. Les changements s'appliquent instantanément.",
+      label: "Langue de l'interface",
+    },
+    data: {
+      title: "Données du registre",
+      desc: "Votre registre de systèmes d'IA n'existe que dans ce navigateur — rien n'est envoyé à un serveur. Réinitialisez-le aux exemples fournis ou videz-le entièrement.",
+      count: plural({
+        one: "{count} système dans ce navigateur",
+        other: "{count} systèmes dans ce navigateur",
+      }),
+      reset: "Réinitialiser aux données de démo",
+      clear: "Supprimer tous les systèmes",
+      resetDone: "Registre réinitialisé aux systèmes de démonstration.",
+      clearDone: "Registre vidé.",
+      confirmResetTitle: "Réinitialiser aux données de démo ?",
+      confirmResetBody:
+        "Cela remplace le registre actuel par les dix systèmes d'exemple. Les entrées ajoutées dans ce navigateur seront perdues.",
+      confirmClearTitle: "Supprimer tous les systèmes ?",
+      confirmClearBody:
+        "Cela supprime définitivement tous les systèmes du registre de ce navigateur. Cette action est irréversible.",
+    },
+    about: {
+      title: "À propos",
+      desc: "Un espace de conformité au règlement IA de l'UE, de qualité portfolio.",
+      version: "Version",
+      mode: "Génération de documents",
+      docs: "Documentation",
+      source: "Code source",
+    },
+  },
+
+  /* ------------------------------------------------------------------ alerts */
+  alerts: {
+    title: "Alertes",
+    subtitle: "Signaux issus de votre registre",
+    empty: "Tout est à jour — aucun signal de conformité en attente.",
+    viewAll: "Aller au tableau de bord",
+    prohibitedTitle: plural({
+      one: "{count} système à pratique interdite",
+      other: "{count} systèmes à pratique interdite",
+    }),
+    prohibitedBody: "Interdits par l'article 5 — cessez immédiatement leur usage.",
+    attentionTitle: plural({
+      one: "{count} système à haut risque sous l'objectif",
+      other: "{count} systèmes à haut risque sous l'objectif",
+    }),
+    attentionBody: "Moins de la moitié de leurs obligations sont satisfaites.",
+    deadlineTitle: "Échéance des obligations à haut risque",
+    deadlineBody: "Les obligations du chapitre III s'appliquent le {date} (art. 113).",
+  },
+
+  /* ------------------------------------------------------------------- error */
+  error: {
+    title: "Une erreur est survenue",
+    body: "Une erreur inattendue a interrompu cette page. Vos systèmes enregistrés sont en sécurité — rien n'a été perdu.",
+    retry: "Réessayer",
+    home: "Retour à l'accueil",
+    reference: "Référence de l'erreur",
+  },
+
+  /* ------------------------------------------------------------------- toast */
+  toast: {
+    region: "Notifications",
+    dismiss: "Fermer",
+    saved: "Système enregistré dans votre registre.",
+    deleted: "Système supprimé.",
+    copied: "Copié dans le presse-papiers.",
+    copyFailed: "Impossible de copier — sélectionnez et copiez manuellement.",
+    exportBlocked: "Fenêtre bloquée. Autorisez les fenêtres contextuelles pour exporter le document.",
+  },
+
+  /* ------------------------------------------------------------ commandPalette */
+  commandPalette: {
+    aria: "Palette de commandes",
+    trigger: "Rechercher",
+    placeholder: "Rechercher commandes et systèmes…",
+    empty: "Aucun résultat.",
+    groups: { navigate: "Naviguer", actions: "Actions", systems: "Systèmes" },
+    actions: {
+      newClassification: "Nouvelle classification",
+      resetDemo: "Réinitialiser les données de démo",
+      toggleTheme: "Changer de thème",
+      openDocs: "Ouvrir la documentation",
+    },
+  },
+
   /* ---------------------------------------------------------------- classify */
   classify: {
     steps: {
@@ -948,6 +1056,8 @@ const fr: Messages = {
 
   /* ----------------------------------------------------------------- aiSource */
   ai: {
+    demoDocNote:
+      "> **Rédigé par IA · Mode Démo (Conforma).** Ceci est un exemple réaliste en anglais généré sans aucun service d'IA externe, afin que la démo publique fonctionne sans identifiants. Avec une clé `ANTHROPIC_API_KEY` configurée, Conforma rédige les documents nativement dans votre langue. Remplacez chaque `[BRACKETED PLACEHOLDER]` avant utilisation. Aide à la décision, pas un avis juridique.",
     demoBadge: "Mode démo · exemple de sortie d’IA",
     demoBadgeTitle:
       "Aucune clé d’API Anthropic n’est configurée ; la génération par IA s’exécute donc en mode démo — des exemples de documents réalistes et pré-générés. Aucune API payante requise.",

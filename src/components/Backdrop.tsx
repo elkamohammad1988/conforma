@@ -19,7 +19,7 @@ const PARTICLES = [
 
 export function Backdrop() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div aria-hidden className="backdrop-layer pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       {/* Volumetric light pools — slow drift */}
       <div
         className="animate-drift absolute -top-48 h-[46rem] w-[46rem] rounded-full"

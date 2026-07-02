@@ -106,7 +106,8 @@ export default function ReportPage() {
           <h2 className="text-sm font-semibold uppercase tracking-[0.1em] text-ink-3">
             {t("report.systemRegister")}
           </h2>
-          <table className="mt-3 w-full text-start text-sm">
+          <div className="mt-3 overflow-x-auto scrollbar-thin print:overflow-x-visible">
+          <table className="w-full min-w-[32rem] text-start text-sm">
             <thead className="border-b border-line text-xs uppercase tracking-[0.1em] text-ink-3">
               <tr>
                 <th className="py-2 text-start font-medium">{t("report.table.system")}</th>
@@ -151,6 +152,7 @@ export default function ReportPage() {
               )}
             </tbody>
           </table>
+          </div>
         </section>
 
         <footer className="mt-10 border-t border-line pt-5 text-xs leading-relaxed text-ink-3">

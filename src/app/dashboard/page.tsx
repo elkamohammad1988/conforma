@@ -7,6 +7,7 @@ import { Countdown } from "@/components/Countdown";
 import { ArrowForward } from "@/components/Arrow";
 import { Magnetic } from "@/components/Motion";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { CountUp } from "@/components/ui/CountUp";
 import { compliancePct, useSystems, type RegisteredSystem } from "@/lib/store";
 import { type RiskTier } from "@/lib/eu-ai-act";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -109,9 +110,17 @@ export default function DashboardPage() {
         );
 
   const highRiskCount = (counts.high ?? 0) + (counts.prohibited ?? 0);
-  const nearest = systems
+  // Nearest *upcoming* deadline: a portfolio with a prohibited system carries the
+  // already-passed 2025-02-02 prohibitions date, which must not become the
+  // headline KPI. Prefer the soonest future date; fall back to the most recent
+  // past one only if every deadline has elapsed. (Runs client-side — the page
+  // returns a skeleton while `systems === null` — so reading "today" is safe.)
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const deadlinesByDate = systems
     .map((s) => s.result.deadline)
-    .sort((a, b) => a.date.localeCompare(b.date))[0];
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const nearest =
+    deadlinesByDate.find((d) => d.date >= todayIso) ?? deadlinesByDate[0];
 
   // Highest risk, then least compliant — the systems that need a human now.
   const attention = [...systems]
@@ -140,7 +149,7 @@ export default function DashboardPage() {
           style={{
             insetInlineEnd: "-3rem",
             background:
-              "radial-gradient(closest-side, rgba(var(--crimson),0.18), transparent 70%)",
+              "radial-gradient(closest-side, rgba(var(--accent),0.18), transparent 70%)",
           }}
         />
         <div className="relative flex flex-wrap items-end justify-between gap-6">
@@ -180,6 +189,8 @@ export default function DashboardPage() {
           label={t("dashboard.kpi.systems")}
           tip={t("dashboard.kpi.systemsTip")}
           value={formatNumber(systems.length)}
+          countTo={systems.length}
+          format={(n) => formatNumber(Math.round(n))}
           sub={t("dashboard.kpi.systemsSub", { count: highRiskCount })}
           icon={<RegistryGlyph />}
         />
@@ -188,6 +199,8 @@ export default function DashboardPage() {
           label={t("dashboard.kpi.compliance")}
           tip={t("dashboard.kpi.complianceTip")}
           value={`${avg}%`}
+          countTo={avg}
+          format={(n) => `${Math.round(n)}%`}
           progress={avg}
           sub={t("dashboard.kpi.complianceSub")}
           icon={<CheckGlyph />}
@@ -198,6 +211,8 @@ export default function DashboardPage() {
           label={t("dashboard.kpi.highRisk")}
           tip={t("dashboard.kpi.highRiskTip")}
           value={formatNumber(counts.high ?? 0)}
+          countTo={counts.high ?? 0}
+          format={(n) => formatNumber(Math.round(n))}
           sub={t("dashboard.kpi.highRiskSub")}
           icon={<ShieldGlyph />}
         />
@@ -435,6 +450,8 @@ export default function DashboardPage() {
 function StatCard({
   label,
   value,
+  countTo,
+  format,
   sub,
   tip,
   icon,
@@ -444,6 +461,9 @@ function StatCard({
 }: {
   label: string;
   value: string;
+  /** When set, the value counts up 0 → countTo on mount; `value` is the fallback. */
+  countTo?: number;
+  format?: (n: number) => string;
   sub: React.ReactNode;
   tip?: string;
   icon: React.ReactNode;
@@ -481,7 +501,7 @@ function StatCard({
         <span
           className={`grid h-9 w-9 place-items-center rounded-xl border transition-transform duration-300 group-hover:scale-105 ${
             featured
-              ? "border-transparent bg-gradient-to-b from-brand-500 to-brand-600 text-white shadow-[0_6px_18px_-6px_rgba(var(--crimson),0.7)]"
+              ? "border-transparent bg-gradient-to-b from-brand-500 to-brand-600 text-on-accent shadow-[0_6px_18px_-6px_rgba(var(--accent),0.7)]"
               : "border-line bg-surface-2 text-ink-2"
           }`}
         >
@@ -489,7 +509,11 @@ function StatCard({
         </span>
       </div>
       <div className="mt-3.5 text-[2.1rem] font-semibold leading-none tracking-tight text-ink nums">
-        {value}
+        {countTo !== undefined ? (
+          <CountUp to={countTo} format={format} />
+        ) : (
+          value
+        )}
       </div>
       {progress !== undefined ? (
         <div className="mt-3.5">
@@ -500,7 +524,7 @@ function StatCard({
                 width: `${progress}%`,
                 background:
                   "linear-gradient(90deg, var(--color-brand-600), var(--color-brand-400))",
-                boxShadow: "0 0 12px rgba(var(--crimson), 0.5)",
+                boxShadow: "0 0 12px rgba(var(--accent), 0.5)",
               }}
             />
           </div>
@@ -558,14 +582,14 @@ function RiskDistribution({
           <svg
             viewBox="0 0 140 140"
             className="h-full w-full -rotate-90"
-            style={{ filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.5))" }}
+            style={{ filter: "drop-shadow(0 3px 8px rgba(14,10,5,0.55))" }}
           >
             <circle
               cx="70"
               cy="70"
               r={R}
               fill="none"
-              stroke="rgba(255,255,255,0.08)"
+              stroke="var(--color-line-2)"
               strokeWidth="15"
             />
             {segments.map((s) => (
@@ -587,7 +611,7 @@ function RiskDistribution({
           <div
             aria-hidden
             className="pointer-events-none absolute inset-[20px] rounded-full"
-            style={{ boxShadow: "inset 0 0 22px rgba(0,0,0,0.4)" }}
+            style={{ boxShadow: "inset 0 0 22px rgba(14,10,5,0.45)" }}
           />
           <div className="absolute inset-0 grid place-items-center">
             <div className="text-center">
@@ -715,18 +739,21 @@ function AttentionPanel({
 /* Compliance meter                                                           */
 /* -------------------------------------------------------------------------- */
 function ComplianceMeter({ pct }: { pct: number }) {
-  const color =
+  // One warm compliance language (matches the landing showcase): amber = behind,
+  // gold = in progress, green = complete. No hot red — risk is already signalled
+  // by the tier badge, so the bar stays in the warm family and never alarms.
+  const fill =
     pct === 100
-      ? "var(--color-brand-600)"
+      ? "var(--color-ok-500)"
       : pct >= 50
-        ? "var(--color-brass-500)"
-        : "var(--color-risk-prohibited)";
+        ? "linear-gradient(90deg, var(--color-brass-500), var(--color-brass-300))"
+        : "var(--color-warn-500)";
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-ink/10">
         <div
           className="h-full rounded-full transition-[width] duration-700"
-          style={{ width: `${pct}%`, background: color }}
+          style={{ width: `${pct}%`, background: fill }}
         />
       </div>
       <span className="w-9 text-end text-xs font-medium text-ink-2 nums">{pct}%</span>
@@ -747,7 +774,7 @@ function DashboardEmpty() {
         className="pointer-events-none absolute inset-x-0 -top-28 h-72"
         style={{
           background:
-            "radial-gradient(55% 100% at 50% 0%, rgba(var(--crimson),0.18), transparent 72%)",
+            "radial-gradient(55% 100% at 50% 0%, rgba(var(--accent),0.18), transparent 72%)",
         }}
       />
       <div className="relative mx-auto max-w-3xl">

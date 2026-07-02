@@ -24,6 +24,7 @@ const en = {
     yes: "Yes",
     no: "No",
     thinking: "Thinking…",
+    loading: "Loading…",
     dash: "—",
     daysLeft: plural({
       one: "{count} day left",
@@ -43,6 +44,13 @@ const en = {
     selected: "Selected language: {language}",
   },
 
+  /* -------------------------------------------------------------- themeToggle */
+  themeToggle: {
+    label: "Toggle theme",
+    toLight: "Switch to light mode",
+    toDark: "Switch to dark mode",
+  },
+
   /* --------------------------------------------------------------------- nav */
   nav: {
     howItWorks: "How it works",
@@ -51,6 +59,7 @@ const en = {
     dashboard: "Dashboard",
     bookDemo: "Book a demo",
     startFree: "Start free",
+    menu: "Menu",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     skipToContent: "Skip to content",
@@ -711,6 +720,105 @@ const en = {
     },
   },
 
+  /* ---------------------------------------------------------------- settings */
+  settings: {
+    title: "Settings",
+    subtitle: "Manage how Conforma looks and behaves on this device.",
+    appearance: {
+      title: "Appearance",
+      desc: "Choose the interface theme. Your preference is saved on this device.",
+      theme: "Theme",
+      light: "Light",
+      dark: "Dark",
+    },
+    language: {
+      title: "Language",
+      desc: "Interface language and text direction. Changes apply instantly.",
+      label: "Interface language",
+    },
+    data: {
+      title: "Registry data",
+      desc: "Your AI-system registry lives only in this browser — nothing is sent to a server. Reset it to the seeded examples, or clear it entirely.",
+      count: plural({
+        one: "{count} system in this browser",
+        other: "{count} systems in this browser",
+      }),
+      reset: "Reset to demo data",
+      clear: "Clear all systems",
+      resetDone: "Registry reset to the demo systems.",
+      clearDone: "Registry cleared.",
+      confirmResetTitle: "Reset to demo data?",
+      confirmResetBody:
+        "This replaces the current registry with the ten seeded example systems. Any entries you added in this browser will be lost.",
+      confirmClearTitle: "Clear all systems?",
+      confirmClearBody:
+        "This permanently removes every system from this browser's registry. This cannot be undone.",
+    },
+    about: {
+      title: "About",
+      desc: "A portfolio-grade EU AI Act compliance workspace.",
+      version: "Version",
+      mode: "Document generation",
+      docs: "Documentation",
+      source: "Source code",
+    },
+  },
+
+  /* ------------------------------------------------------------------ alerts */
+  alerts: {
+    title: "Alerts",
+    subtitle: "Signals from your registry",
+    empty: "You're all caught up — no open compliance signals.",
+    viewAll: "Go to dashboard",
+    prohibitedTitle: plural({
+      one: "{count} prohibited-practice system",
+      other: "{count} prohibited-practice systems",
+    }),
+    prohibitedBody: "Banned under Article 5 — stop use immediately.",
+    attentionTitle: plural({
+      one: "{count} high-risk system below target",
+      other: "{count} high-risk systems below target",
+    }),
+    attentionBody: "Less than half of their obligations are complete.",
+    deadlineTitle: "High-risk obligations deadline",
+    deadlineBody: "Chapter III duties apply on {date} (Art. 113).",
+  },
+
+  /* ------------------------------------------------------------------- error */
+  error: {
+    title: "Something went wrong",
+    body: "An unexpected error interrupted this page. Your saved systems are safe — nothing was lost.",
+    retry: "Try again",
+    home: "Return home",
+    reference: "Error reference",
+  },
+
+  /* ------------------------------------------------------------------- toast */
+  toast: {
+    region: "Notifications",
+    dismiss: "Dismiss",
+    saved: "System saved to your registry.",
+    deleted: "System deleted.",
+    copied: "Copied to clipboard.",
+    copyFailed: "Couldn't copy — please select and copy manually.",
+    exportBlocked: "Pop-up blocked. Allow pop-ups to export the document.",
+  },
+
+  /* ------------------------------------------------------------ commandPalette */
+  commandPalette: {
+    aria: "Command palette",
+    trigger: "Search",
+    placeholder: "Search commands and systems…",
+    empty: "No results.",
+    groups: { navigate: "Navigate", actions: "Actions", systems: "Systems" },
+    actions: {
+      newClassification: "New classification",
+      resetDemo: "Reset demo data",
+      toggleTheme: "Toggle theme",
+      openDocs: "Open documentation",
+    },
+  },
+
   /* ---------------------------------------------------------------- classify */
   classify: {
     steps: {
@@ -948,6 +1056,8 @@ const en = {
 
   /* ----------------------------------------------------------------- aiSource */
   ai: {
+    demoDocNote:
+      "> **AI-drafted by Conforma · Demo Mode.** This is a realistic English-language sample generated with no external AI service, so the public demo works with zero credentials. With an `ANTHROPIC_API_KEY` configured, Conforma drafts documents natively in your selected language. Replace every `[BRACKETED PLACEHOLDER]` before use. Decision-support, not legal advice.",
     demoBadge: "Demo Mode · sample AI output",
     demoBadgeTitle:
       "No Anthropic API key is configured, so AI generation runs in Demo Mode — realistic, pre-generated sample documents. No paid API required.",

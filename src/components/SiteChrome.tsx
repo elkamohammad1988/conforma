@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Logo, LogoMark } from "@/components/Logo";
 import { MobileNav } from "@/components/MobileNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useI18n } from "@/i18n/I18nProvider";
 
 /**
@@ -67,6 +68,7 @@ function TopNav() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <LanguageSwitcher className="hidden sm:block" />
           <Link
             href="/demo"

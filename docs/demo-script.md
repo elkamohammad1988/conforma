@@ -6,8 +6,9 @@ runs on a static deploy with a self-seeding in-browser registry, so it never
 fails on stage.
 
 - **Total runtime:** ~90 seconds
-- **Setup:** open the deployed URL (or `npm run dev`). The registry seeds three
-  example systems on first load, so the dashboard and report are populated.
+- **Setup:** open the deployed URL (or `npm run dev`). The registry seeds ten
+  example systems across all four risk tiers on first load, so the dashboard and
+  report are populated.
 - **Tip:** speak the **bold** lines; the rest is stage direction.
 
 ---

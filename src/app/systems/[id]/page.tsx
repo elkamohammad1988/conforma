@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { Spinner } from "@/components/ui/Spinner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 import {
   compliancePct,
   deleteSystem,
@@ -36,6 +37,7 @@ export default function SystemDetailPage({
 }) {
   const { id } = use(params);
   const { t, formatDate } = useI18n();
+  const { toast } = useToast();
   const router = useRouter();
   const system = useSystem(id);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -296,6 +298,7 @@ export default function SystemDetailPage({
         onCancel={() => setConfirmDelete(false)}
         onConfirm={() => {
           deleteSystem(system.id);
+          toast(t("toast.deleted"));
           router.push("/dashboard");
         }}
       />
@@ -321,13 +324,14 @@ const EXPORT_CSS = `
   table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.85rem; }
   th, td { border: 1px solid #cbd5e1; padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
   th { background: #f1f5f9; }
-  blockquote { border-left: 3px solid #a5b4fc; background: #eef2ff; padding: 0.6rem 0.9rem; margin: 0.8rem 0; }
+  blockquote { border-left: 3px solid #e11d2a; background: #fdeef0; padding: 0.6rem 0.9rem; margin: 0.8rem 0; }
   code { font-family: monospace; background: #f1f5f9; padding: 0.1rem 0.3rem; border-radius: 3px; }
   hr { border: 0; border-top: 1px solid #e2e8f0; margin: 1.2rem 0; }
 `;
 
 function DocSection({ system }: { system: RegisteredSystem }) {
   const { t, locale } = useI18n();
+  const { toast } = useToast();
   const [active, setActive] = useState<string | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
   const [docs, setDocs] = useState<
@@ -360,7 +364,16 @@ function DocSection({ system }: { system: RegisteredSystem }) {
           locale,
         }),
       });
+      // A non-2xx response (429 throttled, 413 too long, 400/500) returns an
+      // `{error}` body with no `markdown`. Reject it here so the catch renders a
+      // friendly message instead of caching `{markdown: undefined}` — which is
+      // truthy, so the early-return above would then serve the broken doc
+      // forever, and <Markdown source={undefined}> would crash the route.
+      if (!res.ok) throw new Error(`generate-doc failed: ${res.status}`);
       const data = await res.json();
+      if (typeof data.markdown !== "string") {
+        throw new Error("generate-doc: malformed response");
+      }
       setDocs((d) => ({
         ...d,
         [docType]: { markdown: data.markdown, source: data.source },
@@ -374,7 +387,9 @@ function DocSection({ system }: { system: RegisteredSystem }) {
         },
       }));
     } finally {
-      setLoading(null);
+      // Only clear the indicator if *this* request is still the active one — a
+      // slower earlier request must not switch off a later doc's spinner.
+      setLoading((cur) => (cur === docType ? null : cur));
     }
   };
 
@@ -401,7 +416,10 @@ function DocSection({ system }: { system: RegisteredSystem }) {
   const exportPdf = () => {
     const inner = previewRef.current?.innerHTML ?? "";
     const win = window.open("", "_blank");
-    if (!win) return;
+    if (!win) {
+      toast(t("toast.exportBlocked"), "error");
+      return;
+    }
     win.document.write(
       `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${fileBase}</title><style>${EXPORT_CSS}</style></head><body>${inner}<script>window.onload=function(){window.print()}<\/script></body></html>`,
     );
@@ -439,7 +457,12 @@ function DocSection({ system }: { system: RegisteredSystem }) {
                   {t(`system.docs.types.${d.key}.cite`)}
                 </span>
               </span>
-              {isLoading && <Spinner className="h-4 w-4 shrink-0 text-brand-500" />}
+              {isLoading && (
+                <Spinner
+                  className="h-4 w-4 shrink-0 text-brand-500"
+                  label={t("common.loading")}
+                />
+              )}
             </button>
           );
         })}
@@ -448,7 +471,10 @@ function DocSection({ system }: { system: RegisteredSystem }) {
       {loading && (
         <div className="mt-4 overflow-hidden rounded-2xl border border-line bg-surface">
           <div className="flex items-center gap-2 border-b border-line bg-ink/[0.03] px-4 py-2.5 text-xs text-ink-3">
-            <Spinner className="h-3.5 w-3.5 text-brand-500" />
+            <Spinner
+              className="h-3.5 w-3.5 text-brand-500"
+              label={t("common.loading")}
+            />
             {t("system.docs.drafting", { label: labelFor(loading) })}
           </div>
           <div className="space-y-3 p-5">
@@ -486,9 +512,13 @@ function DocSection({ system }: { system: RegisteredSystem }) {
               <span className="h-4 w-px bg-ink/10" aria-hidden />
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(activeDoc.markdown);
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
+                  navigator.clipboard
+                    .writeText(activeDoc.markdown)
+                    .then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    })
+                    .catch(() => toast(t("toast.copyFailed"), "error"));
                 }}
                 className="rounded-lg px-2.5 py-1 text-xs font-medium text-ink-3 transition hover:bg-ink/[0.04]"
               >
@@ -508,7 +538,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
               </button>
               <button
                 onClick={exportPdf}
-                className="rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-brand-700"
+                className="rounded-lg bg-brand-600 px-2.5 py-1 text-xs font-semibold text-on-accent transition hover:bg-brand-500"
               >
                 PDF
               </button>

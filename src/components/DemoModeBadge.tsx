@@ -1,31 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useT } from "@/i18n/I18nProvider";
-
-type Mode = "live" | "demo" | "loading";
+import { useAiMode } from "@/components/AiModeProvider";
 
 /**
- * Proactive Demo Mode indicator. Asks the server which mode AI generation runs
- * in and, when no Anthropic key is configured, shows a tasteful pill so users
- * know up-front that AI output is realistic pre-generated sample content. It
- * stays silent in live mode (the per-output "Drafted by Claude" tag covers that)
- * and never surfaces an error — if the status check fails it assumes Demo Mode.
+ * Proactive Demo Mode indicator. Reads the generation mode from context (seeded
+ * once on the server) — so when no Anthropic key is configured it shows a
+ * tasteful pill, synchronously, with no per-mount fetch or loading flash. It
+ * stays silent in live mode (the per-output "Drafted by Claude" tag covers that).
  */
 export function DemoModeBadge({ className = "" }: { className?: string }) {
   const t = useT();
-  const [mode, setMode] = useState<Mode>("loading");
-
-  useEffect(() => {
-    let alive = true;
-    fetch("/api/ai-status")
-      .then((r) => r.json())
-      .then((d) => alive && setMode(d?.demo ? "demo" : "live"))
-      .catch(() => alive && setMode("demo"));
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const mode = useAiMode();
 
   if (mode !== "demo") return null;
 

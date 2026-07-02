@@ -71,10 +71,11 @@ CMD ["npm", "run", "start"]
 ```bash
 npm run lint        # zero warnings/errors
 npm run typecheck   # zero errors
+npm test            # Vitest unit suite
 npm run build       # clean production build
 ```
 
-CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) runs all three on
+CI ([`.github/workflows/ci.yml`](../.github/workflows/ci.yml)) runs all four on
 every push and pull request.
 
 ## Scaling beyond the demo

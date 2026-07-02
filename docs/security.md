@@ -16,6 +16,41 @@ MVP and in a production deployment. For **reporting a vulnerability**, see
 - **No framework fingerprinting.** `poweredByHeader` is disabled in
   `next.config.ts`, so responses don't advertise the framework/version.
 
+## Application security controls (implemented)
+
+These ship in this repository today — not a roadmap:
+
+- **HTTP security headers** ([`next.config.ts`](../next.config.ts)) on every
+  response: a tight Content-Security-Policy (`default-src 'self'`, no third-party
+  origins, `object-src 'none'`, `frame-ancestors 'none'`), HSTS with `preload`,
+  `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, a strict
+  `Referrer-Policy`, and a locked-down `Permissions-Policy`.
+- **Enforced server-only boundary.** `claude.ts` and `api-guard.ts` carry
+  `import "server-only"`, so an accidental client import is a build error.
+- **Input validation.** Both AI routes validate the request body against a
+  [Zod](https://zod.dev) schema ([`schemas.ts`](../src/lib/schemas.ts))
+  element-deep before any prompt runs; malformed input returns `400`/`413`.
+- **Abuse guard.** An in-memory rate limiter caps the unauthenticated AI routes at
+  30 requests/minute/IP ([`api-guard.ts`](../src/lib/api-guard.ts)).
+- **XSS-safe rendering.** Generated Markdown renders to React text nodes (no
+  `dangerouslySetInnerHTML`) and JSON-LD is escaped; a regression test asserts
+  hostile input is neutralised.
+- **Supply chain.** CodeQL (`security-and-quality`) and Dependabot run in CI.
+
+## Threat model (current surface)
+
+| Surface | Risk | Mitigation |
+| --- | --- | --- |
+| Public `POST` AI routes | Cost abuse / DoS on the paid API | Rate limiting + input caps; graceful Demo Mode when unkeyed |
+| Untrusted request body | Malformed data reaching prompt builders | Zod validation element-deep → `400`/`413` |
+| Rendered AI / user content | Stored or reflected XSS | React text-node rendering; escaped JSON-LD; CSP |
+| Clickjacking | UI redress | `X-Frame-Options: DENY` + `frame-ancestors 'none'` |
+| Secret exposure | Key in client bundle or repo | `server-only` boundary; `.env*` git-ignored |
+| Dependencies | Known CVEs | Dependabot + CodeQL |
+
+Out of scope for the MVP (no auth or database yet): authorization, multi-tenant
+isolation and CSRF — covered by the production roadmap below.
+
 ## Data handling in the MVP
 
 The demo is intentionally credential-free:
@@ -49,8 +84,9 @@ rather than overstated.
 ## Dependencies
 
 The dependency surface is deliberately small (Next.js, React, Tailwind,
-`@anthropic-ai/sdk`, lucide-react). Keep it that way; review any new dependency for
-maintenance health and license compatibility before adding it.
+`@anthropic-ai/sdk`, lucide-react, `zod`, `server-only`). Keep it that way; review
+any new dependency for maintenance health and license compatibility before adding
+it. CodeQL and Dependabot watch the surface continuously.
 
 ## Responsible disclosure
 

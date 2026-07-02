@@ -16,6 +16,7 @@ const zhCN: Messages = {
     yes: "是",
     no: "否",
     thinking: "思考中……",
+    loading: "加载中……",
     dash: "—",
     daysLeft: plural({
       other: "剩余 {count} 天",
@@ -34,6 +35,13 @@ const zhCN: Messages = {
     selected: "已选语言：{language}",
   },
 
+  /* -------------------------------------------------------------- themeToggle */
+  themeToggle: {
+    label: "切换主题",
+    toLight: "切换到浅色模式",
+    toDark: "切换到深色模式",
+  },
+
   /* --------------------------------------------------------------------- nav */
   nav: {
     howItWorks: "工作原理",
@@ -42,6 +50,7 @@ const zhCN: Messages = {
     dashboard: "控制台",
     bookDemo: "预约演示",
     startFree: "免费开始",
+    menu: "菜单",
     openMenu: "打开菜单",
     closeMenu: "关闭菜单",
     skipToContent: "跳至正文",
@@ -702,6 +711,101 @@ const zhCN: Messages = {
     },
   },
 
+  /* ---------------------------------------------------------------- settings */
+  settings: {
+    title: "设置",
+    subtitle: "管理 Conforma 在本设备上的外观与行为。",
+    appearance: {
+      title: "外观",
+      desc: "选择界面主题。你的偏好会保存在本设备上。",
+      theme: "主题",
+      light: "浅色",
+      dark: "深色",
+    },
+    language: {
+      title: "语言",
+      desc: "界面语言与文字方向，更改即时生效。",
+      label: "界面语言",
+    },
+    data: {
+      title: "注册表数据",
+      desc: "你的 AI 系统注册表仅存在于本浏览器中，不会发送到任何服务器。可将其重置为示例数据，或完全清空。",
+      count: plural({
+        other: "本浏览器中有 {count} 个系统",
+      }),
+      reset: "重置为演示数据",
+      clear: "清空所有系统",
+      resetDone: "注册表已重置为演示系统。",
+      clearDone: "注册表已清空。",
+      confirmResetTitle: "重置为演示数据？",
+      confirmResetBody:
+        "这会用十个示例系统替换当前注册表。你在本浏览器中添加的条目将会丢失。",
+      confirmClearTitle: "清空所有系统？",
+      confirmClearBody: "这会永久删除本浏览器注册表中的所有系统，且无法撤销。",
+    },
+    about: {
+      title: "关于",
+      desc: "一个作品集级别的欧盟《人工智能法案》合规工作区。",
+      version: "版本",
+      mode: "文档生成",
+      docs: "文档",
+      source: "源代码",
+    },
+  },
+
+  /* ------------------------------------------------------------------ alerts */
+  alerts: {
+    title: "提醒",
+    subtitle: "来自注册表的信号",
+    empty: "一切就绪——暂无待处理的合规信号。",
+    viewAll: "前往仪表盘",
+    prohibitedTitle: plural({
+      other: "{count} 个存在被禁止做法的系统",
+    }),
+    prohibitedBody: "根据第 5 条被禁止——请立即停止使用。",
+    attentionTitle: plural({
+      other: "{count} 个高风险系统低于目标",
+    }),
+    attentionBody: "其义务完成率不足一半。",
+    deadlineTitle: "高风险义务截止日期",
+    deadlineBody: "第三章义务将于 {date} 生效（第 113 条）。",
+  },
+
+  /* ------------------------------------------------------------------- error */
+  error: {
+    title: "出现了一些问题",
+    body: "意外错误中断了此页面。你保存的系统是安全的——没有丢失任何数据。",
+    retry: "重试",
+    home: "返回首页",
+    reference: "错误编号",
+  },
+
+  /* ------------------------------------------------------------------- toast */
+  toast: {
+    region: "通知",
+    dismiss: "关闭",
+    saved: "系统已保存到你的注册表。",
+    deleted: "系统已删除。",
+    copied: "已复制到剪贴板。",
+    copyFailed: "无法复制——请手动选择并复制。",
+    exportBlocked: "弹出窗口被拦截。请允许弹出窗口以导出文档。",
+  },
+
+  /* ------------------------------------------------------------ commandPalette */
+  commandPalette: {
+    aria: "命令面板",
+    trigger: "搜索",
+    placeholder: "搜索命令和系统…",
+    empty: "无结果。",
+    groups: { navigate: "导航", actions: "操作", systems: "系统" },
+    actions: {
+      newClassification: "新建分类",
+      resetDemo: "重置演示数据",
+      toggleTheme: "切换主题",
+      openDocs: "打开文档",
+    },
+  },
+
   /* ---------------------------------------------------------------- classify */
   classify: {
     steps: {
@@ -938,6 +1042,8 @@ const zhCN: Messages = {
 
   /* ----------------------------------------------------------------- aiSource */
   ai: {
+    demoDocNote:
+      "> **由 AI 起草 · 演示模式（Conforma）。** 这是一份未使用任何外部 AI 服务生成的真实英文示例，因此公开演示无需任何凭据即可运行。配置 `ANTHROPIC_API_KEY` 后，Conforma 会以你所选的语言原生起草文档。使用前请替换每一处 `[BRACKETED PLACEHOLDER]`。此为决策支持，并非法律意见。",
     demoBadge: "演示模式 · 示例 AI 输出",
     demoBadgeTitle:
       "未配置 Anthropic API 密钥，因此 AI 生成以演示模式运行——提供真实的预生成示例文档。无需付费 API。",

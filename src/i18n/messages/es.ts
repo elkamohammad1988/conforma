@@ -22,6 +22,7 @@ const es: Messages = {
     yes: "Sí",
     no: "No",
     thinking: "Pensando…",
+    loading: "Cargando…",
     dash: "—",
     daysLeft: plural({
       one: "Queda {count} día",
@@ -41,6 +42,13 @@ const es: Messages = {
     selected: "Idioma seleccionado: {language}",
   },
 
+  /* -------------------------------------------------------------- themeToggle */
+  themeToggle: {
+    label: "Cambiar tema",
+    toLight: "Cambiar al modo claro",
+    toDark: "Cambiar al modo oscuro",
+  },
+
   /* --------------------------------------------------------------------- nav */
   nav: {
     howItWorks: "Cómo funciona",
@@ -49,6 +57,7 @@ const es: Messages = {
     dashboard: "Panel",
     bookDemo: "Reservar una demo",
     startFree: "Empezar gratis",
+    menu: "Menú",
     openMenu: "Abrir menú",
     closeMenu: "Cerrar menú",
     skipToContent: "Saltar al contenido",
@@ -709,6 +718,105 @@ const es: Messages = {
     },
   },
 
+  /* ---------------------------------------------------------------- settings */
+  settings: {
+    title: "Ajustes",
+    subtitle: "Gestiona el aspecto y el comportamiento de Conforma en este dispositivo.",
+    appearance: {
+      title: "Apariencia",
+      desc: "Elige el tema de la interfaz. Tu preferencia se guarda en este dispositivo.",
+      theme: "Tema",
+      light: "Claro",
+      dark: "Oscuro",
+    },
+    language: {
+      title: "Idioma",
+      desc: "Idioma de la interfaz y dirección del texto. Los cambios se aplican al instante.",
+      label: "Idioma de la interfaz",
+    },
+    data: {
+      title: "Datos del registro",
+      desc: "Tu registro de sistemas de IA solo existe en este navegador; no se envía nada a un servidor. Restablécelo a los ejemplos incluidos o vacíalo por completo.",
+      count: plural({
+        one: "{count} sistema en este navegador",
+        other: "{count} sistemas en este navegador",
+      }),
+      reset: "Restablecer datos de demo",
+      clear: "Borrar todos los sistemas",
+      resetDone: "Registro restablecido a los sistemas de demostración.",
+      clearDone: "Registro vaciado.",
+      confirmResetTitle: "¿Restablecer los datos de demo?",
+      confirmResetBody:
+        "Esto reemplaza el registro actual por los diez sistemas de ejemplo. Se perderán las entradas que hayas añadido en este navegador.",
+      confirmClearTitle: "¿Borrar todos los sistemas?",
+      confirmClearBody:
+        "Esto elimina de forma permanente todos los sistemas del registro de este navegador. No se puede deshacer.",
+    },
+    about: {
+      title: "Acerca de",
+      desc: "Un espacio de cumplimiento del Reglamento de IA de la UE, con calidad de portafolio.",
+      version: "Versión",
+      mode: "Generación de documentos",
+      docs: "Documentación",
+      source: "Código fuente",
+    },
+  },
+
+  /* ------------------------------------------------------------------ alerts */
+  alerts: {
+    title: "Alertas",
+    subtitle: "Señales de tu registro",
+    empty: "Todo al día: no hay señales de cumplimiento pendientes.",
+    viewAll: "Ir al panel",
+    prohibitedTitle: plural({
+      one: "{count} sistema con práctica prohibida",
+      other: "{count} sistemas con prácticas prohibidas",
+    }),
+    prohibitedBody: "Prohibidos por el artículo 5: detén su uso de inmediato.",
+    attentionTitle: plural({
+      one: "{count} sistema de alto riesgo por debajo del objetivo",
+      other: "{count} sistemas de alto riesgo por debajo del objetivo",
+    }),
+    attentionBody: "Menos de la mitad de sus obligaciones están completas.",
+    deadlineTitle: "Plazo de las obligaciones de alto riesgo",
+    deadlineBody: "Las obligaciones del capítulo III se aplican el {date} (art. 113).",
+  },
+
+  /* ------------------------------------------------------------------- error */
+  error: {
+    title: "Algo salió mal",
+    body: "Un error inesperado interrumpió esta página. Tus sistemas guardados están a salvo: no se perdió nada.",
+    retry: "Reintentar",
+    home: "Volver al inicio",
+    reference: "Referencia del error",
+  },
+
+  /* ------------------------------------------------------------------- toast */
+  toast: {
+    region: "Notificaciones",
+    dismiss: "Cerrar",
+    saved: "Sistema guardado en tu registro.",
+    deleted: "Sistema eliminado.",
+    copied: "Copiado al portapapeles.",
+    copyFailed: "No se pudo copiar: selecciona y copia manualmente.",
+    exportBlocked: "Ventana emergente bloqueada. Permite las ventanas emergentes para exportar el documento.",
+  },
+
+  /* ------------------------------------------------------------ commandPalette */
+  commandPalette: {
+    aria: "Paleta de comandos",
+    trigger: "Buscar",
+    placeholder: "Buscar comandos y sistemas…",
+    empty: "Sin resultados.",
+    groups: { navigate: "Navegar", actions: "Acciones", systems: "Sistemas" },
+    actions: {
+      newClassification: "Nueva clasificación",
+      resetDemo: "Restablecer datos de demo",
+      toggleTheme: "Cambiar tema",
+      openDocs: "Abrir documentación",
+    },
+  },
+
   /* ---------------------------------------------------------------- classify */
   classify: {
     steps: {
@@ -946,6 +1054,8 @@ const es: Messages = {
 
   /* ----------------------------------------------------------------- aiSource */
   ai: {
+    demoDocNote:
+      "> **Redactado por IA · Modo Demo (Conforma).** Este es un ejemplo realista en inglés generado sin ningún servicio de IA externo, para que la demo pública funcione sin credenciales. Con una clave `ANTHROPIC_API_KEY` configurada, Conforma redacta los documentos de forma nativa en tu idioma. Sustituye cada `[BRACKETED PLACEHOLDER]` antes de usarlo. Apoyo a la decisión, no asesoramiento legal.",
     demoBadge: "Modo Demo · salida de IA de muestra",
     demoBadgeTitle:
       "No hay configurada ninguna clave de API de Anthropic, por lo que la generación con IA se ejecuta en Modo Demo: documentos de muestra realistas y pregenerados. No se requiere ninguna API de pago.",

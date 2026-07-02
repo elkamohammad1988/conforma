@@ -27,6 +27,9 @@
   --color-accent-500: #f5333f;
   --color-accent-600: #e11d2a;
 
+  /* — Near-white ink for text/icons that sit ON the crimson accent — */
+  --color-on-accent: #fff1f2;
+
   /* — Atmospheric foundation. `paper` is transparent so sections reveal the
      body's environmental lighting; surfaces are translucent glass. — */
   --color-paper: transparent; /* sections show the atmosphere through */
@@ -37,7 +40,7 @@
   --color-ink: #f3f2f6; /* primary text */
   --color-ink-soft: #d2d1da; /* dimmed heading */
   --color-ink-2: #a6a5b2; /* secondary text — AA on the dark canvas */
-  --color-ink-3: #77767f; /* muted text — clears AA at small sizes */
+  --color-ink-3: #8a8992; /* muted text — clears AA (4.5:1) even at small sizes */
   --color-line: rgba(255, 255, 255, 0.08); /* hairline */
   --color-line-2: rgba(255, 255, 255, 0.15); /* stronger hairline */
 
@@ -81,7 +84,7 @@
   --foreground: #f3f2f6;
 
   /* Crimson-tinted RGB for glows/rings. */
-  --crimson: 225, 29, 42;
+  --accent: 225, 29, 42;
 
   /* Layered elevation for glass on a dark canvas: inner top highlight + ambient
      occlusion + a deep drop. Elevated levels add a breath of red environment. */
@@ -96,13 +99,175 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 4px 10px rgba(0, 0, 0, 0.55),
     0 34px 70px -30px rgba(0, 0, 0, 0.92),
-    0 24px 60px -34px rgba(var(--crimson), 0.22);
+    0 24px 60px -34px rgba(var(--accent), 0.22);
   --shadow-pop:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 16px 44px -14px rgba(0, 0, 0, 0.85);
 
   /* Reusable signature glows. */
-  --glow-brand: 0 0 0 1px rgba(var(--crimson), 0.4), 0 10px 40px -10px rgba(var(--crimson), 0.55);
+  --glow-brand: 0 0 0 1px rgba(var(--accent), 0.4), 0 10px 40px -10px rgba(var(--accent), 0.55);
+}
+
+/* ============================================================================
+   "Crimson Protocol — Daylight" · the LIGHT theme.
+   Dark is the zero-config default (tokens above); adding data-theme="light" to
+   <html> re-tints the whole product to a clean cool-neutral paper with a
+   near-black ink and the same single crimson accent (darkened where crimson has
+   to carry text on a light ground). Higher specificity than `:root`, so these
+   win regardless of source order.
+   ========================================================================== */
+:root[data-theme="light"] {
+  /* — Cool-neutral paper, near-black ink — */
+  --color-paper: transparent;
+  --color-paper-2: rgba(20, 20, 30, 0.028);
+  --color-surface: rgba(255, 255, 255, 0.86); /* glass card */
+  --color-surface-2: rgba(20, 20, 30, 0.05); /* inset / table head / hover */
+  --color-raised: rgba(255, 255, 255, 0.98); /* popover / elevated (legible) */
+  --color-ink: #17171c; /* primary text — near-black, never pure black */
+  --color-ink-soft: #35353f;
+  --color-ink-2: #54545f; /* secondary — AA on paper */
+  --color-ink-3: #6c6c77; /* muted — clears AA at small sizes */
+  --color-line: rgba(20, 20, 30, 0.11); /* hairline */
+  --color-line-2: rgba(20, 20, 30, 0.18); /* stronger hairline */
+  --color-on-accent: #fff1f2; /* near-white still sits ON the crimson accent */
+
+  /* — Crimson, darkened where it acts as TEXT / links on a light ground. The
+     fill shades (brand-500…900) keep their weight for buttons & gradients. — */
+  --color-brand-300: #e02a36;
+  --color-brand-400: #d11d29; /* links / highlights on light */
+  --color-brand-500: #cf1722;
+  --color-accent-300: #e02a36;
+  --color-accent-400: #d11d29;
+
+  --color-brass-600: #b57e12; /* compliance-clock accent text on light */
+  --color-brass-700: #946512;
+
+  /* — Status / risk · darkened so the -400 TEXT shades clear WCAG AA (4.5:1) on
+     the near-white paper. Greens/teals read brighter than they measure, so they
+     need the most darkening; prohibited red already passes at ~4.8:1. These are
+     text/dot colors — the tinted badge fills (risk-x/10) ride along fine. — */
+  --color-ok-400: #17824f; /* ~4.8:1 (was #1f9d64 · 3.5:1) */
+  --color-warn-400: #a15f0b; /* ~5.0:1 (was #b9740e · 3.8:1) */
+  --color-danger-400: #d5313d;
+  --color-risk-prohibited: #d5313d; /* ~4.8:1 · already AA */
+  --color-risk-high: #a15f0b; /* ~5.0:1 (was #b9740e · 3.8:1) */
+  --color-risk-limited: #147a90; /* ~5.0:1 (was #1f8fa8 · 3.8:1) */
+  --color-risk-minimal: #17824f; /* ~4.8:1 (was #1f9d64 · 3.5:1) */
+
+  /* — Environment · neutral shadows softened for daylight; a white inner top
+     highlight keeps glass cards crisp on the paper. — */
+  --shadow-xs: 0 1px 2px rgba(20, 20, 30, 0.10);
+  --shadow-sm:
+    0 1px 2px rgba(20, 20, 30, 0.12),
+    0 1px 1px rgba(20, 20, 30, 0.08);
+  --shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(20, 20, 30, 0.06),
+    0 16px 40px -24px rgba(20, 20, 30, 0.26);
+  --shadow-raised:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 4px 10px rgba(20, 20, 30, 0.10),
+    0 30px 64px -34px rgba(20, 20, 30, 0.28),
+    0 24px 60px -34px rgba(var(--accent), 0.12);
+  --shadow-pop:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 16px 44px -14px rgba(20, 20, 30, 0.20);
+  --glow-brand:
+    0 0 0 1px rgba(var(--accent), 0.35),
+    0 10px 40px -10px rgba(var(--accent), 0.40);
+
+  --background: #f6f6f9;
+  --foreground: #17171c;
+}
+
+/* The daylight canvas — cool near-white lit by soft crimson pools (gentler). */
+:root[data-theme="light"] body {
+  background-color: #f6f6f9;
+  background-image:
+    radial-gradient(70% 55% at 82% 4%, rgba(var(--accent), 0.08), transparent 62%),
+    radial-gradient(55% 50% at 6% 72%, rgba(var(--accent), 0.05), transparent 60%),
+    radial-gradient(120% 80% at 50% 128%, rgba(120, 8, 16, 0.04), transparent 60%),
+    linear-gradient(180deg, #fbfbfd 0%, #f4f4f7 50%, #f6f6f9 100%);
+}
+:root[data-theme="light"] .app-canvas {
+  background-image:
+    radial-gradient(60% 40% at 100% 0%, rgba(var(--accent), 0.045), transparent 60%);
+}
+/* The cinematic backdrop is calibrated for the dark canvas (white grid lines,
+   deep crimson pools, a mix-blend grain). On the daylight paper those read
+   wrong or muddy, so soften the whole layer — the light body gradient already
+   carries the atmosphere. */
+:root[data-theme="light"] .backdrop-layer {
+  opacity: 0.4;
+}
+:root[data-theme="light"] .backdrop-layer .animate-pulse-glow {
+  display: none;
+}
+
+/* Re-voice the surfaces that hardcode a light-on-dark rgba (they can't flip via
+   a token) so they read correctly on the paper ground. */
+:root[data-theme="light"] .text-accent {
+  /* Override only the image and RE-DECLARE the clip: the `background`
+     shorthand resets `background-clip`, which would paint a solid block. */
+  background-image: linear-gradient(180deg, #e11d2a 0%, #c4141f 55%, #9c0f18 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+}
+:root[data-theme="light"] ::selection {
+  background: rgba(var(--accent), 0.20);
+  color: #17171c;
+}
+:root[data-theme="light"] .glass {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5),
+    rgba(255, 255, 255, 0.18) 40%
+  ), var(--color-surface);
+}
+:root[data-theme="light"] .divider-x {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(20, 20, 30, 0.14) 18%,
+    rgba(20, 20, 30, 0.14) 82%,
+    transparent
+  );
+}
+:root[data-theme="light"] .field {
+  background: rgba(20, 20, 30, 0.035);
+}
+:root[data-theme="light"] .field:focus {
+  background: rgba(20, 20, 30, 0.05);
+}
+:root[data-theme="light"] .field option,
+:root[data-theme="light"] select option {
+  background: #ffffff;
+}
+:root[data-theme="light"] .seg {
+  background: rgba(20, 20, 30, 0.06);
+}
+:root[data-theme="light"] .btn-secondary {
+  background: rgba(20, 20, 30, 0.04);
+}
+:root[data-theme="light"] .btn-secondary:hover {
+  background: rgba(20, 20, 30, 0.07);
+}
+:root[data-theme="light"] .btn-ghost:hover {
+  background: rgba(20, 20, 30, 0.06);
+}
+:root[data-theme="light"] .skeleton {
+  background-color: rgba(20, 20, 30, 0.07);
+}
+:root[data-theme="light"] .skeleton::after {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(20, 20, 30, 0.05) 44%,
+    rgba(var(--accent), 0.10) 56%,
+    transparent 100%
+  );
 }
 
 html {
@@ -116,8 +281,8 @@ html {
 body {
   background-color: #07070b;
   background-image:
-    radial-gradient(70% 55% at 82% 4%, rgba(var(--crimson), 0.2), transparent 62%),
-    radial-gradient(55% 50% at 6% 72%, rgba(var(--crimson), 0.1), transparent 60%),
+    radial-gradient(70% 55% at 82% 4%, rgba(var(--accent), 0.2), transparent 62%),
+    radial-gradient(55% 50% at 6% 72%, rgba(var(--accent), 0.1), transparent 60%),
     radial-gradient(120% 80% at 50% 128%, rgba(120, 8, 16, 0.22), transparent 60%),
     linear-gradient(180deg, #08080c 0%, #060609 50%, #08070b 100%);
   background-attachment: fixed;
@@ -156,7 +321,7 @@ h3 {
 }
 
 ::selection {
-  background: rgba(var(--crimson), 0.32);
+  background: rgba(var(--accent), 0.32);
   color: #ffffff;
 }
 
@@ -166,12 +331,12 @@ h3 {
 }
 
 /* Crimson gradient text — for one signature word, used sparingly. */
-.text-crimson {
+.text-accent {
   background: linear-gradient(180deg, #ff6b74 0%, #f5333f 55%, #c81620 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  text-shadow: 0 0 36px rgba(var(--crimson), 0.35);
+  text-shadow: 0 0 36px rgba(var(--accent), 0.35);
 }
 
 /* ----------------------------------------------------------------------------
@@ -180,7 +345,7 @@ h3 {
 .app-canvas {
   background-color: transparent;
   background-image:
-    radial-gradient(60% 40% at 100% 0%, rgba(var(--crimson), 0.08), transparent 60%);
+    radial-gradient(60% 40% at 100% 0%, rgba(var(--accent), 0.08), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -247,10 +412,10 @@ h3 {
 }
 .lift:hover {
   transform: translateY(-3px);
-  border-color: rgba(var(--crimson), 0.45);
+  border-color: rgba(var(--accent), 0.45);
   box-shadow:
     var(--shadow-raised),
-    0 0 0 1px rgba(var(--crimson), 0.2);
+    0 0 0 1px rgba(var(--accent), 0.2);
 }
 
 /* Light sweep — a slow diagonal sheen that crosses on hover. Pair on any
@@ -330,7 +495,7 @@ h3 {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     0 1px 2px rgba(0, 0, 0, 0.4),
-    0 8px 26px -8px rgba(var(--crimson), 0.6);
+    0 8px 26px -8px rgba(var(--accent), 0.6);
 }
 .btn-primary:hover {
   background:
@@ -339,7 +504,7 @@ h3 {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.32),
     0 1px 2px rgba(0, 0, 0, 0.4),
-    0 12px 34px -8px rgba(var(--crimson), 0.75);
+    0 12px 34px -8px rgba(var(--accent), 0.75);
 }
 
 /* Secondary — dark glass with a hairline that warms on hover. */
@@ -352,7 +517,7 @@ h3 {
 }
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(var(--crimson), 0.5);
+  border-color: rgba(var(--accent), 0.5);
 }
 
 /* Destructive — hot red, reserved for confirmed-destructive actions only. */
@@ -418,7 +583,7 @@ h3 {
 .field:focus {
   border-color: var(--color-brand-500);
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(var(--crimson), 0.25);
+  box-shadow: 0 0 0 3px rgba(var(--accent), 0.25);
 }
 .field option,
 select option {
@@ -450,7 +615,7 @@ select option {
 .seg-item[data-active="true"] {
   color: #fff;
   background: linear-gradient(180deg, #f5414b, var(--color-brand-600));
-  box-shadow: 0 6px 18px -6px rgba(var(--crimson), 0.7);
+  box-shadow: 0 6px 18px -6px rgba(var(--accent), 0.7);
 }
 
 /* ----------------------------------------------------------------------------
@@ -476,8 +641,8 @@ select option {
   color: #fff;
   background: linear-gradient(
     90deg,
-    rgba(var(--crimson), 0.18),
-    rgba(var(--crimson), 0.04)
+    rgba(var(--accent), 0.18),
+    rgba(var(--accent), 0.04)
   );
   font-weight: 560;
 }
@@ -491,7 +656,7 @@ select option {
   transform: translateY(-50%);
   border-radius: 9999px;
   background: var(--color-brand-500);
-  box-shadow: 0 0 10px rgba(var(--crimson), 0.9);
+  box-shadow: 0 0 10px rgba(var(--accent), 0.9);
 }
 
 /* ----------------------------------------------------------------------------
@@ -642,7 +807,7 @@ select option {
     90deg,
     transparent 0,
     rgba(255, 255, 255, 0.07) 44%,
-    rgba(var(--crimson), 0.06) 56%,
+    rgba(var(--accent), 0.06) 56%,
     transparent 100%
   );
   animation: shimmer 1.6s infinite;
@@ -653,7 +818,7 @@ select option {
 }
 .card-hover:hover {
   transform: translateY(-2px);
-  border-color: rgba(var(--crimson), 0.4);
+  border-color: rgba(var(--accent), 0.4);
 }
 
 /* ----------------------------------------------------------------------------
@@ -774,5 +939,63 @@ summary:focus-visible,
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   Print — the readiness report is the primary print target. Drop the cinematic
+   environment and app chrome, and force the legible daylight palette so a report
+   printed from the dark theme is never light-ink-on-white. Chrome elements opt
+   out with `print:hidden`.
+   -------------------------------------------------------------------------- */
+@media print {
+  :root,
+  :root[data-theme="dark"],
+  :root[data-theme="light"] {
+    --color-paper: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-2: rgba(20, 20, 30, 0.05);
+    --color-raised: #ffffff;
+    --color-ink: #17171c;
+    --color-ink-soft: #35353f;
+    --color-ink-2: #45454f;
+    --color-ink-3: #5c5c67;
+    --color-line: rgba(20, 20, 30, 0.22);
+    --color-line-2: rgba(20, 20, 30, 0.3);
+    --color-brass-600: #b57e12;
+    --color-ok-400: #17824f;
+    --color-warn-400: #a15f0b;
+    --color-danger-400: #d5313d;
+    --color-risk-prohibited: #d5313d;
+    --color-risk-high: #a15f0b;
+    --color-risk-limited: #147a90;
+    --color-risk-minimal: #17824f;
+    --background: #ffffff;
+    --foreground: #17171c;
+  }
+
+  .backdrop-layer {
+    display: none !important;
+  }
+
+  body,
+  .app-canvas {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #17171c;
+  }
+
+  .panel,
+  .panel-raised,
+  .glass {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Ask the browser to honour the report's colours (risk badges, bars). */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

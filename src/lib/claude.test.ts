@@ -52,6 +52,11 @@ describe("generateDocument (Demo Mode)", () => {
     expect(markdown).toContain("Annex IV");
     expect(markdown).toContain("2024/1689");
   });
+
+  it("localizes the demo-mode note for non-English locales", async () => {
+    const { markdown } = await generateDocument("transparency-notice", ctx(), "fr");
+    expect(markdown).toContain("Mode Démo");
+  });
 });
 
 describe("explainClassification (Demo Mode)", () => {

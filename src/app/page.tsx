@@ -96,15 +96,24 @@ export default function Home() {
     <div>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
       />
       {/* ---------------------------------------------------------------- Hero */}
       <section className="relative overflow-hidden border-b border-line">
+        {/* Ambient crimson light behind the headline — a glow that sits BEHIND
+            the hero, not on it. Logical inset so it mirrors in RTL; low opacity
+            reads as a soft halo on dark and a faint warm wash on light. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-4 h-80 w-80 rounded-full bg-[rgba(var(--accent),0.10)] blur-[110px] [inset-inline-start:-5rem]"
+        />
         <Spotlight className="mx-auto max-w-6xl px-5 py-20 sm:py-28">
           <div className="grid items-center gap-12 lg:grid-cols-[1.04fr_0.96fr]">
             {/* Message */}
             <div className="max-w-xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-ink-2 backdrop-blur">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-ink/[0.05] px-3.5 py-1.5 text-xs font-medium text-ink-2 backdrop-blur">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
@@ -116,9 +125,9 @@ export default function Home() {
                   className="font-medium text-brass-300"
                 />
               </div>
-              <h1 className="text-balance text-[2.6rem] font-semibold leading-[1.04] tracking-tight sm:text-[3.5rem]">
+              <h1 className="text-balance text-[2.75rem] font-semibold leading-[1.01] tracking-[-0.022em] sm:text-[3.5rem] lg:text-[4rem]">
                 {t("home.hero.titleLine1")}{" "}
-                <span className="text-crimson">{t("home.hero.titleAccent")}</span>
+                <span className="text-accent">{t("home.hero.titleAccent")}</span>
               </h1>
               <p className="mt-6 max-w-lg text-pretty text-lg leading-relaxed text-ink-2">
                 {t("home.hero.subtitle")}
@@ -139,7 +148,7 @@ export default function Home() {
             {/* Floating intelligence cluster (lg+) */}
             <div className="relative hidden h-[30rem] lg:block" aria-hidden>
               {/* platform light */}
-              <div className="absolute bottom-10 left-1/2 h-24 w-[78%] -translate-x-1/2 rounded-[50%] bg-[rgba(225,29,42,0.28)] blur-3xl" />
+              <div className="absolute bottom-10 left-1/2 h-24 w-[78%] -translate-x-1/2 rounded-[50%] bg-[rgba(var(--accent),0.28)] blur-3xl" />
 
               {/* central plinth */}
               <TiltCard
@@ -258,7 +267,7 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden px-5 py-10 text-center sm:grid-cols-4">
           {STAT_KEYS.map((k) => (
             <div key={k} className="px-3">
-              <div className="text-2xl font-semibold text-ink sm:text-3xl">
+              <div className="text-[2rem] font-semibold tracking-tight text-ink nums sm:text-[2.5rem]">
                 {t(`home.stats.${k}.value`)}
               </div>
               <div className="mt-1 text-sm font-medium text-ink-2">
@@ -688,7 +697,7 @@ function ProductShowcase() {
             </div>
             <div className="text-xs text-ink-3">{t("home.showcase.registrySub")}</div>
           </div>
-          <div className="rounded-lg border border-brand-500 bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">
+          <div className="rounded-lg border border-brand-500 bg-brand-600 px-3 py-1.5 text-xs font-semibold text-on-accent">
             + {t("home.showcase.classify")}
           </div>
         </div>
@@ -774,8 +783,8 @@ function ComparisonTable() {
     },
   ];
   return (
-    <div className="mt-12 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-      <table className="w-full text-start text-sm">
+    <div className="mt-12 overflow-x-auto scrollbar-thin rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+      <table className="w-full min-w-[36rem] text-start text-sm">
         <thead>
           <tr className="border-b border-line bg-ink/[0.03] text-ink-3">
             <th className="px-5 py-3.5 font-medium" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -8,6 +8,48 @@ import { useI18n } from "@/i18n/I18nProvider";
 export function MobileNav() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const close = () => {
+    setOpen(false);
+    buttonRef.current?.focus();
+  };
+
+  // While open: trap focus inside the panel, close on Escape, lock body scroll.
+  useEffect(() => {
+    if (!open) return;
+    const panel = panelRef.current;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        close();
+        return;
+      }
+      if (e.key === "Tab" && panel) {
+        const nodes = panel.querySelectorAll<HTMLElement>(
+          'a, button, [tabindex]:not([tabindex="-1"])',
+        );
+        if (nodes.length === 0) return;
+        const first = nodes[0];
+        const last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    panel?.querySelector<HTMLElement>("a, button")?.focus();
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
 
   const links = [
     { href: "/#how", label: t("nav.howItWorks") },
@@ -20,8 +62,10 @@ export function MobileNav() {
   return (
     <div className="md:hidden">
       <button
+        ref={buttonRef}
         aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
         aria-expanded={open}
+        aria-controls="mobile-nav-panel"
         onClick={() => setOpen((o) => !o)}
         className="grid h-9 w-9 place-items-center rounded-lg text-ink-2 hover:bg-ink/[0.04]"
       >
@@ -38,9 +82,16 @@ export function MobileNav() {
         <>
           <div
             className="fixed inset-0 top-16 z-30 bg-ink/20"
-            onClick={() => setOpen(false)}
+            onClick={close}
           />
-          <div className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl">
+          <div
+            ref={panelRef}
+            id="mobile-nav-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t("nav.menu")}
+            className="absolute inset-x-0 top-full z-40 border-b border-line bg-surface/95 p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl"
+          >
             <nav className="flex flex-col">
               {links.map((l) => (
                 <Link

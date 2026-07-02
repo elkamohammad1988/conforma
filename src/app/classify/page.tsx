@@ -7,6 +7,7 @@ import {
   EMPTY_ANSWERS,
   classify,
   type ClassificationAnswers,
+  type ClassificationResult,
   type ProviderRole,
 } from "@/lib/classifier";
 import { ANNEX_III_AREAS, PROHIBITED_PRACTICES } from "@/lib/eu-ai-act";
@@ -15,7 +16,9 @@ import { Countdown } from "@/components/Countdown";
 import { ArrowForward, ArrowBackward } from "@/components/Arrow";
 import { DemoModeBadge } from "@/components/DemoModeBadge";
 import { Spinner } from "@/components/ui/Spinner";
-import { saveSystem, newId, type RegisteredSystem } from "@/lib/store";
+import { saveSystem, makeSystem } from "@/lib/store";
+import { INPUT_LIMITS } from "@/lib/input-limits";
+import { useToast } from "@/components/ui/Toast";
 import { useI18n } from "@/i18n/I18nProvider";
 import { renderRationale } from "@/i18n/rationale";
 
@@ -24,6 +27,7 @@ const TRANSPARENCY_KEYS = ["interacts", "synthetic", "deepfake", "emotion"] as c
 
 export default function ClassifyPage() {
   const { t } = useI18n();
+  const { toast } = useToast();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<ClassificationAnswers>({ ...EMPTY_ANSWERS });
@@ -50,21 +54,18 @@ export default function ClassifyPage() {
     return (
       <ResultView
         answers={answers}
+        result={result}
         onBack={() => setShowResult(false)}
         onSave={() => {
-          const now = new Date().toISOString();
-          const record: RegisteredSystem = {
-            id: newId(),
-            name: answers.name.trim(),
-            description: answers.description.trim(),
-            owner: answers.owner ?? "",
+          // Single constructor — same shape the store uses everywhere else.
+          const record = makeSystem(
+            answers.name.trim(),
+            answers.description.trim(),
+            answers.owner ?? "",
             answers,
-            result,
-            obligationStatus: {},
-            createdAt: now,
-            updatedAt: now,
-          };
+          );
           saveSystem(record);
+          toast(t("toast.saved"));
           router.push(`/systems/${record.id}`);
         }}
       />
@@ -84,9 +85,9 @@ export default function ClassifyPage() {
               <span
                 className={`grid h-6 w-6 place-items-center rounded-full border text-[11px] font-semibold transition-all duration-300 ${
                   i < step
-                    ? "border-transparent text-white [background:linear-gradient(180deg,var(--color-brand-500),var(--color-brand-600))]"
+                    ? "border-transparent text-on-accent [background:linear-gradient(180deg,var(--color-brand-500),var(--color-brand-600))]"
                     : i === step
-                      ? "scale-110 border-brand-500 bg-brand-500/15 text-brand-300 shadow-[0_0_0_4px_rgba(var(--crimson),0.12)]"
+                      ? "scale-110 border-brand-500 bg-brand-500/15 text-brand-300 shadow-[0_0_0_4px_rgba(var(--accent),0.12)]"
                       : "border-line bg-surface-2 text-ink-3"
                 }`}
               >
@@ -103,7 +104,7 @@ export default function ClassifyPage() {
               width: `${((step + 1) / STEP_KEYS.length) * 100}%`,
               background:
                 "linear-gradient(90deg, var(--color-brand-600), var(--color-brand-400))",
-              boxShadow: "0 0 10px rgba(var(--crimson),0.5)",
+              boxShadow: "0 0 10px rgba(var(--accent),0.5)",
             }}
           />
         </div>
@@ -117,6 +118,7 @@ export default function ClassifyPage() {
                 autoFocus
                 value={answers.name}
                 onChange={(e) => set("name", e.target.value)}
+                maxLength={INPUT_LIMITS.systemName}
                 placeholder={t("classify.step0.namePlaceholder")}
                 className={INPUT}
               />
@@ -126,6 +128,7 @@ export default function ClassifyPage() {
                 value={answers.description}
                 onChange={(e) => set("description", e.target.value)}
                 rows={3}
+                maxLength={INPUT_LIMITS.description}
                 placeholder={t("classify.step0.descPlaceholder")}
                 className={`${INPUT} resize-none`}
               />
@@ -276,21 +279,24 @@ export default function ClassifyPage() {
 
 function ResultView({
   answers,
+  result,
   onBack,
   onSave,
 }: {
   answers: ClassificationAnswers;
+  result: ClassificationResult;
   onBack: () => void;
   onSave: () => void;
 }) {
   const { t, formatDate, locale } = useI18n();
-  const result = useMemo(() => classify(answers), [answers]);
   const [narrative, setNarrative] = useState<string | null>(null);
   const [loadingAI, setLoadingAI] = useState(false);
   const [aiSource, setAiSource] = useState<string | null>(null);
+  const [aiError, setAiError] = useState(false);
 
   const explain = async () => {
     setLoadingAI(true);
+    setAiError(false);
     try {
       const res = await fetch("/api/explain", {
         method: "POST",
@@ -302,11 +308,13 @@ function ResultView({
           locale,
         }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setNarrative(data.narrative);
       setAiSource(data.source);
     } catch {
       setNarrative(t("classify.result.couldNotReach"));
+      setAiError(true);
     } finally {
       setLoadingAI(false);
     }
@@ -439,7 +447,11 @@ function ResultView({
               </div>
             )}
             {narrative && (
-              <div className="rounded-xl border border-line bg-ink/[0.02] p-4">
+              <div
+                className="rounded-xl border border-line bg-ink/[0.02] p-4"
+                role={aiError ? "alert" : "status"}
+                aria-live="polite"
+              >
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">
                   {t("classify.result.aiExplanation")}
                   {aiSource === "demo" && (
@@ -581,17 +593,21 @@ function CheckCard({
     : "border-brand-500/60 bg-brand-500/10 ring-1 ring-brand-500/40";
   return (
     <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
       onClick={onToggle}
       className={`flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-start transition ${
         checked ? activeRing : "border-line hover:border-line-2"
       }`}
     >
       <span
-        className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border text-xs text-white ${
+        aria-hidden
+        className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded border text-xs ${
           checked
             ? danger
-              ? "border-danger-500 bg-danger-500"
-              : "border-brand-600 bg-brand-600"
+              ? "border-danger-500 bg-danger-500 text-on-accent"
+              : "border-brand-600 bg-brand-600 text-on-accent"
             : "border-line-2 bg-ink/[0.04]"
         }`}
       >

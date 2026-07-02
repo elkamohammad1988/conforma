@@ -25,7 +25,7 @@ export default function SecurityPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-72"
           style={{
             background:
-              "radial-gradient(60% 100% at 50% 0%, rgba(200,30,40,0.06), transparent 72%)",
+              "radial-gradient(60% 100% at 50% 0%, rgba(225,29,42,0.07), transparent 72%)",
           }}
         />
         <div className="relative mx-auto max-w-3xl px-5 py-20 text-center">
@@ -100,8 +100,8 @@ export default function SecurityPage() {
           {t("security.subprocessors.title")}
         </h2>
         <p className="mt-3 text-ink-2">{t("security.subprocessors.intro")}</p>
-        <div className="mt-6 overflow-hidden rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
-          <table className="w-full text-start text-sm">
+        <div className="mt-6 overflow-x-auto scrollbar-thin rounded-2xl border border-line bg-surface shadow-[var(--shadow-card)]">
+          <table className="w-full min-w-[34rem] text-start text-sm">
             <thead className="border-b border-line bg-ink/[0.03] text-xs uppercase tracking-[0.1em] text-ink-3">
               <tr>
                 <th className="px-5 py-3 text-start font-medium">

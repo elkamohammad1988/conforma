@@ -16,7 +16,10 @@ const csp = [
   "object-src 'none'",
   "frame-ancestors 'none'",
   "form-action 'self'",
-  "img-src 'self' data: blob: https:",
+  // The app serves only same-origin images (icon, generated OG image) plus
+  // inline data:/blob: URIs — no remote origins — so we don't open img-src to
+  // all HTTPS, which would otherwise permit pixel beaconing on an XSS.
+  "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,

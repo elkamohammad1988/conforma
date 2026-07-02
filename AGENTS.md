@@ -40,10 +40,11 @@ Router app.
 
 ## Before you finish
 
-Run and pass all three, with zero warnings:
+Run and pass all four, with zero warnings:
 
 ```bash
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```

@@ -84,7 +84,7 @@ export function ConfirmDialog({
   return (
     <div
       className="animate-fade-in fixed inset-0 z-[80] grid place-items-center p-4"
-      style={{ background: "rgba(4,4,7,0.62)", backdropFilter: "blur(3px)" }}
+      style={{ background: "rgba(12,9,5,0.66)", backdropFilter: "blur(3px)" }}
       onMouseDown={onCancel}
     >
       <div

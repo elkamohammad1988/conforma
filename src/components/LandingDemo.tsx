@@ -87,7 +87,7 @@ export function LandingDemo() {
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+              className={`absolute top-0.5 h-5 w-5 rounded-full bg-on-accent shadow transition-all ${
                 gpai ? "start-[1.375rem]" : "start-0.5"
               }`}
             />

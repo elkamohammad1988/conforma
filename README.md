@@ -11,6 +11,7 @@ auto-classify their risk tier with citations to the exact Articles, close the
 obligations that apply, and generate the documentation regulators expect.
 
 [![CI](https://github.com/elkamohammad1988/conforma/actions/workflows/ci.yml/badge.svg)](https://github.com/elkamohammad1988/conforma/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/elkamohammad1988/conforma/actions/workflows/codeql.yml/badge.svg)](https://github.com/elkamohammad1988/conforma/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-2b3.svg)](LICENSE)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![React 19](https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white)](https://react.dev/)
@@ -74,7 +75,10 @@ regulatory documents.
 
 📂 **Portfolio:** read the full **[case study](docs/case-study.md)**, follow the
 **[90-second demo script](docs/demo-script.md)**, or dive into the
-**[architecture write-up](docs/architecture.md)**.
+**[architecture write-up](docs/architecture.md)** and the
+**[decision records](docs/adr/)**. See also the **[API reference](docs/api.md)**,
+the **[security model](docs/security.md)** and the
+**[accessibility statement](docs/accessibility.md)**.
 
 ### Why it stands out
 
@@ -253,7 +257,7 @@ cp .env.example .env.local
 ```text
 conforma/
 ├─ .github/                 # CI workflow, issue & PR templates
-├─ docs/                    # Architecture, deployment, security, FAQ, screenshots
+├─ docs/                    # Architecture, ADRs, API reference, security, a11y, FAQ, screenshots
 ├─ src/
 │  ├─ app/                  # Next.js App Router (pages, layouts, API routes, SEO)
 │  │  ├─ api/               #   POST /api/explain · /api/generate-doc (server-only)
@@ -301,7 +305,7 @@ current list.
 Contributions are welcome! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** for the
 development workflow, coding standards, and commit conventions, and our
 **[Code of Conduct](CODE_OF_CONDUCT.md)**. Every PR is gated by CI (lint, typecheck,
-build).
+test, build), with CodeQL and Dependabot watching for vulnerabilities.
 
 ---
 

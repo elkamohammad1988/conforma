@@ -28,7 +28,7 @@ export function EmptyState({
         className="pointer-events-none absolute inset-x-0 -top-24 h-56"
         style={{
           background:
-            "radial-gradient(55% 100% at 50% 0%, rgba(var(--crimson),0.12), transparent 72%)",
+            "radial-gradient(55% 100% at 50% 0%, rgba(var(--accent),0.12), transparent 72%)",
         }}
       />
       <div className="relative flex flex-col items-center">

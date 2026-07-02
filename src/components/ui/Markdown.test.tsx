@@ -34,6 +34,22 @@ describe("Markdown renderer", () => {
     expect(out).toContain("<hr/>");
   });
 
+  it("does not hang on a table-shaped line with no divider (regression)", () => {
+    // A lone pipe row matches no table (no divider follows) — it must be
+    // consumed as prose, not spin the parser. Reaching an assertion at all
+    // proves the render terminated.
+    const out = html("Intro line.\n\n| note | ref |\n\nOutro line.");
+    expect(out).toContain("| note | ref |");
+    expect(out).toContain("Intro line.");
+    expect(out).toContain("Outro line.");
+  });
+
+  it("does not hang on a header row separated from its divider by a blank line", () => {
+    const out = html("| A | B |\n\n|---|---|\n| 1 | 2 |");
+    // No genuine table (blank line breaks it); everything renders as prose/rows.
+    expect(out).toContain("| A | B |");
+  });
+
   it("escapes embedded HTML — no XSS even with hostile input", () => {
     const out = html("# <script>alert('xss')</script>\n\nHello <img src=x onerror=alert(1)>");
     expect(out).not.toContain("<script>alert");

@@ -5,6 +5,10 @@ import { usePathname } from "next/navigation";
 import { LogoMark } from "@/components/Logo";
 import { Countdown } from "@/components/Countdown";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { AlertsMenu } from "@/components/AlertsMenu";
+import { CommandPalette, OPEN_COMMAND_PALETTE } from "@/components/CommandPalette";
+import { DOCS_URL } from "@/lib/site";
 import { useI18n } from "@/i18n/I18nProvider";
 
 /* ----------------------------------------------------------------------------
@@ -49,11 +53,8 @@ const SettingsIcon = (p: IconProps) => (
     d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z|M19.4 13.5a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V20a2 2 0 1 1-4 0v-.2a1.6 1.6 0 0 0-2.7-1.1l-.1.1A2 2 0 1 1 4.4 16l.1-.1a1.6 1.6 0 0 0-1.1-2.7H3a2 2 0 1 1 0-4h.2A1.6 1.6 0 0 0 4.4 6l-.1-.1A2 2 0 1 1 7.1 3l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.2a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1A2 2 0 1 1 20.6 5l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H22a2 2 0 1 1 0 4h-.2a1.6 1.6 0 0 0-1.5 1z"
   />
 );
-const BellIcon = (p: IconProps) => (
-  <I
-    {...p}
-    d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9|M13.7 21a2 2 0 0 1-3.4 0"
-  />
+const SearchIcon = (p: IconProps) => (
+  <I {...p} d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z|M20.5 20.5 16 16" />
 );
 const HelpIcon = (p: IconProps) => (
   <I
@@ -78,6 +79,8 @@ function sectionKeyFor(pathname: string): { eyebrow: string; title: string } {
     return { eyebrow: "app.breadcrumb.reporting", title: "app.breadcrumb.reportTitle" };
   if (pathname.startsWith("/systems"))
     return { eyebrow: "app.breadcrumb.registry", title: "app.breadcrumb.systemDetail" };
+  if (pathname.startsWith("/settings"))
+    return { eyebrow: "app.account", title: "app.settings" };
   return { eyebrow: "app.breadcrumb.workspace", title: "app.breadcrumb.overview" };
 }
 
@@ -96,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-canvas min-h-screen lg:flex">
       {/* ------------------------------- Sidebar ------------------------------ */}
-      <aside className="sticky top-0 z-30 hidden h-screen w-[16.5rem] shrink-0 flex-col border-e border-line bg-paper/60 px-4 pb-5 pt-5 backdrop-blur-xl lg:flex">
+      <aside className="sticky top-0 z-30 hidden h-screen w-[16.5rem] shrink-0 flex-col border-e border-line bg-paper/60 px-4 pb-5 pt-5 backdrop-blur-xl lg:flex print:hidden">
         <Link href="/dashboard" className="flex items-center gap-2.5 px-2">
           <LogoMark className="h-8 w-8" />
           <span className="text-[1.05rem] font-semibold tracking-tight text-ink">
@@ -124,11 +127,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <p className="mt-5 px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">
             {t("app.account")}
           </p>
-          <a href="#settings" className="navlink">
+          <Link
+            href="/settings"
+            data-active={isActive("/settings")}
+            aria-current={isActive("/settings") ? "page" : undefined}
+            className="navlink"
+          >
             <SettingsIcon className="h-[18px] w-[18px] shrink-0" />
             {t("app.settings")}
-          </a>
-          <a href="#help" className="navlink">
+          </Link>
+          <a
+            href={DOCS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="navlink"
+          >
             <HelpIcon className="h-[18px] w-[18px] shrink-0" />
             {t("app.helpDocs")}
           </a>
@@ -165,21 +178,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </p>
             <p className="truncate text-xs text-ink-3">{t("app.accountPlan")}</p>
           </div>
-          <a
-            href="#settings"
+          <Link
+            href="/settings"
             className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
             data-tip={t("app.accountSettings")}
             aria-label={t("app.accountSettings")}
           >
             <SettingsIcon className="h-[18px] w-[18px]" />
-          </a>
+          </Link>
         </div>
       </aside>
 
       {/* ------------------------------ Main column --------------------------- */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-paper/70 px-4 backdrop-blur-xl sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-paper/70 px-4 backdrop-blur-xl sm:px-6 print:hidden">
           {/* Mobile brand */}
           <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
             <LogoMark className="h-7 w-7" />
@@ -194,23 +207,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="ms-auto flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event(OPEN_COMMAND_PALETTE))}
+              data-tip={t("commandPalette.trigger")}
+              aria-label={t("commandPalette.trigger")}
+              className="tip inline-flex items-center gap-2 rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink sm:border sm:border-line sm:bg-surface-2 sm:px-2.5 sm:py-1.5"
+            >
+              <SearchIcon className="h-[18px] w-[18px]" />
+              <span className="hidden text-xs sm:inline">
+                {t("commandPalette.trigger")}
+              </span>
+              <kbd className="hidden rounded border border-line px-1 font-mono text-[10px] text-ink-3 sm:inline">
+                ⌘K
+              </kbd>
+            </button>
+            <ThemeToggle />
             <LanguageSwitcher />
             <a
-              href="#help"
+              href={DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               data-tip={t("app.helpDocs")}
               aria-label={t("app.helpAria")}
               className="tip rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
             >
               <HelpIcon />
             </a>
-            <button
-              type="button"
-              data-tip={t("app.notifications")}
-              aria-label={t("app.notifications")}
-              className="tip rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
-            >
-              <BellIcon />
-            </button>
+            <AlertsMenu />
             <div className="ms-1 lg:hidden">
               <Avatar />
             </div>
@@ -218,12 +242,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Mobile section nav */}
-        <div className="flex items-center gap-1 overflow-x-auto border-b border-line bg-paper/60 px-3 py-2 lg:hidden">
+        <div className="flex items-center gap-1 overflow-x-auto border-b border-line bg-paper/60 px-3 py-2 lg:hidden print:hidden">
           {NAV.map(({ href, key, Icon }) => (
             <Link
               key={href}
               href={href}
               data-active={isActive(href)}
+              aria-current={isActive(href) ? "page" : undefined}
               className="navlink whitespace-nowrap"
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -236,6 +261,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       </div>
+
+      <CommandPalette />
     </div>
   );
 }
@@ -243,9 +270,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 function Avatar() {
   return (
     <span
-      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-white shadow-[0_4px_12px_-4px_rgba(var(--crimson),0.7)] ring-1 ring-white/10"
+      className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-on-accent shadow-[0_4px_12px_-4px_rgba(var(--accent),0.55)] ring-1 ring-white/15"
       style={{
-        background: "linear-gradient(140deg, var(--color-brand-500), var(--color-brand-700))",
+        background: "linear-gradient(140deg, var(--color-brand-400), var(--color-brand-600))",
       }}
     >
       ME

@@ -40,11 +40,37 @@ const SEED_FLAG = "conforma.seeded.v2";
 let snapshot: RegisteredSystem[] | null = null;
 const listeners = new Set<() => void>();
 
+/**
+ * Defensive shape check. localStorage can hold legacy, partial or hand-edited
+ * records; a single malformed one must not white-screen the dashboard/report,
+ * so we drop anything that doesn't carry the fields the UI dereferences.
+ */
+function isValidSystem(s: unknown): s is RegisteredSystem {
+  if (typeof s !== "object" || s === null) return false;
+  const r = s as Record<string, unknown>;
+  const result = r.result as Record<string, unknown> | null;
+  return (
+    typeof r.id === "string" &&
+    typeof r.name === "string" &&
+    typeof r.updatedAt === "string" &&
+    typeof r.obligationStatus === "object" &&
+    r.obligationStatus !== null &&
+    typeof result === "object" &&
+    result !== null &&
+    Array.isArray(result.obligations) &&
+    Array.isArray(result.rationale) &&
+    typeof result.deadline === "object" &&
+    result.deadline !== null &&
+    typeof result.tier === "string"
+  );
+}
+
 function read(): RegisteredSystem[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as RegisteredSystem[]) : [];
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter(isValidSystem) : [];
   } catch {
     return [];
   }
@@ -66,8 +92,9 @@ function subscribe(listener: () => void): () => void {
 }
 
 function getSnapshot(): RegisteredSystem[] | null {
+  // Pure reader: `useSyncExternalStore` may call this repeatedly per render, so
+  // it must not mutate anything. Seeding happens once at module init (below).
   if (snapshot === null) {
-    maybeSeed();
     snapshot = read().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }
   return snapshot;
@@ -106,6 +133,23 @@ export function saveSystem(system: RegisteredSystem): void {
 
 export function deleteSystem(id: string): void {
   write(read().filter((s) => s.id !== id));
+}
+
+/** Empty the registry and keep it empty (won't re-seed on next read). */
+export function clearAllSystems(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(SEED_FLAG, "1");
+  write([]);
+}
+
+/** Discard the current registry and restore the seeded demo systems. */
+export function resetToDemoData(): void {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(KEY);
+  window.localStorage.removeItem(SEED_FLAG);
+  maybeSeed();
+  snapshot = null;
+  for (const listener of listeners) listener();
 }
 
 export function setObligationState(
@@ -308,3 +352,8 @@ function maybeSeed() {
   window.localStorage.setItem(KEY, JSON.stringify(records));
   window.localStorage.setItem(SEED_FLAG, "1");
 }
+
+// Seed the demo registry once, on first client load of this module — before any
+// component reads the store — so `getSnapshot` stays pure and there is no
+// empty-then-populated flash. No-op on the server and after the first seed.
+if (typeof window !== "undefined") maybeSeed();

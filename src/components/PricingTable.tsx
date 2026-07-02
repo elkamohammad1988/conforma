@@ -60,7 +60,7 @@ export function PricingTable() {
           }`}
         >
           <span
-            className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-all ${
+            className={`absolute top-0.5 h-5 w-5 rounded-full bg-on-accent shadow-sm transition-all ${
               annual ? "start-[1.375rem]" : "start-0.5"
             }`}
           />
@@ -92,7 +92,7 @@ export function PricingTable() {
                   className="pointer-events-none absolute inset-x-0 -top-20 h-40"
                   style={{
                     background:
-                      "radial-gradient(60% 100% at 50% 0%, rgba(var(--crimson),0.16), transparent 72%)",
+                      "radial-gradient(60% 100% at 50% 0%, rgba(var(--accent),0.16), transparent 72%)",
                   }}
                 />
               )}

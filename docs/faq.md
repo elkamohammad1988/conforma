@@ -70,10 +70,11 @@ Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 ·
 ```bash
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
-All three must pass with zero warnings — CI enforces this on every PR.
+All four must pass with zero warnings — CI enforces this on every PR.
 
 ### How would I add a new obligation or high-risk area?
 
