@@ -10,6 +10,9 @@ import { AlertsMenu } from "@/components/AlertsMenu";
 import { CommandPalette, OPEN_COMMAND_PALETTE } from "@/components/CommandPalette";
 import { DOCS_URL } from "@/lib/site";
 import { useI18n } from "@/i18n/I18nProvider";
+import { useSession } from "@/components/auth/SessionProvider";
+import { signOutAction } from "@/lib/auth/actions";
+import type { ActiveContext } from "@/lib/auth/types";
 
 /* ----------------------------------------------------------------------------
    Hand-drawn icon set — 1.6 stroke, consistent with the rest of the product.
@@ -56,6 +59,15 @@ const SettingsIcon = (p: IconProps) => (
 const SearchIcon = (p: IconProps) => (
   <I {...p} d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14z|M20.5 20.5 16 16" />
 );
+const LogoutIcon = (p: IconProps) => (
+  <I {...p} d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3|M10 12h9|M17 9l3 3-3 3" />
+);
+const TeamIcon = (p: IconProps) => (
+  <I
+    {...p}
+    d="M16 19v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2|M9 9a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7|M22 19v-2a4 4 0 0 0-3-3.87|M16 2.13a4 4 0 0 1 0 7.75"
+  />
+);
 const HelpIcon = (p: IconProps) => (
   <I
     {...p}
@@ -86,6 +98,7 @@ function sectionKeyFor(pathname: string): { eyebrow: string; title: string } {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { t, formatDate } = useI18n();
+  const session = useSession();
   const pathname = usePathname() ?? "/dashboard";
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
@@ -123,6 +136,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {t(`app.nav.${key}`)}
             </Link>
           ))}
+          {/* Team — Production Mode only (there are no orgs in Demo Mode). */}
+          {session && (
+            <Link
+              href="/team"
+              data-active={isActive("/team")}
+              aria-current={isActive("/team") ? "page" : undefined}
+              className="navlink"
+            >
+              <TeamIcon className="h-[18px] w-[18px] shrink-0" />
+              {t("team.nav")}
+            </Link>
+          )}
 
           <p className="mt-5 px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-ink-3">
             {t("app.account")}
@@ -171,21 +196,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Account */}
         <div className="mt-3 flex items-center gap-3 rounded-2xl px-1.5 py-1.5">
-          <Avatar />
+          <Avatar initials={avatarInitials(session)} />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-ink">
-              {t("app.accountName")}
+              {session ? session.fullName || session.email || t("app.accountName") : t("app.accountName")}
             </p>
-            <p className="truncate text-xs text-ink-3">{t("app.accountPlan")}</p>
+            <p className="truncate text-xs text-ink-3">
+              {session?.activeOrg ? session.activeOrg.name : t("app.accountPlan")}
+            </p>
           </div>
-          <Link
-            href="/settings"
-            className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
-            data-tip={t("app.accountSettings")}
-            aria-label={t("app.accountSettings")}
-          >
-            <SettingsIcon className="h-[18px] w-[18px]" />
-          </Link>
+          {session ? (
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
+                data-tip={t("auth.signOut")}
+                aria-label={t("auth.signOut")}
+              >
+                <LogoutIcon className="h-[18px] w-[18px]" />
+              </button>
+            </form>
+          ) : (
+            <Link
+              href="/settings"
+              className="tip rounded-lg p-1.5 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
+              data-tip={t("app.accountSettings")}
+              aria-label={t("app.accountSettings")}
+            >
+              <SettingsIcon className="h-[18px] w-[18px]" />
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -236,7 +276,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </a>
             <AlertsMenu />
             <div className="ms-1 lg:hidden">
-              <Avatar />
+              <Avatar initials={avatarInitials(session)} />
             </div>
           </div>
         </header>
@@ -255,6 +295,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               {t(`app.nav.${key}`)}
             </Link>
           ))}
+          {session && (
+            <Link
+              href="/team"
+              data-active={isActive("/team")}
+              aria-current={isActive("/team") ? "page" : undefined}
+              className="navlink whitespace-nowrap"
+            >
+              <TeamIcon className="h-4 w-4 shrink-0" />
+              {t("team.nav")}
+            </Link>
+          )}
         </div>
 
         <div key={pathname} className="flex-1 animate-fade-in">
@@ -267,7 +318,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Avatar() {
+/** Two-letter avatar initials from the session, or "ME" in Demo Mode. */
+function avatarInitials(session: ActiveContext | null): string {
+  if (!session) return "ME";
+  const src = (session.fullName || session.email || "").trim();
+  if (!src) return "ME";
+  const parts = src.split(/\s+/).filter(Boolean);
+  const raw =
+    parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : src.slice(0, 2);
+  return raw.toUpperCase();
+}
+
+function Avatar({ initials = "ME" }: { initials?: string }) {
   return (
     <span
       className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-[11px] font-semibold text-on-accent shadow-[0_4px_12px_-4px_rgba(var(--accent),0.55)] ring-1 ring-white/15"
@@ -275,7 +337,7 @@ function Avatar() {
         background: "linear-gradient(140deg, var(--color-brand-400), var(--color-brand-600))",
       }}
     >
-      ME
+      {initials}
     </span>
   );
 }

@@ -1,12 +1,13 @@
 /**
- * Detects the visitor's language on their first request and forwards it to the
- * server so the very first render is already in the right locale (no flash of
- * the default language). The choice is then persisted in a cookie:
- *   - returning visitors: the cookie wins;
- *   - first visit: `Accept-Language` decides, and we write the cookie.
+ * Request proxy — two concerns, composed:
  *
- * The resolved locale is also forwarded as a request header so Server
- * Components / `generateMetadata` can read it without re-parsing headers.
+ *   1. **Locale** — detect the visitor's language on first request, forward it
+ *      to Server Components via a header, and persist it in a cookie so the very
+ *      first render is in the right language (no flash of the default locale).
+ *
+ *   2. **Session** (Production Mode only) — refresh the Supabase auth cookies
+ *      and enforce protected routes. In Demo Mode (no Supabase env) this half is
+ *      skipped entirely and behaviour is identical to before.
  *
  * (Next 16 renamed the `middleware` convention to `proxy`.)
  */
@@ -18,8 +19,24 @@ import {
   matchAcceptLanguage,
   resolveLocale,
 } from "@/i18n/config";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { refreshSupabaseSession } from "@/lib/supabase/middleware";
+import { authRedirect } from "@/lib/auth/routes";
 
-export function proxy(request: NextRequest) {
+function persistLocaleCookie(
+  response: NextResponse,
+  locale: string,
+  alreadySet: boolean,
+): void {
+  if (alreadySet) return;
+  response.cookies.set(LOCALE_COOKIE, locale, {
+    path: "/",
+    maxAge: LOCALE_COOKIE_MAX_AGE,
+    sameSite: "lax",
+  });
+}
+
+export async function proxy(request: NextRequest) {
   const cookieLocale = resolveLocale(request.cookies.get(LOCALE_COOKIE)?.value);
   const locale =
     cookieLocale ?? matchAcceptLanguage(request.headers.get("accept-language"));
@@ -27,16 +44,25 @@ export function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(LOCALE_HEADER, locale);
 
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
-
-  if (!cookieLocale) {
-    response.cookies.set(LOCALE_COOKIE, locale, {
-      path: "/",
-      maxAge: LOCALE_COOKIE_MAX_AGE,
-      sameSite: "lax",
-    });
+  // Demo Mode: locale only, exactly as before.
+  if (!isSupabaseConfigured()) {
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
+    persistLocaleCookie(response, locale, Boolean(cookieLocale));
+    return response;
   }
 
+  // Production Mode: refresh session, then apply route protection.
+  const { response, userId } = await refreshSupabaseSession(request, requestHeaders);
+  const redirect = authRedirect(request.nextUrl.pathname, userId, request.nextUrl);
+
+  if (redirect) {
+    // Carry the rotated auth cookies onto the redirect so the session survives.
+    for (const cookie of response.cookies.getAll()) redirect.cookies.set(cookie);
+    persistLocaleCookie(redirect, locale, Boolean(cookieLocale));
+    return redirect;
+  }
+
+  persistLocaleCookie(response, locale, Boolean(cookieLocale));
   return response;
 }
 

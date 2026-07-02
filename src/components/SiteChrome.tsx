@@ -14,7 +14,19 @@ import { useI18n } from "@/i18n/I18nProvider";
  * with its own sidebar + topbar. This keeps the marketing site and the
  * application visually distinct without restructuring the route tree.
  */
-const APP_ROUTES = ["/dashboard", "/systems", "/classify", "/report"];
+const APP_ROUTES = ["/dashboard", "/systems", "/classify", "/report", "/team"];
+
+// Auth + onboarding screens: no marketing nav and no app sidebar — a focused,
+// centered surface. They bring their own layout (see AuthScreen).
+const BARE_ROUTES = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/verify-email",
+  "/onboarding",
+  "/accept-invite",
+];
 
 // Standard/brand names — intentionally not translated.
 const FRAMEWORKS = ["EU AI Act", "GDPR", "ISO/IEC 42001", "NIST AI RMF"];
@@ -24,8 +36,11 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
   const isApp = APP_ROUTES.some(
     (r) => pathname === r || pathname.startsWith(`${r}/`),
   );
+  const isBare = BARE_ROUTES.some(
+    (r) => pathname === r || pathname.startsWith(`${r}/`),
+  );
 
-  if (isApp) {
+  if (isApp || isBare) {
     return (
       <main id="main" className="flex-1">
         {children}
@@ -72,7 +87,7 @@ function TopNav() {
           <LanguageSwitcher className="hidden sm:block" />
           <Link
             href="/demo"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04] sm:inline-block"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04] hover:text-ink sm:inline-block"
           >
             {t("nav.bookDemo")}
           </Link>

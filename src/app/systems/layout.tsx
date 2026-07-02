@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { AppShell } from "@/components/AppShell";
+import { AppGuard } from "@/components/auth/AppGuard";
 import { getServerI18n } from "@/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,5 +15,5 @@ export default function SystemsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AppShell>{children}</AppShell>;
+  return <AppGuard>{children}</AppGuard>;
 }

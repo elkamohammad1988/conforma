@@ -11,26 +11,22 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { type ClassificationAnswers, type ProviderRole } from "./classifier";
 import {
-  classify,
-  type ClassificationAnswers,
-  type ClassificationResult,
-  type ProviderRole,
-} from "./classifier";
+  compliancePct,
+  makeSystem,
+  newId,
+  type ObligationState,
+  type RegisteredSystem,
+} from "./registry";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import * as remote from "@/lib/data/systems-repository";
 
-export type ObligationState = "todo" | "in-progress" | "done";
-
-export interface RegisteredSystem {
-  id: string;
-  name: string;
-  description: string;
-  owner: string;
-  answers: ClassificationAnswers;
-  result: ClassificationResult;
-  obligationStatus: Record<string, ObligationState>;
-  createdAt: string;
-  updatedAt: string;
-}
+// Re-export the domain model so existing importers of `@/lib/store` keep
+// working; the definitions now live in the backend-agnostic `registry` module.
+export { compliancePct, makeSystem, newId };
+export type { ObligationState, RegisteredSystem };
 
 const KEY = "conforma.systems.v2";
 const SEED_FLAG = "conforma.seeded.v2";
@@ -39,6 +35,120 @@ const SEED_FLAG = "conforma.seeded.v2";
 
 let snapshot: RegisteredSystem[] | null = null;
 const listeners = new Set<() => void>();
+
+function notify(): void {
+  for (const listener of listeners) listener();
+}
+
+function sortByUpdated(list: RegisteredSystem[]): RegisteredSystem[] {
+  return [...list].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
+
+/* --------------------------- Backend selection --------------------------- */
+/**
+ * Demo Mode → localStorage; Production Mode → Supabase (RLS-scoped to the active
+ * org via the browser client). The mode defaults from env so a configured
+ * deployment never flashes localStorage data before the session effect runs;
+ * the active org/user is supplied by `configureRegistryBackend`.
+ */
+type RemoteCtx = { orgId: string; userId: string };
+
+let mode: "local" | "remote" = isSupabaseConfigured() ? "remote" : "local";
+let remoteCtx: RemoteCtx | null = null;
+let remoteSnapshot: RegisteredSystem[] | null = null;
+
+/** Point the registry at a tenant (Production) or localStorage (Demo). */
+export function configureRegistryBackend(ctx: RemoteCtx | null): void {
+  const orgChanged = ctx?.orgId !== remoteCtx?.orgId;
+  remoteCtx = ctx;
+  mode = ctx ? "remote" : "local";
+  if (mode === "remote") {
+    if (orgChanged) remoteSnapshot = null;
+    void refreshRemote();
+  }
+  notify();
+}
+
+async function refreshRemote(): Promise<void> {
+  const client = getSupabaseBrowserClient();
+  if (!client || !remoteCtx) return;
+  try {
+    remoteSnapshot = await remote.listSystems(client, remoteCtx.orgId);
+  } catch {
+    remoteSnapshot = remoteSnapshot ?? [];
+  }
+  notify();
+}
+
+/** Optimistically upsert into the remote cache, keeping newest-first order. */
+function cacheUpsert(system: RegisteredSystem): RegisteredSystem[] {
+  const rest = (remoteSnapshot ?? []).filter((s) => s.id !== system.id);
+  return sortByUpdated([system, ...rest]);
+}
+
+async function saveRemote(system: RegisteredSystem): Promise<void> {
+  const client = getSupabaseBrowserClient();
+  if (!client || !remoteCtx) return;
+  remoteSnapshot = cacheUpsert(system);
+  notify();
+  try {
+    await remote.saveSystem(client, remoteCtx.orgId, remoteCtx.userId, system);
+  } finally {
+    void refreshRemote();
+  }
+}
+
+async function deleteRemote(id: string): Promise<void> {
+  const client = getSupabaseBrowserClient();
+  if (!client || !remoteCtx) return;
+  remoteSnapshot = (remoteSnapshot ?? []).filter((s) => s.id !== id);
+  notify();
+  try {
+    await remote.deleteSystem(client, id);
+  } finally {
+    void refreshRemote();
+  }
+}
+
+async function setObligationRemote(
+  id: string,
+  obligationId: string,
+  state: ObligationState,
+): Promise<void> {
+  const client = getSupabaseBrowserClient();
+  if (!client || !remoteCtx) return;
+  const now = new Date().toISOString();
+  remoteSnapshot = sortByUpdated(
+    (remoteSnapshot ?? []).map((s) =>
+      s.id === id
+        ? {
+            ...s,
+            obligationStatus: { ...s.obligationStatus, [obligationId]: state },
+            updatedAt: now,
+          }
+        : s,
+    ),
+  );
+  notify();
+  try {
+    await remote.setObligationState(client, id, obligationId, state, remoteCtx.userId);
+  } finally {
+    void refreshRemote();
+  }
+}
+
+async function clearAllRemote(): Promise<void> {
+  const client = getSupabaseBrowserClient();
+  if (!client || !remoteCtx) return;
+  const ids = (remoteSnapshot ?? []).map((s) => s.id);
+  remoteSnapshot = [];
+  notify();
+  try {
+    await Promise.all(ids.map((id) => remote.deleteSystem(client, id)));
+  } finally {
+    void refreshRemote();
+  }
+}
 
 /**
  * Defensive shape check. localStorage can hold legacy, partial or hand-edited
@@ -94,8 +204,9 @@ function subscribe(listener: () => void): () => void {
 function getSnapshot(): RegisteredSystem[] | null {
   // Pure reader: `useSyncExternalStore` may call this repeatedly per render, so
   // it must not mutate anything. Seeding happens once at module init (below).
+  if (mode === "remote") return remoteSnapshot; // null while loading
   if (snapshot === null) {
-    snapshot = read().sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    snapshot = sortByUpdated(read());
   }
   return snapshot;
 }
@@ -119,11 +230,11 @@ export function useSystem(id: string): RegisteredSystem | null | undefined {
 
 /* ------------------------------- Mutations ------------------------------- */
 
-export function newId(): string {
-  return `sys_${Math.random().toString(36).slice(2, 10)}`;
-}
-
 export function saveSystem(system: RegisteredSystem): void {
+  if (mode === "remote") {
+    void saveRemote(system);
+    return;
+  }
   const all = read();
   const idx = all.findIndex((s) => s.id === system.id);
   if (idx >= 0) all[idx] = system;
@@ -132,24 +243,36 @@ export function saveSystem(system: RegisteredSystem): void {
 }
 
 export function deleteSystem(id: string): void {
+  if (mode === "remote") {
+    void deleteRemote(id);
+    return;
+  }
   write(read().filter((s) => s.id !== id));
 }
 
-/** Empty the registry and keep it empty (won't re-seed on next read). */
+/** Empty the registry. Demo Mode blocks re-seeding; Production deletes rows. */
 export function clearAllSystems(): void {
+  if (mode === "remote") {
+    void clearAllRemote();
+    return;
+  }
   if (typeof window === "undefined") return;
   window.localStorage.setItem(SEED_FLAG, "1");
   write([]);
 }
 
-/** Discard the current registry and restore the seeded demo systems. */
+/**
+ * Discard the current registry and restore the seeded demo systems. This is a
+ * Demo-Mode-only affordance — there is nothing to seed against a real tenant.
+ */
 export function resetToDemoData(): void {
+  if (mode === "remote") return;
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(KEY);
   window.localStorage.removeItem(SEED_FLAG);
   maybeSeed();
   snapshot = null;
-  for (const listener of listeners) listener();
+  notify();
 }
 
 export function setObligationState(
@@ -157,42 +280,16 @@ export function setObligationState(
   obligationId: string,
   state: ObligationState,
 ): void {
+  if (mode === "remote") {
+    void setObligationRemote(id, obligationId, state);
+    return;
+  }
   const all = read();
   const sys = all.find((s) => s.id === id);
   if (!sys) return;
   sys.obligationStatus[obligationId] = state;
   sys.updatedAt = new Date().toISOString();
   write(all);
-}
-
-/** Share of applicable obligations marked done (0–100). */
-export function compliancePct(system: RegisteredSystem): number {
-  const total = system.result.obligations.length;
-  if (total === 0) return 100;
-  const done = system.result.obligations.filter(
-    (o) => system.obligationStatus[o.id] === "done",
-  ).length;
-  return Math.round((done / total) * 100);
-}
-
-export function makeSystem(
-  name: string,
-  description: string,
-  owner: string,
-  answers: ClassificationAnswers,
-): RegisteredSystem {
-  const now = new Date().toISOString();
-  return {
-    id: newId(),
-    name,
-    description,
-    owner,
-    answers,
-    result: classify(answers),
-    obligationStatus: {},
-    createdAt: now,
-    updatedAt: now,
-  };
 }
 
 /* ------------------------------- Seed data ------------------------------- */
@@ -355,5 +452,6 @@ function maybeSeed() {
 
 // Seed the demo registry once, on first client load of this module — before any
 // component reads the store — so `getSnapshot` stays pure and there is no
-// empty-then-populated flash. No-op on the server and after the first seed.
-if (typeof window !== "undefined") maybeSeed();
+// empty-then-populated flash. No-op on the server, after the first seed, and in
+// Production Mode (a real tenant's data must never be shadowed by demo seeds).
+if (typeof window !== "undefined" && !isSupabaseConfigured()) maybeSeed();
