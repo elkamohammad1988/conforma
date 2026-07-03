@@ -23,11 +23,13 @@ obligations that apply, and generate the documentation regulators expect.
 
 **▶ [Live demo](https://conforma-ten.vercel.app)** &nbsp;·&nbsp; runs in **Demo Mode** — no sign-up, no API key, no backend
 <br/>
+**▶ [Watch the 80-second product tour](docs/portfolio/conforma-demo.mp4)** &nbsp;·&nbsp; recorded end-to-end from the live app
+<br/>
 <sub>Deployed on Vercel · <a href="https://conforma-ten.vercel.app">conforma-ten.vercel.app</a></sub>
 
 <br/>
 
-<img src="docs/screenshots/landing.png" alt="Conforma landing page" width="860" />
+<a href="docs/portfolio/conforma-demo.mp4" title="Watch the product tour (MP4)"><img src="docs/screenshots/landing.png" alt="Conforma — click to watch the product tour" width="860" /></a>
 
 </div>
 
@@ -106,9 +108,12 @@ the **[security model](docs/security.md)** and the
 | **Marketing landing** | **Mobile (responsive)** |
 | <img src="docs/screenshots/landing.png" alt="Landing page" width="420" /> | <img src="docs/screenshots/mobile.png" alt="Mobile responsive view" width="240" /> |
 
-> Every shot is generated from the running app with `npm run screenshots`
-> (Playwright drives your installed Chrome/Edge at 2× — no browser download). A
-> longer narrated walkthrough lives in **[docs/demo-script.md](docs/demo-script.md)**.
+> Every shot above is a fresh 2× retina capture of the **live production
+> deployment**, regenerated with `npm run screenshots` (Playwright drives your
+> installed Chrome/Edge — no browser download). The **[80-second product
+> tour](docs/portfolio/conforma-demo.mp4)** is recorded the same way with
+> `npm run demo:video`, and a narrated walkthrough lives in
+> **[docs/demo-script.md](docs/demo-script.md)**.
 
 ---
 
@@ -217,6 +222,8 @@ realistic pre-generated AI drafts, clearly labelled in the UI.
 | `npm test` | Run the Vitest unit suite |
 | `npm run test:watch` | Run Vitest in watch mode |
 | `npm run screenshots` | Regenerate `docs/screenshots/` from a running build (Playwright) |
+| `npm run covers` | Derive the portfolio / social cover crops from the screenshots (sharp) |
+| `npm run demo:video` | Record the product-tour demo video — `docs/portfolio/conforma-demo.mp4` (Playwright + ffmpeg) |
 
 ---
 
