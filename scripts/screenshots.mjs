@@ -117,7 +117,36 @@ async function main() {
     console.warn("  ! could not resolve a seeded system id — skipped system-detail");
   }
 
+  // ---- Command palette (⌘K) over the dashboard — the power-user launcher ----
+  await page.goto(`${BASE}/dashboard`, { waitUntil: "networkidle" });
+  await settle(page, "System Registry");
+  await page.keyboard.press("Control+k");
+  const palette = page.locator('[role="dialog"] input[role="combobox"]');
+  await palette.waitFor({ timeout: 5000 }).catch(() => {});
+  await palette.type("Talent", { delay: 40 }).catch(() => {});
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: path.join(OUT, "command-palette.png") });
+  console.log("  ✓ command-palette.png");
+
   await ctx.close();
+
+  // ---- Light theme showcase — the same landing, re-tinted for daylight -----
+  const light = await browser.newContext({
+    viewport: DESKTOP,
+    deviceScaleFactor: 2,
+    reducedMotion: "reduce",
+    colorScheme: "light",
+    locale: "en-US",
+  });
+  await light.addInitScript(() => {
+    try { localStorage.setItem("conforma.theme", "light"); } catch {}
+  });
+  const lpage = await light.newPage();
+  await lpage.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await settle(lpage, "EU AI Act compliance");
+  await lpage.screenshot({ path: path.join(OUT, "landing-light.png") });
+  console.log("  ✓ landing-light.png");
+  await light.close();
 
   // ---- Aspect-ratio hero crops (16:9 · 4:3 · 1:1) for portfolio covers ----
   // Each fresh context re-seeds the registry on its first dashboard paint.
@@ -181,6 +210,13 @@ async function main() {
     await mpage.screenshot({ path: path.join(OUT, `${shot.name}.png`) });
     console.log(`  ✓ ${shot.name}.png`);
   }
+  // Mobile navigation drawer open — the responsive chrome in action.
+  await mpage.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await settle(mpage, "EU AI Act compliance");
+  await mpage.getByRole("button", { name: /menu/i }).first().click().catch(() => {});
+  await mpage.waitForTimeout(500);
+  await mpage.screenshot({ path: path.join(OUT, "mobile-nav.png") });
+  console.log("  ✓ mobile-nav.png");
   await mobile.close();
 
   // ---- i18n showcase: the same dashboard in Arabic (full RTL mirror) ----

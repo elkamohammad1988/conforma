@@ -36,6 +36,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "screenshots": "node scripts/screenshots.mjs",
+    "demo:video": "node scripts/record-demo.mjs",
     "covers": "node scripts/covers.mjs",
     "verify:rls": "node --env-file=.env.local scripts/verify-rls.mjs",
     "check:env": "node scripts/check-env.mjs",
