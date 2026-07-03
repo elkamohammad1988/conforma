@@ -99,6 +99,11 @@ const en = {
     rights: "© {year} Conforma. All rights reserved.",
     disclaimer:
       "Decision-support tooling for Regulation (EU) 2024/1689 — not legal advice. Confirm classifications with qualified counsel.",
+    builtBy: "Designed & built by",
+    portfolioNote:
+      "an independent portfolio project demonstrating production-grade full-stack engineering.",
+    caseStudy: "Case study",
+    hireCta: "Available for work",
   },
 
   /* ------------------------------------------------------------ announcement */
@@ -761,6 +766,7 @@ const en = {
       mode: "Document generation",
       docs: "Documentation",
       source: "Source code",
+      builtBy: "Built by",
     },
   },
 

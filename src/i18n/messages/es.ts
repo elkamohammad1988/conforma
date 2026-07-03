@@ -97,6 +97,11 @@ const es: Messages = {
     rights: "© {year} Conforma. Todos los derechos reservados.",
     disclaimer:
       "Herramienta de apoyo a la decisión para el Regulation (EU) 2024/1689 — no constituye asesoramiento jurídico. Confirme las clasificaciones con asesores cualificados.",
+    builtBy: "Diseñado y desarrollado por",
+    portfolioNote:
+      "un proyecto de portafolio independiente que demuestra ingeniería full-stack de nivel producción.",
+    caseStudy: "Caso de estudio",
+    hireCta: "Disponible para proyectos",
   },
 
   /* ------------------------------------------------------------ announcement */
@@ -759,6 +764,7 @@ const es: Messages = {
       mode: "Generación de documentos",
       docs: "Documentación",
       source: "Código fuente",
+      builtBy: "Desarrollado por",
     },
   },
 

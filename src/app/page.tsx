@@ -15,6 +15,7 @@ import {
   PRIMARY_DEADLINE,
   RISK_TIERS,
 } from "@/lib/eu-ai-act";
+import { AUTHOR } from "@/lib/site";
 import { useI18n } from "@/i18n/I18nProvider";
 
 function ArrowRight() {
@@ -74,6 +75,7 @@ export default function Home() {
         operatingSystem: "Web",
         description: t("metadata.root.ogDescription"),
         offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+        author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.url },
       },
       {
         "@type": "FAQPage",

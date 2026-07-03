@@ -6,6 +6,7 @@ import { Logo, LogoMark } from "@/components/Logo";
 import { MobileNav } from "@/components/MobileNav";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { AUTHOR, CASE_STUDY_URL, REPO_URL } from "@/lib/site";
 import { useI18n } from "@/i18n/I18nProvider";
 
 /**
@@ -14,7 +15,7 @@ import { useI18n } from "@/i18n/I18nProvider";
  * with its own sidebar + topbar. This keeps the marketing site and the
  * application visually distinct without restructuring the route tree.
  */
-const APP_ROUTES = ["/dashboard", "/systems", "/classify", "/report", "/team"];
+const APP_ROUTES = ["/dashboard", "/systems", "/classify", "/report", "/team", "/settings"];
 
 // Auth + onboarding screens: no marketing nav and no app sidebar — a focused,
 // centered surface. They bring their own layout (see AuthScreen).
@@ -188,9 +189,52 @@ function SiteFooter() {
             </div>
           ))}
         </div>
-        <div className="mt-10 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-3 sm:flex-row sm:items-center sm:justify-between">
-          <p>{t("footer.rights", { year })}</p>
-          <p className="max-w-md leading-relaxed">{t("footer.disclaimer")}</p>
+        {/* Portfolio authorship — the bridge from this polished demo to the
+            developer a client is actually evaluating. Product persona stays
+            intact above; the real human who built it is named here. */}
+        <div className="mt-10 border-t border-line pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="max-w-xl text-sm leading-relaxed text-ink-2">
+              {t("footer.builtBy")}{" "}
+              <span className="font-semibold text-ink">{AUTHOR.name}</span>
+              {" — "}
+              {t("footer.portfolioNote")}
+            </p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-ink-2 transition hover:text-brand-400"
+              >
+                GitHub
+              </a>
+              <a
+                href={CASE_STUDY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-ink-2 transition hover:text-brand-400"
+              >
+                {t("footer.caseStudy")}
+              </a>
+              <a
+                href={`mailto:${AUTHOR.email}?subject=${encodeURIComponent(
+                  "Full-stack engagement — via Conforma",
+                )}`}
+                className="inline-flex items-center gap-2 font-semibold text-brand-400 transition hover:text-brand-300"
+              >
+                <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
+                </span>
+                {t("footer.hireCta")}
+              </a>
+            </div>
+          </div>
+          <div className="mt-8 flex flex-col gap-3 border-t border-line pt-6 text-xs text-ink-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>{t("footer.rights", { year })}</p>
+            <p className="max-w-md leading-relaxed">{t("footer.disclaimer")}</p>
+          </div>
         </div>
       </div>
     </footer>

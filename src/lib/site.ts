@@ -13,3 +13,11 @@ export const SITE_URL =
 
 export const REPO_URL = "https://github.com/elkamohammad1988/conforma";
 export const DOCS_URL = `${REPO_URL}/tree/main/docs`;
+export const CASE_STUDY_URL = `${REPO_URL}/blob/main/docs/case-study.md`;
+
+/** The developer behind this portfolio project — the person a client is evaluating. */
+export const AUTHOR = {
+  name: "Mohammad Elkabouri",
+  email: "elkabouri.moha1988@gmail.com",
+  url: "https://github.com/elkamohammad1988",
+} as const;

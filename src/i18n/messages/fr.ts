@@ -99,6 +99,11 @@ const fr: Messages = {
     rights: "© {year} Conforma. Tous droits réservés.",
     disclaimer:
       "Outil d’aide à la décision pour le Regulation (EU) 2024/1689 — ne constitue pas un avis juridique. Confirmez les classifications auprès d’un conseil qualifié.",
+    builtBy: "Conçu et développé par",
+    portfolioNote:
+      "un projet de portfolio indépendant démontrant une ingénierie full-stack de niveau production.",
+    caseStudy: "Étude de cas",
+    hireCta: "Disponible pour missions",
   },
 
   /* ------------------------------------------------------------ announcement */
@@ -761,6 +766,7 @@ const fr: Messages = {
       mode: "Génération de documents",
       docs: "Documentation",
       source: "Code source",
+      builtBy: "Développé par",
     },
   },
 

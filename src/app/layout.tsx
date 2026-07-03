@@ -8,7 +8,7 @@ import { I18nProvider } from "@/i18n/I18nProvider";
 import { getServerI18n } from "@/i18n/server";
 import { LOCALE_META, LOCALES } from "@/i18n/config";
 import { aiMode } from "@/lib/claude";
-import { SITE_URL as siteUrl } from "@/lib/site";
+import { SITE_URL as siteUrl, AUTHOR } from "@/lib/site";
 import "./globals.css";
 
 // One Latin typeface, used with discipline. Geist is a premium grotesque; the
@@ -42,7 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: t("metadata.root.description"),
     applicationName: "Conforma",
-    authors: [{ name: "Conforma" }],
+    authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
+    creator: AUTHOR.name,
     alternates: { canonical: "/", languages },
     openGraph: {
       title: t("metadata.root.ogTitle"),
@@ -75,6 +76,11 @@ export default async function RootLayout({
     url: siteUrl,
     logo: `${siteUrl}/icon.svg`,
     description: t("metadata.root.ogDescription"),
+    founder: {
+      "@type": "Person",
+      name: AUTHOR.name,
+      url: AUTHOR.url,
+    },
     contactPoint: {
       "@type": "ContactPoint",
       email: "hello@conforma.eu",

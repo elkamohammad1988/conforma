@@ -90,6 +90,10 @@ const zhCN: Messages = {
     rights: "© {year} Conforma. 保留所有权利。",
     disclaimer:
       "面向 Regulation (EU) 2024/1689 的决策支持工具——不构成法律意见。请与具备资质的法律顾问确认分类结果。",
+    builtBy: "设计与构建者",
+    portfolioNote: "一个独立的作品集项目，展示生产级全栈工程能力。",
+    caseStudy: "案例研究",
+    hireCta: "可承接工作",
   },
 
   /* ------------------------------------------------------------ announcement */
@@ -750,6 +754,7 @@ const zhCN: Messages = {
       mode: "文档生成",
       docs: "文档",
       source: "源代码",
+      builtBy: "开发者",
     },
   },
 

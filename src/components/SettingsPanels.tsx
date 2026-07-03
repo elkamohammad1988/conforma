@@ -13,7 +13,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toast";
 import { useAiMode } from "@/components/AiModeProvider";
 import { BillingPanel } from "@/components/billing/BillingPanel";
-import { REPO_URL, DOCS_URL } from "@/lib/site";
+import { AUTHOR, CASE_STUDY_URL, REPO_URL, DOCS_URL } from "@/lib/site";
 
 /* Compact 1.6-stroke icons, consistent with the app chrome's hand-drawn set. */
 function Icon({ d, className = "h-[18px] w-[18px]" }: { d: string; className?: string }) {
@@ -193,6 +193,9 @@ export function SettingsPanels({ version }: { version: string }) {
           <dl className="divide-y divide-line text-sm">
             <Row label={t("settings.about.version")}>
               <span className="nums font-medium text-ink">v{version}</span>
+            </Row>
+            <Row label={t("settings.about.builtBy")}>
+              <ExternalLink href={CASE_STUDY_URL} label={AUTHOR.name} />
             </Row>
             <Row label={t("settings.about.mode")}>
               <span className="inline-flex items-center gap-1.5">
