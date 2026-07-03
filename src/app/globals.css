@@ -80,6 +80,11 @@
 }
 
 :root {
+  /* Native UI (scrollbars, form-control chrome, autofill) matches the theme —
+     the dark canvas never shows a stark white scrollbar. Tracks `data-theme`,
+     which the pre-paint script sets before first paint, so there is no flash. */
+  color-scheme: dark;
+
   --background: #07070b;
   --foreground: #f3f2f6;
 
@@ -117,6 +122,8 @@
    win regardless of source order.
    ========================================================================== */
 :root[data-theme="light"] {
+  color-scheme: light;
+
   /* — Cool-neutral paper, near-black ink — */
   --color-paper: transparent;
   --color-paper-2: rgba(20, 20, 30, 0.028);
@@ -781,6 +788,23 @@ select option {
 }
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
+}
+
+/* ----------------------------------------------------------------------------
+   Scroll-reveal starting state. Gated on `.js` (set on <html> before first
+   paint) so crawlers and no-JS visitors always render the full content, JS
+   visitors never flash it, and there is no CLS. `<Reveal>` flips data-shown to
+   "true" from an IntersectionObserver to trigger the transition.
+   -------------------------------------------------------------------------- */
+.js .reveal[data-shown="false"] {
+  opacity: 0;
+  transform: translateY(1.25rem);
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal[data-shown="false"] {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 @keyframes ring-draw {

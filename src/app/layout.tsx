@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Noto_Sans_Arabic } from "next/font/google";
 import { SiteChrome } from "@/components/SiteChrome";
 import { Backdrop } from "@/components/Backdrop";
@@ -24,6 +24,16 @@ const notoArabic = Noto_Sans_Arabic({
   subsets: ["arabic"],
   display: "swap",
 });
+
+// Tint the mobile browser chrome to the product's canvas — the dark cinematic
+// base by default, the daylight paper for light-OS users — so the address bar
+// belongs to the app instead of the browser's default white.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f6f9" },
+    { media: "(prefers-color-scheme: dark)", color: "#07070b" },
+  ],
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t, locale } = await getServerI18n();
@@ -99,11 +109,13 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${notoArabic.variable} h-full`}
     >
       <body className="flex min-h-full flex-col text-ink antialiased">
-        {/* Paint the saved / preferred theme before first paint — no flash. */}
+        {/* Paint the saved / preferred theme before first paint — no flash — and
+            mark the document as JS-capable so scroll-reveal only ever hides
+            content when it can also un-hide it (crawlers / no-JS see it all). */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var k='conforma.theme',s=localStorage.getItem(k);document.documentElement.dataset.theme=(s==='light'||s==='dark')?s:'dark';}catch(e){document.documentElement.dataset.theme='dark';}})();",
+              "(function(){var e=document.documentElement;e.classList.add('js');try{var k='conforma.theme',s=localStorage.getItem(k);e.dataset.theme=(s==='light'||s==='dark')?s:'dark';}catch(err){e.dataset.theme='dark';}})();",
           }}
         />
         <Backdrop />

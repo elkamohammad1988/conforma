@@ -110,7 +110,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="app-canvas min-h-screen lg:flex">
+    <div className="app-canvas min-h-screen overflow-x-clip lg:flex">
       {/* ------------------------------- Sidebar ------------------------------ */}
       <aside className="sticky top-0 z-30 hidden h-screen w-[16.5rem] shrink-0 flex-col border-e border-line bg-paper/60 px-4 pb-5 pt-5 backdrop-blur-xl lg:flex print:hidden">
         <Link href="/dashboard" className="flex items-center gap-2.5 px-2">

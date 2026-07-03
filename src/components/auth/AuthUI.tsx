@@ -29,7 +29,7 @@ export function AuthScreen({
   footer?: React.ReactNode;
 }) {
   return (
-    <div className="app-canvas flex min-h-screen flex-col items-center justify-center px-5 py-12">
+    <div className="app-canvas flex min-h-screen flex-col items-center justify-center overflow-x-clip px-5 py-12">
       <div className="w-full max-w-[25rem]">
         <Link
           href="/"

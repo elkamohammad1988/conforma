@@ -4,8 +4,11 @@ import { useCallback, useRef, useState } from "react";
 
 /**
  * Reveals its children with a subtle slide-up the first time they scroll into
- * view. Progressive enhancement: content is fully visible if JS never runs, and
- * the animation is skipped entirely for users who prefer reduced motion.
+ * view. Progressive enhancement done properly: the hidden starting state lives in
+ * a CSS rule gated on the `.js` class (set on <html> before first paint), so
+ * crawlers and no-JS visitors always get the fully-rendered content, JS visitors
+ * never see a flash of it, and there is no layout shift. The animation is skipped
+ * entirely for users who prefer reduced motion.
  *
  * The IntersectionObserver is wired through a callback ref rather than an effect,
  * so state only ever updates from a callback (never synchronously in an effect
@@ -54,9 +57,9 @@ export function Reveal({
   return (
     <Tag
       ref={attach as React.Ref<never>}
-      className={`${className} transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        shown ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
-      }`}
+      data-reveal
+      data-shown={shown ? "true" : "false"}
+      className={`reveal ${className} transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]`}
       style={{ transitionDelay: shown ? `${delay}ms` : "0ms" }}
     >
       {children}
