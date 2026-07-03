@@ -150,6 +150,30 @@ function run(cmd, args) {
   });
 }
 
+/**
+ * Duration (seconds) of the black segment at the very start of a raw clip.
+ * Playwright begins recording the instant the context exists — before the first
+ * page has painted — so a cold navigation shows as a black lead-in whose length
+ * depends on load time. We detect it with ffmpeg's blackdetect and trim it at
+ * transcode so the video always opens on content, never on a black hold.
+ */
+function detectLeadBlack(clip) {
+  return new Promise((resolve) => {
+    let err = "";
+    const p = spawn(ffmpegPath, [
+      "-i", clip, "-vf", "blackdetect=d=0.2:pix_th=0.10", "-an", "-f", "null", "-",
+    ]);
+    p.stderr.on("data", (d) => (err += d.toString()));
+    p.on("error", () => resolve(0));
+    p.on("close", () => {
+      // Only trim black that begins at t=0; leave a 0.15s breath; cap at 10s.
+      const m = err.match(/black_start:0(?:\.0+)?\s+black_end:([\d.]+)/);
+      const end = m ? parseFloat(m[1]) : 0;
+      resolve(Math.min(Math.max(end - 0.15, 0), 10));
+    });
+  });
+}
+
 /* ---------------------------------- story --------------------------------- */
 
 async function recordDesktop(browser, tmpDir) {
@@ -325,6 +349,12 @@ async function main() {
 
   if (!desktopRaw) throw new Error("no desktop video was produced");
 
+  // Trim any cold-load black lead-in so the video opens on content, not a hold.
+  const leadDesktop = await detectLeadBlack(desktopRaw);
+  const leadMobile = mobileRaw ? await detectLeadBlack(mobileRaw) : 0;
+  if (leadDesktop > 0.2) console.log(`  ✂ trimming ${leadDesktop.toFixed(2)}s black lead-in (desktop)`);
+  if (leadMobile > 0.2) console.log(`  ✂ trimming ${leadMobile.toFixed(2)}s black lead-in (mobile)`);
+
   // Transcode: desktop is the master; pad the mobile clip to 16:9 and append it.
   console.log("▶ Transcoding with ffmpeg…");
   if (mobileRaw) {
@@ -333,10 +363,10 @@ async function main() {
       "-i", desktopRaw,
       "-i", mobileRaw,
       "-filter_complex",
-      // normalise both to 1280x720@30, pad the portrait mobile clip on a dark bed,
-      // then concatenate.
-      `[0:v]scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30[v0];` +
-      `[1:v]scale=-2:${H},pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30[v1];` +
+      // trim each clip's cold-load black, normalise both to 1280x720@30, pad the
+      // portrait mobile clip on a dark bed, then concatenate.
+      `[0:v]trim=start=${leadDesktop},setpts=PTS-STARTPTS,scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30[v0];` +
+      `[1:v]trim=start=${leadMobile},setpts=PTS-STARTPTS,scale=-2:${H},pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30[v1];` +
       `[v0][v1]concat=n=2:v=1:a=0,format=yuv420p,fade=t=in:st=0:d=0.5[v]`,
       "-map", "[v]",
       "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-movflags", "+faststart",
@@ -346,7 +376,7 @@ async function main() {
     await run(ffmpegPath, [
       "-y",
       "-i", desktopRaw,
-      "-vf", `scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=0.5`,
+      "-vf", `trim=start=${leadDesktop},setpts=PTS-STARTPTS,scale=${W}:${H}:force_original_aspect_ratio=decrease,pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2:color=0x07070b,setsar=1,fps=30,format=yuv420p,fade=t=in:st=0:d=0.5`,
       "-c:v", "libx264", "-crf", "20", "-preset", "medium", "-movflags", "+faststart",
       MP4,
     ]);
