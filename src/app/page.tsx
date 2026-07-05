@@ -7,8 +7,9 @@ import { LandingDemo } from "@/components/LandingDemo";
 import { ComplianceTimeline } from "@/components/ComplianceTimeline";
 import { Reveal } from "@/components/Reveal";
 import { RiskBadge } from "@/components/RiskBadge";
-import { LogoMark } from "@/components/Logo";
 import { Spotlight, TiltCard, Magnetic } from "@/components/Motion";
+import { classify, EMPTY_ANSWERS } from "@/lib/classifier";
+import { renderRationale } from "@/i18n/rationale";
 import {
   ANNEX_III_AREAS,
   PENALTIES,
@@ -30,27 +31,23 @@ function ArrowRight() {
   );
 }
 
-/** Compact progress ring for the hero compliance card. */
-function Ring({ pct }: { pct: number }) {
-  const r = 17;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg viewBox="0 0 44 44" className="h-11 w-11 -rotate-90" aria-hidden>
-      <circle cx="22" cy="22" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3.5" />
-      <circle
-        cx="22"
-        cy="22"
-        r={r}
-        fill="none"
-        stroke="var(--color-risk-minimal)"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={c * (1 - pct / 100)}
-      />
-    </svg>
-  );
-}
+// The hero instrument shows the product's real output — a genuine, cited
+// classification from the same deterministic engine the app ships. Employment /
+// CV-screening resolves to High risk with Annex III + Chapter III citations. The
+// result is locale-free, so it is computed once here and rendered per-locale.
+const HERO_RESULT = classify({
+  ...EMPTY_ANSWERS,
+  isAISystem: true,
+  annexIII: ["employment"],
+});
+
+// A faint registry sits behind the focused verdict — depth, plus the "inventory"
+// story. System names are product nouns; the header label is translated.
+const REGISTRY_HINT = [
+  { name: "HelpDesk Copilot", dot: "bg-risk-limited", pct: 100 },
+  { name: "SentinelAML — transaction monitoring", dot: "bg-risk-high", pct: 20 },
+  { name: "ForecastIQ — demand planning", dot: "bg-risk-minimal", pct: 100 },
+] as const;
 
 // Standard/brand framework names — intentionally not translated.
 const FRAMEWORKS = ["EU AI Act · 2024/1689", "GDPR", "ISO/IEC 42001", "NIST AI RMF"];
@@ -127,7 +124,7 @@ export default function Home() {
                   className="font-medium text-brass-300"
                 />
               </div>
-              <h1 className="text-balance text-[2.75rem] font-semibold leading-[1.01] tracking-[-0.022em] sm:text-[3.5rem] lg:text-[4rem]">
+              <h1 className="text-balance text-[2.9rem] font-semibold leading-[0.97] tracking-[-0.03em] sm:text-[3.65rem] lg:text-[4.35rem]">
                 {t("home.hero.titleLine1")}{" "}
                 <span className="text-accent">{t("home.hero.titleAccent")}</span>
               </h1>
@@ -147,110 +144,44 @@ export default function Home() {
               <p className="mt-5 text-xs text-ink-3">{t("home.hero.fineprint")}</p>
             </div>
 
-            {/* Floating intelligence cluster (lg+) */}
-            <div className="relative hidden h-[30rem] lg:block" aria-hidden>
-              {/* platform light */}
-              <div className="absolute bottom-10 left-1/2 h-24 w-[78%] -translate-x-1/2 rounded-[50%] bg-[rgba(var(--accent),0.28)] blur-3xl" />
-
-              {/* central plinth */}
-              <TiltCard
-                className="absolute left-1/2 top-1/2 z-10 w-48 -translate-x-1/2 -translate-y-1/2"
-                max={6}
-              >
-                <div className="glass sweep relative overflow-hidden rounded-2xl p-6 text-center">
-                  <LogoMark className="mx-auto h-16 w-16 drop-shadow-[0_0_20px_rgba(225,29,42,0.6)]" />
-                  <div className="mt-3 text-base font-semibold tracking-tight text-ink">
-                    Conforma
-                  </div>
-                  <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-ink-3">
-                    EU AI ACT
-                  </div>
-                </div>
-              </TiltCard>
-
-              {/* compliance ring — top right */}
-              <div
-                className="animate-float absolute right-0 top-1 w-44"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <TiltCard max={12}>
-                  <div className="glass rounded-2xl p-4">
-                    <div className="text-xs text-ink-3">
-                      {t("home.showcase.stats.compliance")}
-                    </div>
-                    <div className="mt-2 flex items-center gap-3">
-                      <Ring pct={94} />
-                      <div>
-                        <div className="text-xl font-semibold text-ink nums">94%</div>
-                        <div className="text-[11px] font-medium text-risk-minimal">
-                          ▲ +6
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TiltCard>
-              </div>
-
-              {/* risk — left */}
-              <div
-                className="animate-float absolute left-0 top-[30%] w-40"
-                style={{ animationDelay: "1.6s" }}
-              >
-                <TiltCard max={12}>
-                  <div className="glass rounded-2xl p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-ink-3">Risk</span>
-                      <RiskBadge tier="high" size="sm" />
-                    </div>
-                    <div className="mt-2 text-2xl font-semibold text-ink nums">23</div>
-                    <svg viewBox="0 0 120 28" className="mt-1 h-7 w-full" preserveAspectRatio="none" aria-hidden>
-                      <polyline
-                        points="0,22 18,18 36,20 54,12 72,15 90,7 108,10 120,4"
-                        fill="none"
-                        stroke="var(--color-brand-500)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </TiltCard>
-              </div>
-
-              {/* systems monitored — bottom right */}
-              <div
-                className="animate-float absolute bottom-6 right-8 w-44"
-                style={{ animationDelay: "1s" }}
-              >
-                <TiltCard max={12}>
-                  <div className="glass rounded-2xl p-4">
-                    <div className="text-xs text-ink-3">
-                      {t("home.showcase.stats.systems")}
-                    </div>
-                    <div className="mt-1 text-2xl font-semibold text-ink nums">128</div>
-                    <div className="mt-2 flex items-end gap-1">
-                      {[0.4, 0.6, 0.45, 0.8, 0.55, 1, 0.7].map((h, i) => (
-                        <span
-                          key={i}
-                          className="w-1.5 rounded-full bg-brand-500/70"
-                          style={{ height: `${0.55 + h * 1.2}rem` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </TiltCard>
-              </div>
+            {/* The product's real output — a live, cited classification laid
+                over a hint of the registry behind it. One authoritative
+                instrument with layered depth, not a cluster of vanity KPIs. */}
+            <div className="relative hidden h-[28rem] lg:block" aria-hidden>
+              <HeroClassification />
             </div>
           </div>
 
-          {/* Framework trust strip */}
+          {/* Framework certification rail — a designed band, not floating words.
+              A centred eyebrow flanked by fading hairlines, then each framework
+              on a single baseline behind a brand-diamond mark, split by logical
+              start-dividers so the whole reads as "aligned / certified". */}
           <div className="mt-20">
-            <p className="text-center text-xs font-medium uppercase tracking-[0.13em] text-ink-3">
-              {t("home.hero.trustEyebrow")}
-            </p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-semibold text-ink-2">
+            <div className="flex items-center justify-center gap-4">
+              <span
+                aria-hidden
+                className="h-px w-8 bg-gradient-to-r from-transparent to-line-2 sm:w-14"
+              />
+              <p className="text-center text-[0.7rem] font-semibold uppercase tracking-[0.17em] text-ink-3">
+                {t("home.hero.trustEyebrow")}
+              </p>
+              <span
+                aria-hidden
+                className="h-px w-8 bg-gradient-to-l from-transparent to-line-2 sm:w-14"
+              />
+            </div>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
               {FRAMEWORKS.map((f) => (
-                <span key={f}>{f}</span>
+                <span
+                  key={f}
+                  className="group inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-ink-soft transition-colors hover:text-ink sm:border-s sm:border-line-2 sm:ps-6 sm:first:border-s-0 sm:first:ps-0"
+                >
+                  <span
+                    aria-hidden
+                    className="h-1.5 w-1.5 rotate-45 rounded-[1px] bg-brand-500/70 transition-all duration-300 group-hover:bg-brand-500 group-hover:shadow-[0_0_8px_rgba(var(--accent),0.85)]"
+                  />
+                  {f}
+                </span>
               ))}
             </div>
           </div>
@@ -264,18 +195,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------ Stat strip */}
+      {/* --------------------------------------------------------- Stat strip
+          A designed metric band — start-side hairline rules (only across the
+          4-up row, so mobile stays clean; logical, so they mirror in RTL),
+          confident display numerals, and the max-penalty figure carrying the
+          signature accent as the stakes hook. Not a plain centered number row. */}
       <section className="border-y border-line bg-paper-2">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-px overflow-hidden px-5 py-10 text-center sm:grid-cols-4">
-          {STAT_KEYS.map((k) => (
-            <div key={k} className="px-3">
-              <div className="text-[2rem] font-semibold tracking-tight text-ink nums sm:text-[2.5rem]">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-y-8 px-5 py-12 sm:grid-cols-4 sm:gap-y-0">
+          {STAT_KEYS.map((k, i) => (
+            <div
+              key={k}
+              className={`px-4 text-center sm:px-6 ${
+                i > 0 ? "sm:border-s sm:border-line" : ""
+              }`}
+            >
+              <div
+                className={`text-[2.15rem] font-semibold leading-none tracking-tight nums sm:text-[2.6rem] ${
+                  i === 0 ? "text-accent" : "text-ink"
+                }`}
+              >
                 {t(`home.stats.${k}.value`)}
               </div>
-              <div className="mt-1 text-sm font-medium text-ink-2">
+              <div className="mt-2.5 text-sm font-medium text-ink-2">
                 {t(`home.stats.${k}.label`)}
               </div>
-              <div className="text-xs text-ink-3">{t(`home.stats.${k}.sub`)}</div>
+              <div className="mt-0.5 text-xs text-ink-3">{t(`home.stats.${k}.sub`)}</div>
             </div>
           ))}
         </div>
@@ -338,31 +282,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- Personas */}
+      {/* ------------------------------------------------------------- Personas
+          An asymmetric editorial split — thesis pinned on the start side, the
+          three stakeholders as an icon-led list on the end side. A deliberately
+          different rhythm from the centred card grids, and it embodies the
+          "one source, every stakeholder" message. */}
       <section className="border-y border-line bg-paper-2">
         <div className="mx-auto max-w-6xl px-5 py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
-              {t("home.personas.title")}
-            </h2>
-            <p className="mt-4 text-lg leading-relaxed text-ink-2">
-              {t("home.personas.subtitle")}
-            </p>
-          </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {PERSONA_KEYS.map((p) => (
-              <div
-                key={p}
-                className="lift sweep relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
-              >
-                <div className="text-lg font-semibold tracking-tight text-ink">
-                  {t(`home.personas.items.${p}.role`)}
-                </div>
-                <p className="mt-2 text-sm leading-relaxed text-ink-2">
-                  {t(`home.personas.items.${p}.desc`)}
+          <div className="grid gap-10 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16">
+            <Reveal>
+              <div className="lg:sticky lg:top-28">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-3">
+                  {t("home.personas.eyebrow")}
+                </p>
+                <h2 className="mt-3 text-[1.9rem] font-semibold tracking-tight text-ink sm:text-[2.35rem]">
+                  {t("home.personas.title")}
+                </h2>
+                <p className="mt-4 text-lg leading-relaxed text-ink-2">
+                  {t("home.personas.subtitle")}
                 </p>
               </div>
-            ))}
+            </Reveal>
+            <div className="flex flex-col gap-4">
+              {PERSONA_KEYS.map((p, i) => (
+                <Reveal key={p} delay={i * 90}>
+                  <div className="lift sweep group relative flex items-start gap-4 overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow-card)] sm:p-6">
+                    <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-line bg-surface text-brand-400 shadow-[var(--shadow-card)]">
+                      <FIcon d={PERSONA_ICONS[p]} className="h-[19px] w-[19px]" />
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent"
+                      />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-[1.05rem] font-semibold tracking-tight text-ink">
+                        {t(`home.personas.items.${p}.role`)}
+                      </div>
+                      <p className="mt-1.5 text-sm leading-relaxed text-ink-2">
+                        {t(`home.personas.items.${p}.desc`)}
+                      </p>
+                    </div>
+                    <span
+                      aria-hidden
+                      className="ms-auto self-center text-ink-3 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 rtl:-scale-x-100"
+                    >
+                      <ArrowRight />
+                    </span>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -465,21 +434,9 @@ export default function Home() {
             {t("home.features.subtitle")}
           </p>
         </Reveal>
-        <div className="grid gap-6 md:grid-cols-3">
-          {FEATURE_KEYS.map((f) => (
-            <div
-              key={f}
-              className="lift sweep relative overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)]"
-            >
-              <h3 className="text-lg font-semibold tracking-tight text-ink">
-                {t(`home.features.items.${f}.title`)}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-2">
-                {t(`home.features.items.${f}.desc`, { count: ANNEX_III_AREAS.length })}
-              </p>
-            </div>
-          ))}
-        </div>
+        <Reveal delay={80}>
+          <FeaturesBento />
+        </Reveal>
       </section>
 
       {/* ----------------------------------------------------------- Comparison */}
@@ -661,6 +618,123 @@ export default function Home() {
   );
 }
 
+/**
+ * The hero instrument. Not decorative KPIs — the product's actual verdict: a
+ * real classification (from the shipped engine) with its cited Articles, floated
+ * over a dimmed hint of the registry for depth. A slow aperture scan gives it
+ * life; every string is already localised, so it mirrors cleanly in RTL.
+ */
+function HeroClassification() {
+  const { t } = useI18n();
+  const result = HERO_RESULT;
+  const cites = result.rationale.filter((r) => r.citation).slice(0, 2);
+
+  return (
+    <>
+      {/* Environmental platform light beneath the composition. Two crimson
+          pools, tuned so the instrument sits on a soft halo on the dark canvas
+          AND on a faint warm ground on the daylight paper — the card never
+          floats untethered on light. */}
+      <div className="absolute bottom-4 start-1/2 h-28 w-[82%] -translate-x-1/2 rounded-[50%] bg-[rgba(var(--accent),0.24)] blur-[64px] rtl:translate-x-1/2" />
+      <div className="absolute bottom-20 start-[56%] h-44 w-44 -translate-x-1/2 rounded-full bg-[rgba(var(--accent),0.12)] blur-[80px] rtl:translate-x-1/2" />
+
+      {/* Registry behind — the inventory the verdict was drawn from. Tucked up
+          and to the end so it peeks from behind the verdict card, its lower edge
+          fading under it. Kept legible in BOTH themes (was over-dimmed on the
+          light paper): a real shadowed card, faded only at its foot. */}
+      <div className="absolute end-0 top-1 w-[17.5rem] rotate-[2.4deg] opacity-[0.88] [mask-image:linear-gradient(180deg,#000_0%,#000_60%,transparent)]">
+        <div className="glass rounded-2xl p-4 shadow-[var(--shadow-card)]">
+          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-3">
+            {t("home.showcase.registryTitle")}
+          </div>
+          <div className="mt-3 space-y-2.5">
+            {REGISTRY_HINT.map((r) => (
+              <div key={r.name} className="flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${r.dot}`} />
+                  <span className="truncate text-xs text-ink-2">{r.name}</span>
+                </div>
+                <span className="h-1 w-9 shrink-0 overflow-hidden rounded-full bg-ink/10">
+                  <span
+                    className="block h-full rounded-full bg-ink/25"
+                    style={{ width: `${r.pct}%` }}
+                  />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Foreground — the live, cited verdict. */}
+      <TiltCard max={7} className="absolute bottom-1 start-0 z-10 w-[22rem]">
+        <div className="glass sweep relative overflow-hidden rounded-2xl p-5 shadow-[var(--shadow-raised)]">
+          <span
+            aria-hidden
+            className="hero-scan pointer-events-none absolute inset-x-0 top-0 h-16 bg-[linear-gradient(180deg,rgba(var(--accent),0.16),transparent)]"
+          />
+
+          {/* Live header */}
+          <div className="relative flex items-center gap-2">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-60" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-500" />
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-3">
+              {t("landingDemo.liveClassification")}
+            </span>
+          </div>
+
+          {/* The system under assessment */}
+          <div className="relative mt-3 text-[0.95rem] font-semibold tracking-tight text-ink">
+            TalentRank — CV screening
+          </div>
+
+          {/* The verdict */}
+          <div className="relative mt-3 flex flex-wrap items-center gap-2.5">
+            <RiskBadge tier={result.tier} />
+            <span className="text-sm font-semibold text-ink-soft">
+              {t(`domain.riskTiers.${result.tier}.label`)}
+            </span>
+          </div>
+
+          {/* Cited rationale — the auditor-grade signature */}
+          <ul className="relative mt-4 space-y-2">
+            {cites.map((r, i) => (
+              <li key={i} className="flex items-start gap-2">
+                <span className="mt-px shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-400 ring-1 ring-brand-500/20">
+                  {r.citation}
+                </span>
+                <span className="line-clamp-2 text-xs leading-relaxed text-ink-2">
+                  {renderRationale(r, t)}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Obligations meter */}
+          <div className="relative mt-4 border-t border-line pt-3">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="uppercase tracking-[0.14em] text-ink-3">
+                {t("landingDemo.obligations")}
+              </span>
+              <span className="font-semibold text-ink nums">
+                {result.obligations.length}
+              </span>
+            </div>
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-ink/10">
+              <span
+                className="block h-full rounded-full bg-gradient-to-r from-brand-600 to-brand-400"
+                style={{ width: "45%" }}
+              />
+            </div>
+          </div>
+        </div>
+      </TiltCard>
+    </>
+  );
+}
+
 /** A crisp, in-browser product mockup — stays in sync with the real design. */
 function ProductShowcase() {
   const { t } = useI18n();
@@ -836,5 +910,140 @@ function Cell({ v, highlight }: { v: boolean | string; highlight?: boolean }) {
     >
       {content}
     </td>
+  );
+}
+
+/* Feature iconography — same 1.6-stroke, 24-grid hand-drawn idiom as the app
+   sidebar, so the marketing surface and the product speak one visual language. */
+const FEATURE_ICONS: Record<(typeof FEATURE_KEYS)[number], string> = {
+  cited: "M12 3 4 6v5c0 4.6 3.1 7.4 8 9 4.9-1.6 8-4.4 8-9V6l-8-3z|M9 12l2 2 4-4",
+  annexIII: "M4 5h6v6H4z|M14 5h6v6h-6z|M4 15h6v4H4z|M14 15h6v4h-6z",
+  drafted:
+    "M7 3h8l3 3v15H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z|M14 3v4h4|M9.5 15l.7-1.6.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7z",
+  deadlines: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z|M12 7.5v5l3 1.8",
+  roles:
+    "M16 19v-1.5a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 17.5V19|M10 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7|M20 19v-1.5a3.5 3.5 0 0 0-2.6-3.4|M15 4.2a3.5 3.5 0 0 1 0 6.6",
+  gpai:
+    "M8 8h8v8H8z|M10.5 10.5h3v3h-3z|M10 3v2|M14 3v2|M10 19v2|M14 19v2|M3 10h2|M3 14h2|M19 10h2|M19 14h2",
+};
+
+/* Persona iconography — legal (balance scale), product (stacked layers),
+   security (lock). Same idiom, so the "who it's for" list reads as one family. */
+const PERSONA_ICONS: Record<(typeof PERSONA_KEYS)[number], string> = {
+  legal:
+    "M12 4v16|M8 20h8|M4 8h16|M12 4 4 8m8-4 8 4|M4 8l-1.9 4.6h3.8L4 8z|M20 8l-1.9 4.6h3.8L20 8z",
+  product: "M12 3 3 7.5l9 4.5 9-4.5-9-4.5z|M3 12l9 4.5 9-4.5|M3 16.5 12 21l9-4.5",
+  security:
+    "M7 11V8a5 5 0 0 1 10 0v3|M6 11h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1z|M12 14.5v2.5",
+};
+
+function FIcon({ d, className = "h-[18px] w-[18px]" }: { d: string; className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      className={className}
+    >
+      {d.split("|").map((p, i) => (
+        <path key={i} d={p} />
+      ))}
+    </svg>
+  );
+}
+
+/** Depth-treated crimson icon plinth — matches the "how it works" step tiles. */
+function IconTile({ k, big }: { k: (typeof FEATURE_KEYS)[number]; big?: boolean }) {
+  return (
+    <span
+      className={`relative grid ${
+        big ? "h-12 w-12" : "h-10 w-10"
+      } place-items-center rounded-xl border border-line bg-surface text-brand-400 shadow-[var(--shadow-card)]`}
+    >
+      <FIcon d={FEATURE_ICONS[k]} className={big ? "h-6 w-6" : "h-[18px] w-[18px]"} />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-2 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent"
+      />
+    </span>
+  );
+}
+
+/**
+ * The capabilities section as a bento — a deliberately different rhythm from the
+ * uniform card grids elsewhere. The signature promise ("Cited, not vibes") gets
+ * a 2×2 hero tile that puts REAL Article citations on screen; the rest are
+ * icon-led tiles. Every surface is token-driven, so it flips in light + RTL.
+ */
+function FeaturesBento() {
+  const { t } = useI18n();
+  // The product's ACTUAL output for a high-risk employment system: real Chapter
+  // III obligations, each pinned to its Article. Localised via the same
+  // domain.obligations keys the in-product checklist uses — i18n/RTL-safe.
+  const citedRows = HERO_RESULT.obligations.slice(0, 4);
+
+  const smallTile = (f: (typeof FEATURE_KEYS)[number]) => (
+    <div
+      key={f}
+      className="lift sweep group relative overflow-hidden rounded-2xl border border-line bg-surface p-5 shadow-[var(--shadow-card)]"
+    >
+      <IconTile k={f} />
+      <h3 className="mt-4 text-[1.02rem] font-semibold tracking-tight text-ink">
+        {t(`home.features.items.${f}.title`)}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-ink-2">
+        {t(`home.features.items.${f}.desc`, { count: ANNEX_III_AREAS.length })}
+      </p>
+    </div>
+  );
+
+  return (
+    <div className="grid gap-4 md:auto-rows-fr md:grid-cols-3">
+      {/* Signature tile — the thesis of the whole product, shown not told. */}
+      <div className="lift sweep group relative flex flex-col overflow-hidden rounded-2xl border border-line bg-surface p-6 shadow-[var(--shadow-card)] sm:p-7 md:col-span-2 md:row-span-2">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 h-48 w-48 rounded-full bg-[rgba(var(--accent),0.10)] blur-3xl [inset-inline-end:-4rem]"
+        />
+        <IconTile k="cited" big />
+        <h3 className="relative mt-5 text-2xl font-semibold tracking-tight text-ink sm:text-[1.7rem]">
+          {t("home.features.items.cited.title")}
+        </h3>
+        <p className="relative mt-3 max-w-md text-[0.95rem] leading-relaxed text-ink-2">
+          {t("home.features.items.cited.desc")}
+        </p>
+        {/* The signature tile SHOWS the promise: real obligations, each pinned
+            to its exact Article/Annex — the product's own localised output. */}
+        <div className="relative mt-6 flex flex-1 flex-col rounded-xl border border-line bg-ink/[0.03] p-4 sm:p-5">
+          <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-3">
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
+              {t("landingDemo.obligations")}
+            </span>
+            <span className="font-mono text-ink-2 nums">{HERO_RESULT.obligations.length}</span>
+          </div>
+          <ul className="mt-2 flex flex-1 flex-col justify-between divide-y divide-line">
+            {citedRows.map((o) => (
+              <li key={o.id} className="flex items-center gap-3 py-2.5">
+                <span
+                  dir="ltr"
+                  className="shrink-0 whitespace-nowrap rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-400 ring-1 ring-brand-500/20"
+                >
+                  {o.citation}
+                </span>
+                <span className="line-clamp-1 text-sm leading-relaxed text-ink-2">
+                  {t(`domain.obligations.${o.id}.title`)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      {FEATURE_KEYS.filter((f) => f !== "cited").map(smallTile)}
+    </div>
   );
 }

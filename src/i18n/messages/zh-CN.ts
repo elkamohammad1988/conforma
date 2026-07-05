@@ -163,6 +163,7 @@ const zhCN: Messages = {
       },
     },
     personas: {
+      eyebrow: "为每个团队打造",
       title: "为每一位负有责任的人提供统一的事实依据",
       subtitle:
         "AI Act 的责任并不只落在某一个团队身上。Conforma 为每一位利益相关方提供同一份有据可依的记录。",

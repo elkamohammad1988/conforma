@@ -171,6 +171,7 @@ const es: Messages = {
       },
     },
     personas: {
+      eyebrow: "Diseñado para cada equipo",
       title: "Una única fuente de verdad para todos los implicados",
       subtitle:
         "El AI Act no recae en un solo equipo. Conforma ofrece a cada parte interesada el mismo registro defendible.",

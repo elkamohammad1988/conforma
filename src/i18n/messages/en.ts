@@ -173,6 +173,7 @@ const en = {
       },
     },
     personas: {
+      eyebrow: "Built for every team",
       title: "One source of truth for everyone on the hook",
       subtitle:
         "The AI Act doesn't sit with one team. Conforma gives each stakeholder the same defensible record.",

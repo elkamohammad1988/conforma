@@ -790,6 +790,20 @@ select option {
   animation: pulse-glow 4s ease-in-out infinite;
 }
 
+/* Ambient classification scan — the logo's aperture, made environmental. A slow
+   crimson band sweeps down the hero verdict card, reading as "continuously
+   monitoring". The global reduced-motion rule freezes it at opacity 0, leaving
+   the static card fully legible. */
+@keyframes hero-scan {
+  0% { transform: translateY(-2.5rem); opacity: 0; }
+  12% { opacity: 0.9; }
+  55% { transform: translateY(14rem); opacity: 0.45; }
+  70%, 100% { transform: translateY(14rem); opacity: 0; }
+}
+.hero-scan {
+  animation: hero-scan 6.5s var(--ease-soft) infinite;
+}
+
 /* ----------------------------------------------------------------------------
    Scroll-reveal starting state. Gated on `.js` (set on <html> before first
    paint) so crawlers and no-JS visitors always render the full content, JS

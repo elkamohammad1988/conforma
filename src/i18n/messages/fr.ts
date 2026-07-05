@@ -173,6 +173,7 @@ const fr: Messages = {
       },
     },
     personas: {
+      eyebrow: "Conçu pour chaque équipe",
       title: "Une source unique de vérité pour tous ceux qui sont concernés",
       subtitle:
         "Le EU AI Act ne relève pas d’une seule équipe. Conforma offre à chaque partie prenante le même dossier défendable.",
