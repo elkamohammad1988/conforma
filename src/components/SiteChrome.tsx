@@ -41,7 +41,14 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
     (r) => pathname === r || pathname.startsWith(`${r}/`),
   );
 
-  if (isApp || isBare) {
+  // App routes: AppShell renders its own <main id="main"> AFTER the sidebar +
+  // topbar, so the "skip to content" link actually bypasses the app navigation
+  // (a plain wrapper here keeps the exact flex layout, and avoids a second
+  // <main>). Bare routes have no AppShell, so they still need the landmark.
+  if (isApp) {
+    return <div className="flex-1">{children}</div>;
+  }
+  if (isBare) {
     return (
       <main id="main" className="flex-1">
         {children}

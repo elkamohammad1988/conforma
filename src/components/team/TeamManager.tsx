@@ -8,7 +8,7 @@
  * see a read-only view.
  */
 
-import { useActionState, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { useToast } from "@/components/ui/Toast";
 import { useSession } from "@/components/auth/SessionProvider";
@@ -168,7 +168,12 @@ function WorkspaceName({ name, canManage }: { name: string; canManage: boolean }
   const { t } = useI18n();
   const { toast } = useToast();
   const [state, action] = useActionState<TeamActionState, FormData>(renameOrgAction, {});
-  if (state.error) toast(t(`team.errors.${state.error}`));
+  // Surface action errors as a toast AFTER commit — never during render (calling
+  // toast() in the render body triggers a cross-component setState warning and
+  // can enqueue the toast on every re-render).
+  useEffect(() => {
+    if (state.error) toast(t(`team.errors.${state.error}`));
+  }, [state, t, toast]);
 
   return (
     <Card title={t("team.orgName")}>
@@ -197,7 +202,9 @@ function InviteForm() {
   const { toast } = useToast();
   const [state, action] = useActionState<TeamActionState, FormData>(inviteMemberAction, {});
   const [copied, setCopied] = useState(false);
-  if (state.error) toast(t(`team.errors.${state.error}`));
+  useEffect(() => {
+    if (state.error) toast(t(`team.errors.${state.error}`));
+  }, [state, t, toast]);
 
   const copy = async () => {
     if (!state.inviteUrl) return;

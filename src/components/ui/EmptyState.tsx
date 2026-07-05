@@ -40,7 +40,7 @@ export function EmptyState({
             {icon}
           </div>
         )}
-        <p className="text-xl font-semibold tracking-tight text-ink">{title}</p>
+        <h2 className="text-xl font-semibold tracking-tight text-ink">{title}</h2>
         {description && (
           <p className="mx-auto mt-2.5 max-w-sm text-sm leading-relaxed text-ink-2">
             {description}

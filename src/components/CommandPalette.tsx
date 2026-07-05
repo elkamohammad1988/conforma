@@ -183,8 +183,9 @@ export function CommandPalette() {
           aria-controls="cmdk-list"
           aria-activedescendant={activeId}
           aria-autocomplete="list"
+          aria-label={t("commandPalette.placeholder")}
           placeholder={t("commandPalette.placeholder")}
-          className="w-full border-b border-line bg-transparent px-4 py-3.5 text-sm text-ink outline-none placeholder:text-ink-3"
+          className="w-full border-b border-line bg-transparent px-4 py-3.5 text-sm text-ink outline-none transition focus:ring-2 focus:ring-inset focus:ring-brand-500/50 placeholder:text-ink-3"
         />
         <ul
           id="cmdk-list"

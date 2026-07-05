@@ -308,9 +308,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
 
-        <div key={pathname} className="flex-1 animate-fade-in">
+        <main id="main" key={pathname} className="flex-1 animate-fade-in">
           {children}
-        </div>
+        </main>
       </div>
 
       <CommandPalette />

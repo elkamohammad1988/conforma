@@ -237,7 +237,7 @@ export default function SystemDetailPage({
                       <span className="text-sm font-medium text-ink">
                         {t(`domain.obligations.${o.id}.title`)}
                       </span>
-                      <span className="font-mono text-[11px] text-ink-3">
+                      <span dir="ltr" className="font-mono text-[11px] text-ink-3">
                         {o.citation}
                       </span>
                       <span className="rounded bg-ink/[0.04] px-1.5 py-0.5 text-[10px] font-medium uppercase text-ink-3">
@@ -453,7 +453,7 @@ function DocSection({ system }: { system: RegisteredSystem }) {
                 <span className="block font-medium text-ink">
                   {t(`system.docs.types.${d.key}.label`)}
                 </span>
-                <span className="font-mono text-[11px] text-ink-3">
+                <span dir="ltr" className="font-mono text-[11px] text-ink-3">
                   {t(`system.docs.types.${d.key}.cite`)}
                 </span>
               </span>

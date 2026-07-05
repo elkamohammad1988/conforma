@@ -74,6 +74,9 @@ export default function ClassifyPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-12">
+      {/* Page heading — visually the stepper carries the hierarchy, but the
+          document still needs a single h1 for assistive tech. */}
+      <h1 className="sr-only">{t("app.breadcrumb.classifyTitle")}</h1>
       {/* Stepper */}
       <div className="mb-8">
         <div className="flex items-center justify-between text-xs font-medium">
@@ -361,7 +364,7 @@ function ResultView({
           <ul className="mt-3 space-y-2.5">
             {result.rationale.map((r, i) => (
               <li key={i} className="flex items-start gap-3 text-sm">
-                <span className="mt-0.5 rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300 ring-1 ring-brand-500/25">
+                <span dir="ltr" className="mt-0.5 rounded bg-brand-500/15 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-brand-300 ring-1 ring-brand-500/25">
                   {r.citation}
                 </span>
                 <span className="text-ink-2">{renderRationale(r, t)}</span>
@@ -409,7 +412,7 @@ function ResultView({
                     <span className="font-medium text-ink">
                       {t(`domain.obligations.${o.id}.title`)}
                     </span>
-                    <span className="ms-1.5 font-mono text-[11px] text-ink-3">
+                    <span dir="ltr" className="ms-1.5 font-mono text-[11px] text-ink-3">
                       {o.citation}
                     </span>
                   </div>
@@ -616,7 +619,7 @@ function CheckCard({
       <span className="flex-1">
         <span className="flex items-center gap-2">
           <span className="text-sm font-medium text-ink">{title}</span>
-          <span className="font-mono text-[11px] text-ink-3">{cite}</span>
+          <span dir="ltr" className="font-mono text-[11px] text-ink-3">{cite}</span>
         </span>
         {desc && <span className="mt-0.5 block text-xs text-ink-3">{desc}</span>}
       </span>

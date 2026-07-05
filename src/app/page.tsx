@@ -702,7 +702,7 @@ function HeroClassification() {
           <ul className="relative mt-4 space-y-2">
             {cites.map((r, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="mt-px shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-400 ring-1 ring-brand-500/20">
+                <span dir="ltr" className="mt-px shrink-0 rounded bg-brand-500/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-brand-400 ring-1 ring-brand-500/20">
                   {r.citation}
                 </span>
                 <span className="line-clamp-2 text-xs leading-relaxed text-ink-2">

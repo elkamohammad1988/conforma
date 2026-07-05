@@ -64,7 +64,7 @@ export default function ReportPage() {
             <LogoMark className="h-9 w-9" />
             <div>
               <div className="text-lg font-semibold tracking-tight">Conforma</div>
-              <div className="text-xs text-ink-3">{t("report.reportTitle")}</div>
+              <h1 className="text-xs font-normal text-ink-3">{t("report.reportTitle")}</h1>
             </div>
           </div>
           <div className="text-end text-xs text-ink-3">

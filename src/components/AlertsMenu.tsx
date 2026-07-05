@@ -127,7 +127,7 @@ export function AlertsMenu() {
         aria-haspopup="dialog"
         aria-expanded={open}
         data-tip={t("app.notifications")}
-        aria-label={t("app.notifications")}
+        aria-label={badge > 0 ? `${t("app.notifications")}: ${badge}` : t("app.notifications")}
         className="tip relative rounded-lg p-2 text-ink-3 transition hover:bg-ink/[0.04] hover:text-ink"
       >
         <BellIcon />
