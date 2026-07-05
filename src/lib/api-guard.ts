@@ -39,6 +39,26 @@ export function withinRateLimit(ip: string, max = MAX_PER_WINDOW): boolean {
 }
 
 /**
+ * Parse `?limit=&offset=` for a list endpoint, clamped to safe bounds so a
+ * client can't request an unbounded page. Used by the public v1 API.
+ */
+export function parsePageParams(
+  url: string,
+  { defaultLimit = 50, maxLimit = 200 } = {},
+): { limit: number; offset: number } {
+  const params = new URL(url).searchParams;
+  const rawLimit = Number(params.get("limit"));
+  const rawOffset = Number(params.get("offset"));
+  const limit =
+    Number.isFinite(rawLimit) && rawLimit > 0
+      ? Math.min(Math.floor(rawLimit), maxLimit)
+      : defaultLimit;
+  const offset =
+    Number.isFinite(rawOffset) && rawOffset > 0 ? Math.floor(rawOffset) : 0;
+  return { limit, offset };
+}
+
+/**
  * Best-effort client IP for the rate-limit bucket key.
  *
  * Prefer `x-real-ip`, which the hosting platform (Vercel) sets from the trusted

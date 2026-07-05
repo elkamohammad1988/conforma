@@ -38,6 +38,17 @@ export async function GET(request: NextRequest) {
 
   const env = validateEnv();
   const healthy = database !== "error" && env.ok;
+
+  // The detailed env report (which vars are missing/partial) is infra recon, so
+  // it is only surfaced to an authorized caller — a shared HEALTH_TOKEN via query
+  // or `x-health-token`. Everyone else gets a plain boolean. The readiness status
+  // itself stays public so uptime monitors and load balancers still work.
+  const healthToken = process.env.HEALTH_TOKEN;
+  const authorized =
+    Boolean(healthToken) &&
+    (request.nextUrl.searchParams.get("token") === healthToken ||
+      request.headers.get("x-health-token") === healthToken);
+
   return NextResponse.json(
     {
       status: healthy ? "ok" : "degraded",
@@ -49,8 +60,7 @@ export async function GET(request: NextRequest) {
         billing: process.env.STRIPE_SECRET_KEY ? "configured" : "disabled",
         ai: aiMode(),
       },
-      // Only surface the specific misconfiguration details on the deep probe.
-      ...(deep ? { config: env } : { configOk: env.ok }),
+      ...(authorized ? { config: env } : { configOk: env.ok }),
     },
     { status: healthy ? 200 : 503 },
   );

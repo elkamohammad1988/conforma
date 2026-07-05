@@ -69,18 +69,41 @@ export async function saveDocument(client: Client, doc: NewDocument): Promise<st
   return data.id;
 }
 
-/** All documents in an org, newest first. */
+/** All documents in an org, newest first. Optional keyset window for the API. */
 export async function listDocuments(
   client: Client,
   orgId: string,
+  page?: { limit: number; offset: number },
 ): Promise<StoredDocument[]> {
-  const { data, error } = await client
+  let query = client
     .from("documents")
     .select("*")
     .eq("org_id", orgId)
     .order("created_at", { ascending: false });
+  if (page) query = query.range(page.offset, page.offset + page.limit - 1);
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []).map(rowToDocument);
+}
+
+/**
+ * Count an org's real (non-demo) AI document generations since a timestamp —
+ * the authoritative meter for the monthly `aiDocumentsPerMonth` quota. `.neq`
+ * excludes NULL model rows in Postgres, so only paid generations are counted.
+ */
+export async function countAiDocumentsSince(
+  client: Client,
+  orgId: string,
+  sinceIso: string,
+): Promise<number> {
+  const { count, error } = await client
+    .from("documents")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", orgId)
+    .neq("model", "demo")
+    .gte("created_at", sinceIso);
+  if (error) throw error;
+  return count ?? 0;
 }
 
 /** A single document by id, or `null` if not found/authorized. */

@@ -12,6 +12,7 @@ import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireManager } from "@/lib/auth/guards";
+import { PLAN_LIMITS } from "@/lib/billing/plans";
 import { logAudit } from "@/lib/audit";
 import { requestOrigin } from "@/lib/request-origin";
 import { isEmail } from "@/lib/validation";
@@ -40,6 +41,28 @@ export async function inviteMemberAction(
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const role: OrgRole = formData.get("role") === "admin" ? "admin" : "member";
   if (!isEmail(email)) return { error: "invalidEmail" };
+
+  // Enforce the plan's seat cap server-side: current members + pending invites
+  // must stay under the limit (the UI meter alone was bypassable via the action).
+  // Fully race-proof enforcement would live in the create_invitation RPC; this
+  // closes the common path.
+  const seatLimit = PLAN_LIMITS[ctx.plan].members;
+  if (seatLimit !== null) {
+    const [members, invites] = await Promise.all([
+      supabase
+        .from("org_members")
+        .select("user_id", { head: true, count: "exact" })
+        .eq("org_id", ctx.activeOrg.id),
+      supabase
+        .from("invitations")
+        .select("id", { head: true, count: "exact" })
+        .eq("org_id", ctx.activeOrg.id)
+        .eq("status", "pending"),
+    ]);
+    if ((members.count ?? 0) + (invites.count ?? 0) >= seatLimit) {
+      return { error: "memberLimit" };
+    }
+  }
 
   const { data, error } = await supabase.rpc("create_invitation", {
     p_org: ctx.activeOrg.id,

@@ -71,12 +71,15 @@ export function systemToInsert(
 export async function listSystems(
   client: Client,
   orgId: string,
+  page?: { limit: number; offset: number },
 ): Promise<RegisteredSystem[]> {
-  const { data: rows, error } = await client
+  let query = client
     .from("systems")
     .select("*")
     .eq("org_id", orgId)
     .order("updated_at", { ascending: false });
+  if (page) query = query.range(page.offset, page.offset + page.limit - 1);
+  const { data: rows, error } = await query;
   if (error) throw error;
   if (!rows || rows.length === 0) return [];
 

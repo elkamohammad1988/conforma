@@ -43,7 +43,10 @@ export function aiMode(): AiMode {
 
 let client: Anthropic | null = null;
 function getClient(): Anthropic {
-  if (!client) client = new Anthropic();
+  // Cap the call below the route's `maxDuration = 60`s so a slow generation
+  // returns the graceful demo fallback instead of a platform 504, and bound
+  // retries so SDK backoff can't blow the budget.
+  if (!client) client = new Anthropic({ timeout: 50_000, maxRetries: 1 });
   return client;
 }
 
@@ -116,8 +119,11 @@ export async function generateDocument(
   docType: DocType,
   ctx: DocContext,
   locale: Locale = DEFAULT_LOCALE,
+  opts?: { forceDemo?: boolean },
 ): Promise<{ markdown: string; source: AiSource }> {
-  if (!isClaudeConfigured()) {
+  // `forceDemo` is set by the route's entitlement guard for anonymous callers,
+  // so the paid model is never invoked without an authenticated, in-quota org.
+  if (opts?.forceDemo || !isClaudeConfigured()) {
     return { markdown: demoDocument(docType, ctx, locale), source: "demo" };
   }
 
@@ -152,9 +158,10 @@ export async function generateDocument(
 export async function explainClassification(
   ctx: DocContext,
   locale: Locale = DEFAULT_LOCALE,
+  opts?: { forceDemo?: boolean },
 ): Promise<{ narrative: string; source: AiSource }> {
   const tr = createTranslator(locale, getMessages(locale));
-  if (!isClaudeConfigured()) {
+  if (opts?.forceDemo || !isClaudeConfigured()) {
     return { narrative: demoNarrative(ctx, tr), source: "demo" };
   }
   try {

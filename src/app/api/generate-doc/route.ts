@@ -4,6 +4,8 @@ import { isLocale } from "@/i18n/config";
 import { parseAiBody } from "@/lib/api-guard";
 import { generateDocBodySchema } from "@/lib/schemas";
 import { persistGeneratedDocument } from "@/lib/data/persist-document";
+import { decideAi } from "@/lib/ai/entitlement";
+import { captureError } from "@/lib/observability";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -12,6 +14,19 @@ export async function POST(req: Request) {
   const guard = await parseAiBody(req, generateDocBodySchema);
   if ("response" in guard) return guard.response;
   const body = guard.data;
+
+  // Wallet + meter guard: only an authenticated, in-quota org spends the key.
+  const decision = await decideAi({ metered: true });
+  if (decision.effect === "quota") {
+    return NextResponse.json(
+      {
+        error: "quota_exceeded",
+        message: `You've reached your monthly limit of ${decision.limit} AI documents. Upgrade your plan to generate more.`,
+        limit: decision.limit,
+      },
+      { status: 402 },
+    );
+  }
 
   try {
     const { markdown, source } = await generateDocument(
@@ -23,6 +38,7 @@ export async function POST(req: Request) {
         result: body.result,
       },
       isLocale(body.locale) ? body.locale : undefined,
+      { forceDemo: decision.effect === "demo" },
     );
 
     // Production Mode: persist the document to the signed-in user's org.
@@ -43,7 +59,8 @@ export async function POST(req: Request) {
       source,
       documentId,
     });
-  } catch {
+  } catch (error) {
+    captureError(error, { scope: "api.generate-doc" });
     return NextResponse.json(
       { error: "Could not generate the document." },
       { status: 500 },

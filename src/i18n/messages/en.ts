@@ -1589,6 +1589,7 @@ const en = {
       forbidden: "You don't have permission for that.",
       invalidEmail: "Enter a valid email address.",
       alreadyInvited: "That email already has a pending invitation.",
+      memberLimit: "You've reached your plan's member limit. Upgrade to add more seats.",
       notAllowed: "That change isn't allowed.",
       invalidInvite: "This invitation is invalid, expired, or for a different email.",
       generic: "Something went wrong.",

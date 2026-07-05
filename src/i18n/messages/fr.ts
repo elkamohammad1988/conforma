@@ -1589,6 +1589,7 @@ const fr: Messages = {
       forbidden: "Vous n'avez pas l'autorisation nécessaire.",
       invalidEmail: "Saisissez une adresse e-mail valide.",
       alreadyInvited: "Cet e-mail a déjà une invitation en attente.",
+      memberLimit: "Vous avez atteint la limite de membres de votre offre. Passez à une offre supérieure pour ajouter des sièges.",
       notAllowed: "Cette modification n'est pas autorisée.",
       invalidInvite: "Cette invitation est invalide, expirée ou destinée à une autre adresse.",
       generic: "Une erreur s'est produite.",

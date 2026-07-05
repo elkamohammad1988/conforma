@@ -1587,6 +1587,7 @@ const es: Messages = {
       forbidden: "No tienes permiso para eso.",
       invalidEmail: "Introduce un correo válido.",
       alreadyInvited: "Ese correo ya tiene una invitación pendiente.",
+      memberLimit: "Has alcanzado el límite de miembros de tu plan. Mejora tu plan para añadir más asientos.",
       notAllowed: "Ese cambio no está permitido.",
       invalidInvite: "Esta invitación no es válida, ha caducado o es para otro correo.",
       generic: "Algo salió mal.",

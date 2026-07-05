@@ -1572,6 +1572,7 @@ const zhCN: Messages = {
       forbidden: "你没有执行此操作的权限。",
       invalidEmail: "请输入有效的邮箱地址。",
       alreadyInvited: "该邮箱已有待处理的邀请。",
+      memberLimit: "您已达到当前套餐的成员上限。升级即可添加更多席位。",
       notAllowed: "不允许进行该更改。",
       invalidInvite: "此邀请无效、已过期或属于其他邮箱。",
       generic: "出了点问题。",

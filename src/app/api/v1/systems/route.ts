@@ -12,13 +12,20 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { listSystems } from "@/lib/data/systems-repository";
 import { compliancePct } from "@/lib/registry";
 import { captureError } from "@/lib/observability";
+import { parsePageParams, withinRateLimit } from "@/lib/api-guard";
 
 export const dynamic = "force-dynamic";
+
+const V1_RATE_PER_MIN = 120;
 
 export async function GET(request: Request) {
   const auth = await authenticateApiKey(request);
   if (!auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  // Per-org throttle (in-memory backstop; durable edge limiting is operator-side).
+  if (!withinRateLimit(`v1:${auth.orgId}`, V1_RATE_PER_MIN)) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   const admin = createSupabaseAdminClient();
@@ -26,8 +33,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
 
+  const page = parsePageParams(request.url);
   try {
-    const systems = await listSystems(admin, auth.orgId);
+    const systems = await listSystems(admin, auth.orgId, page);
     return NextResponse.json({
       systems: systems.map((s) => ({
         id: s.id,
@@ -40,6 +48,7 @@ export async function GET(request: Request) {
         createdAt: s.createdAt,
         updatedAt: s.updatedAt,
       })),
+      pagination: { limit: page.limit, offset: page.offset, count: systems.length },
     });
   } catch (error) {
     captureError(error, { scope: "api.v1.systems", orgId: auth.orgId });

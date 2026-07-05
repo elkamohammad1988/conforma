@@ -33,8 +33,13 @@ async function syncSubscription(
   const priceId = sub.items.data[0]?.price.id ?? null;
   const periodEnd = periodEndOf(sub);
 
+  // Entitle the paid plan ONLY while the subscription is genuinely paying.
+  // `incomplete`, `incomplete_expired`, `past_due`, `unpaid` and `canceled` all
+  // fall back to `free` — otherwise a sub whose first payment never clears, or a
+  // customer who stops paying, would keep full paid access until Stripe cancels.
+  const entitled = sub.status === "active" || sub.status === "trialing";
   const patch = {
-    plan: sub.status === "canceled" ? ("free" as const) : planForPriceId(priceId),
+    plan: entitled ? planForPriceId(priceId) : ("free" as const),
     status: sub.status as SubscriptionStatus,
     stripe_subscription_id: sub.id,
     stripe_price_id: priceId,
