@@ -18,6 +18,7 @@ const fr: Messages = {
     startFree: "Commencer gratuitement",
     bookDemo: "Réserver une démo",
     talkToSales: "Parler à un commercial",
+    exploreDemo: "Explorer le tableau de bord",
     back: "Retour",
     continue: "Continuer",
     optional: "(facultatif)",
@@ -917,6 +918,7 @@ const fr: Messages = {
       "Chaque système d’IA que vous développez ou déployez, avec son statut en direct au titre du Regulation (EU) 2024/1689.",
     exportReport: "Exporter le rapport",
     classifySystem: "Classer un système",
+    restoreDemo: "Restaurer les données d'exemple",
     kpi: {
       systems: "Systèmes enregistrés",
       systemsTip: "Systèmes d’IA actuellement dans votre inventaire.",

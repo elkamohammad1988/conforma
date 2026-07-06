@@ -667,6 +667,18 @@ select option {
 }
 
 /* ----------------------------------------------------------------------------
+   Mobile navigation drawer — a SOLID surface (not glass). It drops over the
+   high-contrast hero, where any translucency lets the headline ghost through
+   and reads as unfinished; a solid, theme-aware panel keeps the menu crisp.
+   -------------------------------------------------------------------------- */
+.mobile-nav-panel {
+  background-color: #131318;
+}
+:root[data-theme="light"] .mobile-nav-panel {
+  background-color: #ffffff;
+}
+
+/* ----------------------------------------------------------------------------
    Tooltip
    -------------------------------------------------------------------------- */
 .tip {

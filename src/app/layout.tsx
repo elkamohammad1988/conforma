@@ -102,6 +102,9 @@ export default async function RootLayout({
     <html
       lang={locale}
       dir={dir}
+      // Opt in to the CSS `scroll-behavior: smooth` (set in globals.css) so Next
+      // keeps route-change scroll instant while smooth-scrolling in-page anchors.
+      data-scroll-behavior="smooth"
       // The pre-paint theme script sets `data-theme` on <html> before React
       // hydrates, so this element's attributes legitimately differ from the
       // server HTML. Scope the suppression to <html> only (it does not cascade).

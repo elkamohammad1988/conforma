@@ -97,7 +97,7 @@ function TopNav() {
             href="/demo"
             className="hidden rounded-lg px-3 py-2 text-sm font-medium text-ink-2 transition hover:bg-ink/[0.04] hover:text-ink sm:inline-block"
           >
-            {t("nav.bookDemo")}
+            {t("common.talkToSales")}
           </Link>
           <Link href="/classify" className="btn btn-primary btn-sm">
             {t("nav.startFree")}

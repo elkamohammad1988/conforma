@@ -10,6 +10,7 @@ const zhCN: Messages = {
     startFree: "免费开始",
     bookDemo: "预约演示",
     talkToSales: "联系销售",
+    exploreDemo: "探索实时仪表板",
     back: "返回",
     continue: "继续",
     optional: "（可选）",
@@ -902,6 +903,7 @@ const zhCN: Messages = {
       "您构建或部署的每一个 AI 系统，及其在 Regulation (EU) 2024/1689 下的实时状态。",
     exportReport: "导出报告",
     classifySystem: "对一个系统进行分类",
+    restoreDemo: "恢复示例数据",
     kpi: {
       systems: "已登记系统",
       systemsTip: "当前清单中的 AI 系统。",

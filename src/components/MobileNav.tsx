@@ -56,7 +56,7 @@ export function MobileNav() {
     { href: "/security", label: t("nav.security") },
     { href: "/pricing", label: t("nav.pricing") },
     { href: "/dashboard", label: t("nav.dashboard") },
-    { href: "/demo", label: t("nav.bookDemo") },
+    { href: "/demo", label: t("common.talkToSales") },
   ];
 
   return (
@@ -81,7 +81,7 @@ export function MobileNav() {
       {open && (
         <>
           <div
-            className="animate-fade-in fixed inset-0 top-16 z-30 bg-ink/20"
+            className="animate-fade-in fixed inset-0 top-16 z-30 bg-[#05050a]/80 backdrop-blur-sm"
             onClick={close}
           />
           <div
@@ -90,7 +90,7 @@ export function MobileNav() {
             role="dialog"
             aria-modal="true"
             aria-label={t("nav.menu")}
-            className="animate-pop absolute inset-x-0 top-full z-40 border-b border-line bg-raised p-3 shadow-[var(--shadow-raised)] backdrop-blur-xl"
+            className="mobile-nav-panel animate-pop absolute inset-x-0 top-full z-40 border-b border-line p-3 shadow-[var(--shadow-raised)]"
           >
             <nav className="flex flex-col">
               {links.map((l) => (

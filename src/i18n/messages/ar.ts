@@ -12,6 +12,7 @@ const ar: Messages = {
     startFree: "ابدأ مجانًا",
     bookDemo: "احجز عرضًا توضيحيًا",
     talkToSales: "تواصل مع المبيعات",
+    exploreDemo: "استكشف لوحة التحكم",
     back: "رجوع",
     continue: "متابعة",
     optional: "(اختياري)",
@@ -931,6 +932,7 @@ const ar: Messages = {
       "كل نظام ذكاء اصطناعي تبنيه أو تنشره، مع حالته المباشرة بموجب Regulation (EU) 2024/1689.",
     exportReport: "تصدير التقرير",
     classifySystem: "تصنيف نظام",
+    restoreDemo: "استعادة البيانات التجريبية",
     kpi: {
       systems: "الأنظمة المسجَّلة",
       systemsTip: "أنظمة الذكاء الاصطناعي الموجودة حاليًا في جردك.",

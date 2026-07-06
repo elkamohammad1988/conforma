@@ -16,6 +16,7 @@ const es: Messages = {
     startFree: "Empezar gratis",
     bookDemo: "Reservar una demo",
     talkToSales: "Hablar con ventas",
+    exploreDemo: "Explorar el panel en vivo",
     back: "Atrás",
     continue: "Continuar",
     optional: "(opcional)",
@@ -915,6 +916,7 @@ const es: Messages = {
       "Cada sistema de IA que construye o despliega, con su estado en directo conforme al Regulation (EU) 2024/1689.",
     exportReport: "Exportar informe",
     classifySystem: "Clasificar un sistema",
+    restoreDemo: "Restaurar datos de muestra",
     kpi: {
       systems: "Sistemas registrados",
       systemsTip: "Sistemas de IA actualmente en su inventario.",

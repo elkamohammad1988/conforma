@@ -18,6 +18,7 @@ import {
 } from "@/lib/eu-ai-act";
 import { AUTHOR } from "@/lib/site";
 import { useI18n } from "@/i18n/I18nProvider";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 function ArrowRight() {
   return (
@@ -61,6 +62,10 @@ const TIER_ORDER = ["prohibited", "high", "limited", "minimal"] as const;
 
 export default function Home() {
   const { t, formatCurrency, formatDate } = useI18n();
+  // In Demo Mode the whole product is open and pre-seeded, so the hero leads
+  // with the payoff — one click into the live, populated dashboard — instead of
+  // a cold "start" wizard. In Production Mode the original sign-up path stands.
+  const demoMode = !isSupabaseConfigured();
 
   const structuredData = {
     "@context": "https://schema.org",
@@ -133,12 +138,19 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
                 <Magnetic>
-                  <Link href="/classify" className="btn btn-primary px-5 py-3 text-[0.95rem]">
-                    {t("common.startFree")} <ArrowRight />
+                  <Link
+                    href={demoMode ? "/dashboard" : "/classify"}
+                    className="btn btn-primary px-5 py-3 text-[0.95rem]"
+                  >
+                    {demoMode ? t("common.exploreDemo") : t("common.startFree")}{" "}
+                    <ArrowRight />
                   </Link>
                 </Magnetic>
-                <Link href="/demo" className="btn btn-secondary px-5 py-3 text-[0.95rem]">
-                  {t("common.bookDemo")}
+                <Link
+                  href={demoMode ? "/classify" : "/demo"}
+                  className="btn btn-secondary px-5 py-3 text-[0.95rem]"
+                >
+                  {demoMode ? t("common.startFree") : t("common.bookDemo")}
                 </Link>
               </div>
               <p className="mt-5 text-xs text-ink-3">{t("home.hero.fineprint")}</p>

@@ -8,7 +8,13 @@ import { ArrowForward } from "@/components/Arrow";
 import { Magnetic } from "@/components/Motion";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { CountUp } from "@/components/ui/CountUp";
-import { compliancePct, useSystems, type RegisteredSystem } from "@/lib/store";
+import {
+  compliancePct,
+  useSystems,
+  resetToDemoData,
+  type RegisteredSystem,
+} from "@/lib/store";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { type RiskTier } from "@/lib/eu-ai-act";
 import { useI18n } from "@/i18n/I18nProvider";
 
@@ -766,6 +772,10 @@ function ComplianceMeter({ pct }: { pct: number }) {
 /* -------------------------------------------------------------------------- */
 function DashboardEmpty() {
   const { t } = useI18n();
+  // Demo-only safety net: if a visitor clears the registry to see the empty
+  // state, one click restores the seeded sample systems instantly. There is
+  // nothing to seed against a real tenant, so this is hidden in Production Mode.
+  const demoMode = !isSupabaseConfigured();
   return (
     <section className="animate-fade-in relative mt-8 overflow-hidden rounded-3xl border border-line bg-surface px-6 py-14 text-center shadow-[var(--shadow-card)] sm:px-10 sm:py-20">
       {/* environmental light from above */}
@@ -811,12 +821,21 @@ function DashboardEmpty() {
           ))}
         </ol>
 
-        <div className="mt-10 flex justify-center">
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Magnetic>
             <Link href="/classify" className="btn btn-primary px-5 py-3 text-[0.95rem]">
               <PlusIcon /> {t("dashboard.classifySystem")}
             </Link>
           </Magnetic>
+          {demoMode && (
+            <button
+              type="button"
+              onClick={() => resetToDemoData()}
+              className="btn btn-ghost px-4 py-3 text-[0.95rem]"
+            >
+              <RestoreIcon /> {t("dashboard.restoreDemo")}
+            </button>
+          )}
         </div>
       </div>
     </section>
@@ -887,6 +906,8 @@ function stroke(d: string, className = "h-[18px] w-[18px]") {
 }
 
 const PlusIcon = () => stroke("M12 5v14|M5 12h14", "h-4 w-4");
+const RestoreIcon = () =>
+  stroke("M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8|M3 3v5h5", "h-4 w-4");
 const ArrowIcon = ({ className = "h-3.5 w-3.5" }: { className?: string }) =>
   stroke("M5 12h14|M13 6l6 6-6 6", `${className} rtl:-scale-x-100`);
 const ArrowBack = ({ className = "h-3.5 w-3.5" }: { className?: string }) =>

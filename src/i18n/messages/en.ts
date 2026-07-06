@@ -18,6 +18,7 @@ const en = {
     startFree: "Start free",
     bookDemo: "Book a demo",
     talkToSales: "Talk to sales",
+    exploreDemo: "Explore the live dashboard",
     back: "Back",
     continue: "Continue",
     optional: "(optional)",
@@ -917,6 +918,7 @@ const en = {
       "Every AI system you build or deploy, with its live status under Regulation (EU) 2024/1689.",
     exportReport: "Export report",
     classifySystem: "Classify a system",
+    restoreDemo: "Restore sample data",
     kpi: {
       systems: "Systems registered",
       systemsTip: "AI systems currently in your inventory.",
