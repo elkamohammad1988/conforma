@@ -1,9 +1,11 @@
 /**
  * Request proxy — two concerns, composed:
  *
- *   1. **Locale** — detect the visitor's language on first request, forward it
- *      to Server Components via a header, and persist it in a cookie so the very
- *      first render is in the right language (no flash of the default locale).
+ *   1. **Locale** — resolve the visitor's language, forward it to Server
+ *      Components via a header, and persist it in a cookie so the very first
+ *      render is already correct (no flash of the wrong locale). First-time
+ *      visitors get a predictable English-first experience; an explicit choice
+ *      from the in-app switcher is stored in `NEXT_LOCALE` and sticks for a year.
  *
  *   2. **Session** (Production Mode only) — refresh the Supabase auth cookies
  *      and enforce protected routes. In Demo Mode (no Supabase env) this half is
@@ -13,10 +15,10 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import {
+  DEFAULT_LOCALE,
   LOCALE_COOKIE,
   LOCALE_COOKIE_MAX_AGE,
   LOCALE_HEADER,
-  matchAcceptLanguage,
   resolveLocale,
 } from "@/i18n/config";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -37,9 +39,12 @@ function persistLocaleCookie(
 }
 
 export async function proxy(request: NextRequest) {
+  // Honour an explicit prior choice (cookie); otherwise default to English.
+  // `matchAcceptLanguage` remains the negotiation primitive (see i18n/config) if
+  // auto-detection is ever desired, but an English-first entry is the deliberate
+  // default so the product never opens in a language the visitor didn't pick.
   const cookieLocale = resolveLocale(request.cookies.get(LOCALE_COOKIE)?.value);
-  const locale =
-    cookieLocale ?? matchAcceptLanguage(request.headers.get("accept-language"));
+  const locale = cookieLocale ?? DEFAULT_LOCALE;
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set(LOCALE_HEADER, locale);

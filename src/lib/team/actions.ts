@@ -16,6 +16,8 @@ import { PLAN_LIMITS } from "@/lib/billing/plans";
 import { logAudit } from "@/lib/audit";
 import { requestOrigin } from "@/lib/request-origin";
 import { isEmail } from "@/lib/validation";
+import { sendEmail } from "@/lib/email/provider";
+import { buildInviteEmail } from "@/lib/email/invite";
 import {
   ACTIVE_ORG_COOKIE,
   ACTIVE_ORG_COOKIE_MAX_AGE,
@@ -81,7 +83,22 @@ export async function inviteMemberAction(
   revalidatePath("/team");
 
   const origin = await requestOrigin();
-  return { ok: true, inviteUrl: `${origin}/accept-invite?token=${data.token}` };
+  const inviteUrl = `${origin}/accept-invite?token=${data.token}`;
+
+  // Best-effort delivery. When email is unconfigured (Demo Mode / self-host
+  // without Resend) sendEmail returns {skipped} and the manager still shares the
+  // copyable link below — so an invite never fails because email did.
+  await sendEmail(
+    buildInviteEmail({
+      to: email,
+      orgName: ctx.activeOrg.name,
+      inviterName: ctx.fullName ?? ctx.email ?? "A teammate",
+      role,
+      acceptUrl: inviteUrl,
+    }),
+  );
+
+  return { ok: true, inviteUrl };
 }
 
 export async function revokeInviteAction(inviteId: string): Promise<TeamActionState> {
