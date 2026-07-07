@@ -69,11 +69,14 @@ exact obligations that apply, a live countdown to your deadline, and first-draft
 regulatory documents.
 
 > [!NOTE]
-> Conforma is a **portfolio-grade MVP**: a lean, fully working Next.js app that
-> demonstrates the architecture a production SaaS (auth + billing + Postgres)
-> would grow into. The registry persists in the browser so the whole product is
-> demo-able with **zero credentials**. It is decision-support tooling, **not legal
-> advice** — see the [Disclaimer](#disclaimer).
+> Conforma is **dual-mode by design.** Out of the box it runs in **Demo Mode** —
+> the registry lives in the browser, so the whole product is explorable with
+> **zero credentials** (that is exactly what the
+> [live demo](https://conforma-ten.vercel.app) serves). Set the Supabase env vars
+> and the *same codebase* switches to **Production Mode**: real Postgres with
+> row-level security, authentication, organizations, per-tenant isolation and
+> Stripe billing — no rewrite, one flag. It is decision-support tooling, **not
+> legal advice** — see the [Disclaimer](#disclaimer).
 
 📂 **Portfolio:** read the full **[case study](docs/case-study.md)**, follow the
 **[90-second demo script](docs/demo-script.md)**, or dive into the
@@ -93,6 +96,11 @@ the **[security model](docs/security.md)** and the
 - **One source of truth.** The entire regulation lives in a single typed module
   ([`eu-ai-act.ts`](src/lib/eu-ai-act.ts)) that the classifier, the obligation
   checklist and the document generator all read from.
+- **Demo-simple, production-real.** The *same* app runs credential-free on
+  `localStorage` **and** as a multi-tenant SaaS on Supabase — Postgres with
+  row-level security, auth, organizations and Stripe billing — selected entirely
+  by environment. The persistence seam ([`store.ts`](src/lib/store.ts)) is a real
+  interface, not a stub, so switching modes is configuration, not a rewrite.
 
 ---
 
@@ -139,6 +147,27 @@ the **[security model](docs/security.md)** and the
 - 🔍 **SEO & social ready** — metadata, Open Graph image, JSON-LD, `robots.txt` and
   `sitemap.xml` out of the box.
 
+### Production Mode — a full multi-tenant SaaS layer
+
+The same codebase, activated by adding Supabase (and, optionally, Stripe) env vars:
+
+- 🔐 **Authentication & multi-tenancy** — email auth, organizations, `owner` /
+  `admin` / `member` roles, and team invitations (transactional email **and** a
+  shareable accept link).
+- 🛡️ **Postgres + Row-Level Security** — per-tenant data isolation enforced at the
+  database, not just the app: **8 migrations, 40+ RLS policies**.
+- 💳 **Stripe billing** — Free / Pro / Team plans, checkout, customer portal and
+  signature-verified webhooks driving plan state, with server-side seat and usage
+  limits.
+- 🧾 **Audit trail** — every privileged mutation (invites, role changes, billing)
+  is recorded per organization.
+- 🔑 **Public REST API** — `/api/v1/systems` and `/api/v1/documents`, authenticated
+  with **hashed** API keys (only the hash is ever stored).
+
+> One flag flips it back: `NEXT_PUBLIC_DEMO=1` forces Demo Mode even with Supabase
+> configured — how the public portfolio deploy stays sign-up-free while the whole
+> production architecture remains wired.
+
 ---
 
 ## Architecture
@@ -169,6 +198,8 @@ flowchart TD
 | Deterministic classifier, AI on top | Results are reproducible and traceable; AI never overrides cited logic. |
 | Server-only Claude integration | The API key never reaches the browser; route handlers are the only caller. |
 | `useSyncExternalStore`-backed registry | SSR-safe client persistence with no hydration mismatch and no effect-based refetching. |
+| One persistence seam, two backends | `store.ts` abstracts the registry, so localStorage (Demo) and Supabase/Postgres+RLS (Production) are the same interface — `isSupabaseConfigured()` is the single switch every layer reads. |
+| RLS as the security boundary | Per-tenant isolation is enforced in Postgres policies, not just app checks — the browser-safe anon key can't cross tenants even if the app layer is wrong. |
 
 A deeper write-up lives in **[docs/architecture.md](docs/architecture.md)**.
 
@@ -184,7 +215,10 @@ A deeper write-up lives in **[docs/architecture.md](docs/architecture.md)**.
 | Icons | [lucide-react](https://lucide.dev/) |
 | AI (optional) | [`@anthropic-ai/sdk`](https://github.com/anthropics/anthropic-sdk-typescript) — Claude (`claude-opus-4-8`) |
 | Persistence (demo) | Browser `localStorage` via an external store |
-| Tooling | ESLint 9 (flat config) · `tsc` · Vitest · GitHub Actions CI |
+| Backend (production) | [Supabase](https://supabase.com/) — Postgres + Row-Level Security, auth & multi-tenancy ([`@supabase/ssr`](https://github.com/supabase/auth-helpers)) |
+| Billing (optional) | [Stripe](https://stripe.com/) — plans, checkout, customer portal, webhooks |
+| Validation | [Zod](https://zod.dev/) schemas across API and server actions |
+| Tooling | ESLint 9 (flat config) · `tsc` · Vitest (190 tests) · GitHub Actions CI |
 
 ---
 
@@ -235,13 +269,20 @@ All variables are **optional** — copy the template and fill in only what you n
 cp .env.example .env.local
 ```
 
+All variables are optional — with none set, the app runs in **Demo Mode**. Adding
+the Supabase group switches on **Production Mode**; the rest layer in live AI and
+billing.
+
 | Variable | Required | Description |
 | --- | :---: | --- |
-| `ANTHROPIC_API_KEY` | No | Enables live Claude drafting of compliance documents and plain-language narratives. Without it, Conforma runs in **Demo Mode** with realistic pre-generated drafts — no paid API required. Get one at [console.anthropic.com](https://console.anthropic.com/). |
+| `ANTHROPIC_API_KEY` | No | Enables live Claude drafting of compliance documents and plain-language narratives. Without it, Conforma runs with realistic pre-generated drafts — no paid API required. Get one at [console.anthropic.com](https://console.anthropic.com/). |
 | `NEXT_PUBLIC_APP_URL` | No | Public base URL used for absolute links, canonical tags and Open Graph (defaults to `http://localhost:3000`). |
+| `NEXT_PUBLIC_SUPABASE_URL`&nbsp;·&nbsp;`NEXT_PUBLIC_SUPABASE_ANON_KEY`&nbsp;·&nbsp;`SUPABASE_SERVICE_ROLE_KEY` | No | Switch on **Production Mode**: Postgres + RLS, auth and multi-tenancy. The anon key is browser-safe (RLS protects the data); the service-role key is server-only. See [docs/DATABASE.md](docs/DATABASE.md). |
+| `NEXT_PUBLIC_DEMO` | No | Set to `1` to force **Demo Mode even when Supabase is configured** — used on the public portfolio deploy so it stays sign-up-free while the production env stays wired. |
+| `STRIPE_SECRET_KEY`&nbsp;·&nbsp;`STRIPE_WEBHOOK_SECRET`&nbsp;·&nbsp;`STRIPE_PRICE_*` | No | Enable subscriptions, the customer portal and webhook-driven plan state. Without them, billing is inert and every org stays on Free. |
 
 > `.env.local` is git-ignored. **Never commit real secrets** — only `.env.example`
-> is tracked.
+> is tracked, and it documents every variable above.
 
 ---
 
@@ -267,22 +308,30 @@ conforma/
 ├─ docs/                    # Architecture, ADRs, API reference, security, a11y, FAQ, screenshots
 ├─ src/
 │  ├─ app/                  # Next.js App Router (pages, layouts, API routes, SEO)
-│  │  ├─ api/               #   POST /api/explain · /api/generate-doc (server-only)
+│  │  ├─ api/               #   explain · generate-doc · v1/{systems,documents} · stripe/webhook · health
 │  │  ├─ classify/          #   risk-classification wizard
 │  │  ├─ dashboard/         #   AI system registry
 │  │  ├─ systems/[id]/      #   per-system detail, checklist & document generation
 │  │  ├─ report/            #   printable readiness report
+│  │  ├─ login · signup · onboarding · team · settings   #   auth & tenancy (Production Mode)
 │  │  ├─ (marketing)        #   pricing · security · demo · privacy · terms
 │  │  ├─ layout.tsx         #   shell, nav, footer, metadata, JSON-LD
 │  │  ├─ opengraph-image.tsx#   generated OG image
 │  │  ├─ robots.ts · sitemap.ts
+│  ├─ proxy.ts              # Locale + Supabase session/route-guard middleware
+│  ├─ i18n/                 # 5 locales (en·ar·fr·es·zh-CN) + RTL, typed messages
 │  ├─ components/           # Reusable UI (RiskBadge, Countdown, PricingTable, …)
 │  └─ lib/                  # Domain logic
 │     ├─ eu-ai-act.ts       #   encoded regulation — single source of truth
 │     ├─ classifier.ts      #   deterministic risk-classification engine
 │     ├─ claude.ts          #   optional, server-only AI drafting layer
-│     ├─ store.ts           #   registry persistence (external store)
-│     └─ use-client-value.ts#   SSR-safe client-only value hook
+│     ├─ store.ts           #   registry persistence seam (localStorage ⇆ Supabase)
+│     ├─ supabase/          #   client/server/admin, dual-mode config, RLS types
+│     ├─ auth/ · team/      #   session context, guards, orgs, roles, invitations
+│     ├─ billing/           #   Stripe plans, checkout, portal, webhooks
+│     ├─ api-keys/ · data/  #   hashed API keys; RLS-scoped repositories
+│     ├─ email/ · audit.ts  #   transactional email (Resend) & audit log
+│     └─ observability.ts   #   structured logging
 ├─ .env.example
 └─ package.json
 ```
@@ -291,16 +340,21 @@ conforma/
 
 ## Roadmap
 
-This is a focused MVP; the data model is intentionally shaped to grow. Planned
-directions:
+The data model was shaped to grow, and much of the "someday" list is already
+shipped on this branch:
 
-- [ ] **Persistence** — swap the localStorage store for Postgres/Supabase with
-      row-level security (the store interface is already isolated).
-- [ ] **Auth & multi-tenancy** — organisations, SSO/SAML, role-based access.
-- [ ] **Audit trail** — immutable change history per classification and document.
+- [x] **Persistence** — Postgres/Supabase with row-level security, behind the same
+      isolated store interface (`isSupabaseConfigured()` selects the backend).
+- [x] **Auth & multi-tenancy** — organizations, `owner`/`admin`/`member` roles,
+      team invitations and per-tenant RLS isolation.
+- [x] **Billing** — Stripe plans, checkout, customer portal and webhook-driven
+      plan state with server-side seat & usage limits.
+- [x] **Audit trail** — privileged mutations recorded per organization.
+- [x] **Public API** — `/api/v1` for systems & documents, authenticated with hashed API keys.
+- [x] **Test suite** — 190 Vitest tests over the classifier, RLS config, billing, auth and i18n parity, wired into CI.
+- [ ] **SSO/SAML** — enterprise identity on top of the existing auth layer.
 - [ ] **Annex IV exports** — DOCX/PDF generation of the technical file.
 - [ ] **Regulation versioning** — track amendments and re-flag affected systems.
-- [x] **Test suite** — Vitest unit tests over the classifier, obligation mapping and Demo Mode, wired into CI.
 
 See [open issues](https://github.com/elkamohammad1988/conforma/issues) for the
 current list.
