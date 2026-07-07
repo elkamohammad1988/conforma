@@ -106,13 +106,3 @@ export function validateEnv(env: Record<string, string | undefined> = process.en
     warnings,
   };
 }
-
-/** Throw if the environment is partially/mis-configured (for a preflight gate). */
-export function assertEnv(env: Record<string, string | undefined> = process.env): void {
-  const report = validateEnv(env);
-  if (!report.ok) {
-    throw new Error(
-      `Environment misconfiguration:\n  - ${report.warnings.join("\n  - ")}`,
-    );
-  }
-}

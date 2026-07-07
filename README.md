@@ -218,7 +218,7 @@ A deeper write-up lives in **[docs/architecture.md](docs/architecture.md)**.
 | Backend (production) | [Supabase](https://supabase.com/) — Postgres + Row-Level Security, auth & multi-tenancy ([`@supabase/ssr`](https://github.com/supabase/auth-helpers)) |
 | Billing (optional) | [Stripe](https://stripe.com/) — plans, checkout, customer portal, webhooks |
 | Validation | [Zod](https://zod.dev/) schemas across API and server actions |
-| Tooling | ESLint 9 (flat config) · `tsc` · Vitest (190 tests) · GitHub Actions CI |
+| Tooling | ESLint 9 (flat config) · `tsc` · Vitest (188 tests) · GitHub Actions CI |
 
 ---
 
@@ -280,6 +280,7 @@ billing.
 | `NEXT_PUBLIC_SUPABASE_URL`&nbsp;·&nbsp;`NEXT_PUBLIC_SUPABASE_ANON_KEY`&nbsp;·&nbsp;`SUPABASE_SERVICE_ROLE_KEY` | No | Switch on **Production Mode**: Postgres + RLS, auth and multi-tenancy. The anon key is browser-safe (RLS protects the data); the service-role key is server-only. See [docs/DATABASE.md](docs/DATABASE.md). |
 | `NEXT_PUBLIC_DEMO` | No | Set to `1` to force **Demo Mode even when Supabase is configured** — used on the public portfolio deploy so it stays sign-up-free while the production env stays wired. |
 | `STRIPE_SECRET_KEY`&nbsp;·&nbsp;`STRIPE_WEBHOOK_SECRET`&nbsp;·&nbsp;`STRIPE_PRICE_*` | No | Enable subscriptions, the customer portal and webhook-driven plan state. Without them, billing is inert and every org stays on Free. |
+| `RESEND_API_KEY`&nbsp;·&nbsp;`EMAIL_FROM` | No | Send team-invitation emails via Resend. Without them, invites still return a shareable accept link — email is skipped, never fatal. |
 
 > `.env.local` is git-ignored. **Never commit real secrets** — only `.env.example`
 > is tracked, and it documents every variable above.
@@ -351,7 +352,7 @@ shipped on this branch:
       plan state with server-side seat & usage limits.
 - [x] **Audit trail** — privileged mutations recorded per organization.
 - [x] **Public API** — `/api/v1` for systems & documents, authenticated with hashed API keys.
-- [x] **Test suite** — 190 Vitest tests over the classifier, RLS config, billing, auth and i18n parity, wired into CI.
+- [x] **Test suite** — 188 Vitest tests over the classifier, RLS config, billing, auth and i18n parity, wired into CI.
 - [ ] **SSO/SAML** — enterprise identity on top of the existing auth layer.
 - [ ] **Annex IV exports** — DOCX/PDF generation of the technical file.
 - [ ] **Regulation versioning** — track amendments and re-flag affected systems.

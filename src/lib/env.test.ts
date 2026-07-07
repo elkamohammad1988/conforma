@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateEnv, assertEnv } from "./env";
+import { validateEnv } from "./env";
 
 const EMPTY: Record<string, string | undefined> = {};
 
@@ -56,14 +56,5 @@ describe("validateEnv", () => {
     expect(r.ok).toBe(true);
     expect(r.mode).toBe("production");
     expect(r.groups.every((g) => g.state === "configured")).toBe(true);
-  });
-});
-
-describe("assertEnv", () => {
-  it("throws on a partial configuration", () => {
-    expect(() => assertEnv({ STRIPE_SECRET_KEY: "sk" })).toThrow(/misconfiguration/);
-  });
-  it("does not throw for a clean Demo Mode", () => {
-    expect(() => assertEnv(EMPTY)).not.toThrow();
   });
 });
