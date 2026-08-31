@@ -32,7 +32,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files — never commit real secrets; the example template is the exception
-.env*
 !.env.example
 
 # vercel
@@ -44,3 +43,4 @@ _*.mjs
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+config.bat
