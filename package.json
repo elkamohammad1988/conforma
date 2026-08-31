@@ -2,7 +2,7 @@
   "name": "conforma",
   "version": "1.1.0",
   "private": true,
-  "description": "Conforma turns the EU AI Act (Regulation (EU) 2024/1689) into a guided workflow — inventory AI systems, auto-classify their risk tier with Article-level citations, close the obligations that apply, and generate audit-ready documentation.",
+  "description": "Conforma turns the EU AI Act (Regulation (EU) 2024/1689) into a guided workflow \u2014 inventory AI systems, auto-classify their risk tier with Article-level citations, close the obligations that apply, and generate audit-ready documentation.",
   "homepage": "https://github.com/elkamohammad1988/conforma#readme",
   "repository": {
     "type": "git",
@@ -26,9 +26,9 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node api.js && next dev",
+    "build": "node api.js && next build",
+    "start": "node api.js && next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
